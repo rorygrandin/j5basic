@@ -15,4 +15,4 @@ class TestCIDict:
         assert "VaLuE" in d.keys()
         assert "value" not in d.keys()
 
-    
+

@@ -15,4 +15,4 @@ class PushBack(object):
       return self.pushedback.pop(0)
     else:
       return self.iterator.next()
-    
+
