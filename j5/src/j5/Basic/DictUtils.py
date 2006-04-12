@@ -208,3 +208,27 @@ class ordereddict(dict):
     return (k,v)
 
 
+class attrdict(dict):
+  """Dictionary that also allows access to keys using attributes"""
+  def __getattr__(self, attr, default=None):
+    if attr in self:
+      return self[attr]
+    else:
+      return default
+
+def attribify(context):
+  """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
+  if isinstance(context, dict) and not isinstance(context, attrdict):
+    newcontext = attrdict(context)
+    for key, value in newcontext.items():
+      if isinstance(value, (dict, list)):
+        newcontext[key] = attribify(value)
+    return newcontext
+  elif isinstance(context, list):
+    for n, item in enumerate(context):
+      if isinstance(item, (dict, list)):
+        context[n] = attribify(item)
+    return context
+  else:
+    return context
+
