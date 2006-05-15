@@ -1,5 +1,4 @@
 
-import Namespace
 from Basic import DictUtils
 
 class TestCIDict:
