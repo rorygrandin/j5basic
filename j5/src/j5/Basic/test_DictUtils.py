@@ -1,5 +1,5 @@
 
-from Basic import DictUtils
+from j5.Basic import DictUtils
 
 class TestCIDict:
     def test_get(self):

@@ -21,7 +21,7 @@
 # along with jToolkit; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from Database import Dates
+from j5.Database import Dates
 
 class timecache(dict):
   """caches objects, remembers time, and dumps when neccessary..."""

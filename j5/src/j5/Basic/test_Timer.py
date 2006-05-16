@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Basic import Timer
+from j5.Basic import Timer
 import threading
 import time
 

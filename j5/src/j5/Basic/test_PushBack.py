@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Basic import PushBack
+from j5.Basic import PushBack
 
 class TestPushBack:
     def test_wrap(self):
