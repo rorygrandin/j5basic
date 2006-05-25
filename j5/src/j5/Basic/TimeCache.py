@@ -21,14 +21,16 @@
 # along with jToolkit; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from j5.Database import Dates
+# TODO: write test class
+
+import datetime
 
 class timecache(dict):
   """caches objects, remembers time, and dumps when neccessary..."""
   def __init__(self, expiryperiod):
     """constructs a timecache dictionary with an expiryperiod given in seconds..."""
     dict.__init__(self)
-    self.expiryperiod = Dates.seconds(expiryperiod)
+    self.expiryperiod = datetime.timedelta(seconds=expiryperiod)
 
   def expired(self, timestamp):
     """checks if self.timestamp is older than self.expiryperiod"""
@@ -40,7 +42,7 @@ class timecache(dict):
 
   def gettimestamp(self):
     """returns a new timestamp for the current time..."""
-    return Dates.currentdate()
+    return datetime.datetime.now()
 
   def purge(self):
     """removes all items that are older then self.expiryperiod"""
