@@ -35,7 +35,6 @@ class Multiton(object):
 
     def __new__(cls,*args):
         key = hash(tuple(args))
-        print cls, cls.__dict__
         try:
             cls._multiton_lock.acquire()
             try:
