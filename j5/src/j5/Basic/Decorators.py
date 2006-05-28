@@ -186,7 +186,15 @@ class SelfLocking(object):
         """Can only be used on objects which have a self.lock (class or instance)
            attribute which supports the acquire() and release() methods.
            The decorator acquires self.lock, runs the method and releases the lock
-           afterwards."""
+           afterwards.
+           
+           Inside a method decorated with runwithlock, attempt to avoid calling other
+           functions which obtain locks (including other methods wrapped with
+           runwithlock). If you *really* have to do so, you are responsible for
+           assuring that race conditions do not arise.  Ideally, methods wrapped with
+           runwithlock (whatever functions they call) should do as little as possible,
+           and preferrably nothing which has any chance of blocking for long periods of
+           time (I/O, database queries, anything over a network, etc)."""
 
         def wrapper(self,*args,**kws):
             try:
