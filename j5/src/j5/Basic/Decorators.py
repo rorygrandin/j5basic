@@ -8,6 +8,7 @@
 __all__ = ["decorator","SelfLocking"]
 
 import inspect, new, itertools
+import logging
 
 #
 # Utility Functions (for working with other functions)
@@ -38,6 +39,10 @@ def getrightargs(function, args):
         for arg in argnames:
             if arg in args:
                 newdict[arg] = args[arg]
+            elif arg != "self" and (defaults is None or arg in argnames[:-len(defaults)]):      # If it doesn't have a default
+                logging.warn("Lacking compulsory argument %s on callable %r - setting to None" % (arg, function))
+                logging.debug("Full arg set = %r" % args)
+                newdict[arg] = None
         return newdict
     return args
 
