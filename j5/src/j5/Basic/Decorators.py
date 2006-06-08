@@ -102,7 +102,7 @@ class decorator_helpers(object):
                         elif defaults_pos == arg_pos + 1:
                             defaults.insert(0, argdefault)
                         else:
-                            raise ValueError("Couldn't add default to existing argument %s" % argname)
+                            logging.debug("Couldn't add default to existing argument %s in function %s" % (argname, func.__name__))
                     else:
                         defaults.append(argdefault)
                     has_defaults = True
