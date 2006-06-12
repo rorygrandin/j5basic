@@ -28,7 +28,7 @@ def getrightargs(function, args):
             if hasattr(function, "__call__"):
                 function = function.__call__
             else:
-                raise ValueException("%s is not a function, method, class or object with a __call__ attribute")
+                raise ValueError("%s is not a function, method, class or object with a __call__ attribute")
         elif not hasattr(function, "__init__"):
             return {}
         else:
