@@ -56,6 +56,11 @@ def getpart(module, partname):
     return module
 
 def getcallingframe():
-    stack = inspect.stack()
-    return stack[2][0]
+    try:
+        # TODO: check whether this is ever needed - if not, use the exception code below
+        stack = inspect.stack()
+        return stack[2][0]
+    except:
+        return inspect.currentframe().f_back
+
 
