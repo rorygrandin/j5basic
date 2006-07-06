@@ -6,7 +6,7 @@ import sys
 
 importedmodules = {}
 
-def resolvemodule(modulename):
+def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
     if importedmodules.has_key(modulename):
         logging.debug("Returning cached object %s for %s" % (importedmodules[modulename],modulename))
@@ -15,13 +15,13 @@ def resolvemodule(modulename):
     try:
         parentmodule = getimportablemodule(modulename)
     except (ImportError, SyntaxError), e:
-        logging.warn("Could not import module %s" % (modulename))
+        logging.log(loglevel, "Could not import module %s" % (modulename))
         raise AttributeError(str(e))
     logging.debug("parentmodule for %s is %s" % (modulename, str(parentmodule)))
     try:
         module = getpart(parentmodule, modulename)
     except AttributeError, e:
-        logging.warn("Could not resolve modulename %s" % (modulename))
+        logging.log(loglevel, "Could not resolve modulename %s" % (modulename))
         raise
     importedmodules[modulename] = module
     logging.debug("Returning object %s for %s" % (module, modulename))
