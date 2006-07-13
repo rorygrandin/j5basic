@@ -3,6 +3,7 @@
 from j5.Basic import Decorators
 import threading
 import time
+import py.test
 
 class TestDecoratorDecorator(object):
 
@@ -159,3 +160,13 @@ class TestSelfLocking(object):
         assert len(Foo.res) == 2*THREADS
         for i in range(THREADS):
             assert Foo.res[2*i] == Foo.res[2*i+1]
+
+def TestNotImplemented(object):
+
+    def test_noimp(self):
+        @Decorators.notimplemented
+        def f(x,y):
+            """Should be overridden elsewhere."""
+            pass
+
+        py.test.raises(NotImplementedError,f,1,2)

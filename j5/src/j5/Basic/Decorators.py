@@ -213,3 +213,21 @@ class SelfLocking(object):
         wrapper.func_name = f.func_name
 
         return wrapper
+
+#
+# Decorator for unimplement methods
+#
+
+def notimplemented(f):
+    """Takes a function f with a docstring and replaces it with a function which
+       raises NotImplementedError(f.__doc__). Useful to avoid having to retype
+       docstrings on methods designed to be overridden elsewhere."""
+
+    def wrapper(self,*args,**kws):
+        raise NotImplementedError(f.__doc__)
+
+    wrapper.__doc__ = f.__doc__
+    wrapper.func_name = f.func_name
+
+    return wrapper
+    
