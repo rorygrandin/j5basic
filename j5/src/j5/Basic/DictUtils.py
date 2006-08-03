@@ -21,6 +21,8 @@
 # along with jToolkit; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from j5.Config import ConfigTree
+
 def filterdict(origdict, keyset):
   """returns the subset of origdict containing only the keys in keyset and their corresponding values """
   newdict = {}
@@ -218,7 +220,8 @@ class attrdict(dict):
 
 def attribify(context):
   """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
-  if isinstance(context, dict) and not isinstance(context, attrdict):
+  # We shouldn't convert Config nodes
+  if isinstance(context, dict) and not isinstance(context, attrdict) and not isinstance(context, ConfigTree.Node):
     newcontext = attrdict(context)
     for key, value in newcontext.items():
       if isinstance(value, (dict, list)):
