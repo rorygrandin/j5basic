@@ -55,7 +55,4 @@ def getpart(module, partname):
         module = getattr(module, component)
     return module
 
-def getcallingframe():
-    return inspect.currentframe().f_back
-
 
