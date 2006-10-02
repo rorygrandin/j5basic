@@ -231,3 +231,16 @@ def notimplemented(f):
 
     return wrapper
     
+def wraptimer(function):
+    """Log the time a function takes to run."""
+    def timecall(self, *args, **kw):
+        start_time = time.time()
+        argstr = ", ".join([repr(arg) for arg in args]) + ", ".join(["%s=%r" % (kw, val) for kw, val in kw.iteritems()])
+        logging.debug("about to call %s(%s)" % (function.__name__, argstr))
+        result = function(self, *args, **kw)
+        end_time = time.time()
+        logging.debug("call to %s(%s) took %0.2f seconds" % (function.__name__, argstr, end_time-start_time))
+        return result
+    timecall.__doc__ = function.__doc__
+    return timecall
+
