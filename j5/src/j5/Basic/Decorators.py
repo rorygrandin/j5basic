@@ -264,3 +264,77 @@ def wraptimer(function):
     timecall.__doc__ = function.__doc__
     return timecall
 
+### helper methods for decorators to extract or alter arguments, and pass on the right thing to the decoratees
+
+def override_arg(argname,value,args,kwargs,argspec):
+    """overrides the given argname=value in args or kwargs as appropriate, returning (args, kwargs)"""
+    if argname in kwargs:
+        kwargs[argname] = value
+        return (args, kwargs)
+    regargs, varargs, varkwargs, defaults = argspec
+    if argname in regargs:
+        args[regargs.index(argname)] = value
+    else:
+        kwargs[argname] = value
+    return (args, kwargs)
+
+def get_or_pop_arg(argname,args,kwargs,argspec):
+    """Finds the value of argname by looking in args and kwargs. Is argname
+       is present in argspec then the value is simply returned. If argname
+       is not present, the value is removed from arg or kwargs as appropriate.
+       
+       Note: If argname is not present in either argspec or kwargs then it is
+             assumed to be the last element of args and is popped off (and added
+             to kwargs if the argspec says a **keywords argument is present)."""
+    regargs, varargs, varkwargs, defaults = argspec
+
+    if argname in kwargs:
+        if varkwargs is None and argname not in regargs:
+            return kwargs.pop(argname)
+        else:
+            return kwargs[argname]
+    elif argname not in regargs:
+        if varkwargs is None:
+            return args.pop()
+        else:
+            value = args.pop()
+            kwargs[argname] = value
+            return value
+    else:
+        return args[regargs.index(argname)]
+
+# TODO: compare to getrightargs, see if any code can be merged
+
+def conform_to_argspec(args,kwargs,argspec):
+    """Attempts to take the arguments in arg and kwargs and return only those which can be used
+       by the argspec given."""
+    regargs, varargs, varkwargs, defaults = argspec
+    N = len(regargs)
+
+    # shallow copy arguments
+    newargs = list(args)
+    newkwargs = kwargs.copy()
+
+    # Fill up as many regarg slots from *args as we can
+    if varargs is None:
+        newargs = newargs[:N]
+    else:
+        pass
+
+    # Fill up the rest from **kwargs
+    for varname in regargs[len(newargs):]:
+        try:
+            newargs.append(newkwargs[varname])
+            del newkwargs[varname]
+        except KeyError:
+            # just leave the rest of the kwargs as they are and let Python raise an error later
+            break
+
+    # Handle remaining kwargs
+    if varkwargs is None:
+        newkwargs = {}
+    else:
+        pass
+
+    return newargs, newkwargs
+
