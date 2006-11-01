@@ -45,9 +45,9 @@ def subtractdicts(ldict, rdict):
         diffdict[key] = lvalue
       elif type(lvalue) != type(rvalue):
         # handle str/unicode mismatch
-        if type(lvalue) == str: lvaluecmp = lvalue.decode('utf8')
+        if type(lvalue) == str: lvaluecmp = lvalue.decode('UTF-8')
         else: lvaluecmp = lvalue
-        if type(rvalue) == str: rvaluecmp = rvalue.decode('utf8')
+        if type(rvalue) == str: rvaluecmp = rvalue.decode('UTF-8')
         else: rvaluecmp = rvalue
         if lvaluecmp != rvaluecmp:
           diffdict[key] = lvalue
