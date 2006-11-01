@@ -15,7 +15,7 @@ def resolvemodule(modulename, loglevel=logging.WARN):
     try:
         parentmodule = getimportablemodule(modulename)
     except (ImportError, SyntaxError), e:
-        logging.log(loglevel, "Could not import module %s" % (modulename))
+        logging.log(loglevel, "Could not import module for %s" % (modulename))
         raise AttributeError(str(e))
     logging.debug("parentmodule for %s is %s" % (modulename, str(parentmodule)))
     try:
@@ -44,7 +44,13 @@ def getimportablemodule(modulename):
             import traceback
             cls, exc, trc = sys.exc_info()
             filename, line_number, function_name, text = traceback.extract_tb(trc, 10)[-1]
-            if filename != __file__:
+            thisfilename = __file__
+            if filename.endswith(".pyc") or filename.endswith(".pyo"):
+                filename = filename[:-1]
+            if thisfilename.endswith(".pyc") or thisfilename.endswith(".pyo"):
+                thisfilename = thisfilename[:-1]
+            if filename != thisfilename:
+                logging.warning("Import Error attempting to import %s (%s), comes from file %s which seems to be a real module that can't be imported" % (attemptedname, error, filename))
                 raise
             logging.debug("Import Error attempting to import %s: %s" % (attemptedname, error))
             currentattempt -= 1
