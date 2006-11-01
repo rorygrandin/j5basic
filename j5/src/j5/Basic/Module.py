@@ -39,7 +39,6 @@ def getimportablemodule(modulename):
             module = __import__(attemptedname)
             return module
         except ImportError, error:
-            # FIXME: if the given module is found, but could not be imported, an error should be raised here
             logging.debug("Import Error attempting to import %s: %s" % (attemptedname, error))
             currentattempt -= 1
             errormessage = error
