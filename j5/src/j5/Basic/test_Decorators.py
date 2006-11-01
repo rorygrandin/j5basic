@@ -30,11 +30,19 @@ class TestDecoratorDecorator(object):
 
     @staticmethod
     def callfdec(f, x, y, z, calling_frame):
-        """decorator extending underlying function"""
+        """decorator extending underlying function and getting calling_frame"""
         if not hasattr(f, "call_frames"):
             f.call_frames = []
         f.call_frames.append(calling_frame)
         return f(x + y * z)
+
+    @staticmethod
+    def callfdec2(f, x, calling_frame):
+        """decorator extending underlying function, and passing calling_frame into it"""
+        if not hasattr(f, "call_frames"):
+            f.call_frames = []
+        f.call_frames.append(calling_frame)
+        return f(x, calling_frame)
 
     @staticmethod
     def g(x):
@@ -106,9 +114,9 @@ class TestDecoratorDecorator(object):
         assert self.g.calls[-1] == "Called with x=100, y=4, z=3"
 
     def test_decorator_calling_frame_arg(self):
-        """tests that a decorated function can extend the underlying function"""
+        """tests that a decorated function can get the frame of the calling function"""
         frames_so_far = len(getattr(self.g, "call_frames", []))
-        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3), ('calling_frame', None)], calling_frame_arg="calling_frame")
+        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3)], calling_frame_arg="calling_frame")
         callf_g = callf_decorator(self.g)
         assert callf_g(100, 4) == 100 + 12 + 25
         assert len(self.g.call_frames) == frames_so_far + 1
@@ -116,17 +124,42 @@ class TestDecoratorDecorator(object):
         assert call_frame
         assert call_frame.f_code.co_name == "test_decorator_calling_frame_arg"
 
+    def test_decorator_calling_frame_extendedarg(self):
+        """tests that a decorated function can get the frame of the calling function and pass it as an extended argument"""
+        frames_so_far = len(getattr(self.g, "call_frames", []))
+        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3), ("calling_frame", None)], calling_frame_arg="calling_frame")
+        callf_g = callf_decorator(self.g)
+        assert callf_g(100, 4) == 100 + 12 + 25
+        assert len(self.g.call_frames) == frames_so_far + 1
+        call_frame = self.g.call_frames[-1]
+        assert call_frame
+        assert call_frame.f_code.co_name == "test_decorator_calling_frame_extendedarg"
+
     def test_decorator_lambda_calling_frame_arg(self):
-        """tests that a decorated function can extend the underlying function"""
+        """tests that a decorated function can get the frame of the calling function when a lambda is being decorated"""
         l = lambda x: x + 21
         frames_so_far = len(getattr(l, "call_frames", []))
-        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3), ('calling_frame', None)], calling_frame_arg="calling_frame")
+        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3)], calling_frame_arg="calling_frame")
         callf_l = callf_decorator(l)
         assert callf_l(100, 4) == 100 + 12 + 21
         assert len(l.call_frames) == frames_so_far + 1
         call_frame = l.call_frames[-1]
         assert call_frame
         assert call_frame.f_code.co_name == "test_decorator_lambda_calling_frame_arg"
+
+    def test_decorator_lambda_calling_frame_extendedarg(self):
+        """tests that a decorated function can get the frame of the calling function when a lambda is being decorated, and pass it as an extended argument"""
+        l = lambda x, calling_frame: x + 21
+        frames_so_far = len(getattr(l, "call_frames", []))
+        callf_decorator = Decorators.decorator(self.callfdec2, [("calling_frame", None)], calling_frame_arg="calling_frame")
+        callf_l = callf_decorator(l)
+        assert callf_l(100, "nonsense") == 100 + 21
+        assert len(l.call_frames) == frames_so_far + 1
+        call_frame = l.call_frames[-1]
+        assert call_frame
+        # check that the argument given for calling frame is overridden
+        assert call_frame != "nonsense"
+        assert call_frame.f_code.co_name == "test_decorator_lambda_calling_frame_extendedarg"
 
     def test_extend_decorator_signature(self):
         """tests that a decorated function can extend the signature of the underlying function"""

@@ -145,9 +145,14 @@ class decorator_helpers(object):
                 infodict["name"] = "lambda_wrapper"
             execdict["inspect"] = inspect
             infodict["calling_frame_arg"] = calling_frame_arg
-            func_src = """def %(name)s(%(fullsign)s):
-            %(calling_frame_arg)s = inspect.currentframe().f_back
-            return _call_(_func_, %(shortsign)s)""" % infodict
+            if calling_frame_arg in infodict["argnames"]:
+                func_src = """def %(name)s(%(fullsign)s):
+                %(calling_frame_arg)s = inspect.currentframe().f_back
+                return _call_(_func_, %(shortsign)s)""" % infodict
+            else:
+                func_src = """def %(name)s(%(fullsign)s):
+                %(calling_frame_arg)s = inspect.currentframe().f_back
+                return _call_(_func_, %(shortsign)s, %(calling_frame_arg)s=%(calling_frame_arg)s)""" % infodict
             func_code = compile(func_src, func.func_code.co_filename, 'exec')
         elif func.__name__ == "<lambda>" and not calling_frame_arg:
             lambda_src = "lambda %(fullsign)s: _call_(_func_, %(shortsign)s)" \
@@ -195,7 +200,6 @@ class decorator(object):
 
     def __call__(self, func):
         return decorator_helpers._decorate(func, self.caller, self.extendedargs, self.calling_frame_arg)
-
 
 #
 # Decorators for Self Locking objects.
