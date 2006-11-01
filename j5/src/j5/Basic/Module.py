@@ -39,6 +39,13 @@ def getimportablemodule(modulename):
             module = __import__(attemptedname)
             return module
         except ImportError, error:
+            # if the ImportError originated from outside this file then raise it, otherwise continue
+            import sys
+            import traceback
+            cls, exc, trc = sys.exc_info()
+            filename, line_number, function_name, text = traceback.extract_tb(trc, 10)[-1]
+            if filename != __file__:
+                raise
             logging.debug("Import Error attempting to import %s: %s" % (attemptedname, error))
             currentattempt -= 1
             errormessage = error
