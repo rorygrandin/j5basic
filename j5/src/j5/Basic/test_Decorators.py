@@ -29,6 +29,14 @@ class TestDecoratorDecorator(object):
         return f(x + y * z)
 
     @staticmethod
+    def callfdec(f, x, y, z, calling_frame):
+        """decorator extending underlying function"""
+        if not hasattr(f, "call_frames"):
+            f.call_frames = []
+        f.call_frames.append(calling_frame)
+        return f(x + y * z)
+
+    @staticmethod
     def g(x):
         """returns x plus 25"""
         return x + 25
@@ -96,6 +104,29 @@ class TestDecoratorDecorator(object):
         ext_g = ext_decorator(self.g)
         assert ext_g(100, 4) == 100 + 12 + 25
         assert self.g.calls[-1] == "Called with x=100, y=4, z=3"
+
+    def test_decorator_calling_frame_arg(self):
+        """tests that a decorated function can extend the underlying function"""
+        frames_so_far = len(getattr(self.g, "call_frames", []))
+        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3), ('calling_frame', None)], calling_frame_arg="calling_frame")
+        callf_g = callf_decorator(self.g)
+        assert callf_g(100, 4) == 100 + 12 + 25
+        assert len(self.g.call_frames) == frames_so_far + 1
+        call_frame = self.g.call_frames[-1]
+        assert call_frame
+        assert call_frame.f_code.co_name == "test_decorator_calling_frame_arg"
+
+    def test_decorator_lambda_calling_frame_arg(self):
+        """tests that a decorated function can extend the underlying function"""
+        l = lambda x: x + 21
+        frames_so_far = len(getattr(l, "call_frames", []))
+        callf_decorator = Decorators.decorator(self.callfdec, ['y', ('z', 3), ('calling_frame', None)], calling_frame_arg="calling_frame")
+        callf_l = callf_decorator(l)
+        assert callf_l(100, 4) == 100 + 12 + 21
+        assert len(l.call_frames) == frames_so_far + 1
+        call_frame = l.call_frames[-1]
+        assert call_frame
+        assert call_frame.f_code.co_name == "test_decorator_lambda_calling_frame_arg"
 
     def test_extend_decorator_signature(self):
         """tests that a decorated function can extend the signature of the underlying function"""

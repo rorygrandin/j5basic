@@ -127,16 +127,29 @@ class decorator_helpers(object):
         return "_call_" in dic or "_func_" in dic
 
     @staticmethod
-    def _decorate(func, caller, extendedargs={}):
+    def _decorate(func, caller, extendedargs=[], calling_frame_arg=None):
         """Takes a function and a caller and returns the function
            decorated with that caller. The decorated function is obtained
-           by evaluating a lambda function with the correct signature."""
+           by evaluating a lambda function with the correct signature.
+           calling_frame_arg can be given as the name of an argument
+           which should contain the calling function's stack frame"""
         infodict = decorator_helpers.getinfo(func, extendedargs)
         defaults = infodict["defarg"]
         assert not decorator_helpers._contains_reserved_names(infodict["argnames"]), \
                "You cannot use _call_ or _func_ as argument names!"
         execdict = dict(_func_=func, _call_=caller, defarg=defaults or ())
-        if func.__name__ == "<lambda>":
+        if calling_frame_arg:
+            # this uses inspect to pass the calling function's frame to the decorator
+            if func.__name__ == "<lambda>":
+                # we can't do assignment in a normal lambda, so we construct a function
+                infodict["name"] = "lambda_wrapper"
+            execdict["inspect"] = inspect
+            infodict["calling_frame_arg"] = calling_frame_arg
+            func_src = """def %(name)s(%(fullsign)s):
+            %(calling_frame_arg)s = inspect.currentframe().f_back
+            return _call_(_func_, %(shortsign)s)""" % infodict
+            func_code = compile(func_src, func.func_code.co_filename, 'exec')
+        elif func.__name__ == "<lambda>" and not calling_frame_arg:
             lambda_src = "lambda %(fullsign)s: _call_(_func_, %(shortsign)s)" \
                          % infodict
             func_code = compile(lambda_src, func.func_code.co_filename, 'eval')
@@ -154,6 +167,8 @@ class decorator(object):
     """General purpose decorator factory: takes a caller function as
        input and returns a decorator. extendedargs, if given is a list of
        keyword arguments and defaults that will be added to the function signature
+       calling_frame_arg can be given as the name of an argument
+       which should contain the calling function's stack frame
        A caller function is any function like this::
 
        def caller(func, *args, **kw):
@@ -173,12 +188,13 @@ class decorator(object):
            >>> g()
            Calling 'g'"""
 
-    def __init__(self, caller, extendedargs=[]):
+    def __init__(self, caller, extendedargs=[], calling_frame_arg=None):
         self.caller = caller
         self.extendedargs = extendedargs
+        self.calling_frame_arg = calling_frame_arg
 
     def __call__(self, func):
-        return decorator_helpers._decorate(func, self.caller, self.extendedargs)
+        return decorator_helpers._decorate(func, self.caller, self.extendedargs, self.calling_frame_arg)
 
 
 #
