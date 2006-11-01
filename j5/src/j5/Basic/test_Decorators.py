@@ -123,6 +123,10 @@ class TestDecoratorDecorator(object):
         call_frame = self.g.call_frames[-1]
         assert call_frame
         assert call_frame.f_code.co_name == "test_decorator_calling_frame_arg"
+        # check that calling_frame can't be overridden
+        some_frame = Decorators.inspect.currentframe()
+        assert py.test.raises(TypeError, callf_g, 100, 4, calling_frame=some_frame)
+        assert py.test.raises(TypeError, callf_g, 100, 4, some_frame)
 
     def test_decorator_calling_frame_extendedarg(self):
         """tests that a decorated function can get the frame of the calling function and pass it as an extended argument"""
@@ -134,6 +138,14 @@ class TestDecoratorDecorator(object):
         call_frame = self.g.call_frames[-1]
         assert call_frame
         assert call_frame.f_code.co_name == "test_decorator_calling_frame_extendedarg"
+        # check that calling_frame can be overridden, but the result is still correct
+        some_frame = Decorators.inspect.currentframe().f_back
+        assert callf_g(100, 4, calling_frame=some_frame) == 100 + 12 + 25
+        assert len(self.g.call_frames) == frames_so_far + 2
+        assert self.g.call_frames[-1] != some_frame
+        assert callf_g(100, 4, 5, some_frame) == 100 + 20 + 25
+        assert len(self.g.call_frames) == frames_so_far + 3
+        assert self.g.call_frames[-1] != some_frame
 
     def test_decorator_lambda_calling_frame_arg(self):
         """tests that a decorated function can get the frame of the calling function when a lambda is being decorated"""
@@ -146,6 +158,10 @@ class TestDecoratorDecorator(object):
         call_frame = l.call_frames[-1]
         assert call_frame
         assert call_frame.f_code.co_name == "test_decorator_lambda_calling_frame_arg"
+        # check that calling_frame can't be overridden
+        some_frame = Decorators.inspect.currentframe()
+        assert py.test.raises(TypeError, callf_l, 100, 4, calling_frame=some_frame)
+        assert py.test.raises(TypeError, callf_l, 100, 4, some_frame)
 
     def test_decorator_lambda_calling_frame_extendedarg(self):
         """tests that a decorated function can get the frame of the calling function when a lambda is being decorated, and pass it as an extended argument"""
