@@ -3,6 +3,8 @@
 import logging
 import inspect
 import sys
+import os
+import traceback
 
 importedmodules = {}
 
@@ -27,6 +29,14 @@ def resolvemodule(modulename, loglevel=logging.WARN):
     logging.debug("Returning object %s for %s" % (module, modulename))
     return module
 
+def canonicalize(path):
+    """returns the canonical reference to the path that can be used for comparison to other paths"""
+    return os.path.normpath(os.path.realpath(os.path.abspath(path)))
+
+thisfilename = canonicalize(__file__)
+if thisfilename.endswith(".pyc") or thisfilename.endswith(".pyo"):
+    thisfilename = thisfilename[:-1]
+
 def getimportablemodule(modulename):
     """Attempts to import successive modules on the a.b.c route - first a.b.c, then a.b, etc"""
     components = modulename.split('.')
@@ -40,16 +50,12 @@ def getimportablemodule(modulename):
             return module
         except ImportError, error:
             # if the ImportError originated from outside this file then raise it, otherwise continue
-            import sys
-            import traceback
             cls, exc, trc = sys.exc_info()
             filename, line_number, function_name, text = traceback.extract_tb(trc, 10)[-1]
-            thisfilename = __file__
             if filename.endswith(".pyc") or filename.endswith(".pyo"):
                 filename = filename[:-1]
-            if thisfilename.endswith(".pyc") or thisfilename.endswith(".pyo"):
-                thisfilename = thisfilename[:-1]
-            if filename != thisfilename:
+            # need to compare to the canonical version of this filename - and make it case insensitive for windows drive letters
+            if canonicalize(filename).lower() != thisfilename.lower():
                 logging.warning("Import Error attempting to import %s (%s), comes from file %s which seems to be a real module that can't be imported" % (attemptedname, error, filename))
                 raise
             logging.debug("Import Error attempting to import %s: %s" % (attemptedname, error))
