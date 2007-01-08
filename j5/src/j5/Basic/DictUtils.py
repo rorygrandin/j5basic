@@ -23,6 +23,17 @@
 
 from j5.Config import ConfigTree
 
+def assert_dicts_equal(dict1,dict2):
+    """tests equality of two dicts"""
+    k1, k2 = dict1.keys(), dict2.keys()
+    k1.sort()
+    k2.sort()
+
+    assert k1 == k2
+    for key in k1:
+        # this assert means we get the key if the assert fails
+        assert (dict1[key], key) == (dict2[key], key)
+
 def filterdict(origdict, keyset):
   """returns the subset of origdict containing only the keys in keyset and their corresponding values """
   newdict = {}
