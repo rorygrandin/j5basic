@@ -27,3 +27,14 @@ class TestAttrDict:
         assert nested[0].a[0] == "nested"
         assert nested[0].a[1].dictionary == 4
 
+class TestDictHelpers:
+    def test_assert_dicts_equal(self):
+        d1 = {1:2, 3:4}
+        d2 = {1:2, 3:4}
+        d3 = {1:3, 3:5}
+        d4 = {2:1, 4:3}
+
+        DictUtils.assert_dicts_equal(d1, d2)
+        DictUtils.assert_dicts_not_equal(d1, d3)
+        DictUtils.assert_dicts_not_equal(d1, d4)
+

@@ -34,6 +34,18 @@ def assert_dicts_equal(dict1,dict2):
         # this assert means we get the key if the assert fails
         assert (dict1[key], key) == (dict2[key], key)
 
+def assert_dicts_not_equal(dict1,dict2):
+    """tests two dicts are not equal"""
+    k1, k2 = dict1.keys(), dict2.keys()
+    k1.sort()
+    k2.sort()
+
+    if k1 == k2:
+        for key in k1:
+            if (dict1[key], key) != (dict2[key], key):
+                return
+        assert False, (k1, k2)
+
 def filterdict(origdict, keyset):
   """returns the subset of origdict containing only the keys in keyset and their corresponding values """
   newdict = {}
