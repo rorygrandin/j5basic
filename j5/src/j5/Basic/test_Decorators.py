@@ -214,7 +214,7 @@ class TestDecoratorDecorator(object):
 
 class TestSelfLocking(object):
 
-    def test_foo(self):
+    def test_runwithlock(self):
         THREADS = 4
 
         class Foo(object):
@@ -230,6 +230,34 @@ class TestSelfLocking(object):
         threads = []
         for i in range(THREADS):
             threads.append(threading.Thread(target=Foo().haslock,args=[i]))
+
+        for thrd in threads:
+            thrd.start()
+
+        for thrd in threads:
+            thrd.join()
+
+        assert len(Foo.res) == 2*THREADS
+        for i in range(THREADS):
+            assert Foo.res[2*i] == Foo.res[2*i+1]
+        
+        
+    def test_runwithnamedlock(self):
+        THREADS = 4
+
+        class Foo(object):
+            other_lock = threading.Lock()
+            res = []
+
+            @Decorators.SelfLocking.runwithnamedlock('other_lock')
+            def hasotherlock(self,i):
+                self.res.append(i)
+                time.sleep(0.5)
+                self.res.append(i)
+        
+        threads = []
+        for i in range(THREADS):
+            threads.append(threading.Thread(target=Foo().hasotherlock,args=[i]))
 
         for thrd in threads:
             thrd.start()

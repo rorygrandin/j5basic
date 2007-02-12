@@ -234,6 +234,16 @@ class SelfLocking(object):
 
         return wrapper
 
+    @staticmethod
+    def runwithnamedlock(lockname):
+        def wrapper(f, self, *args, **kws):
+            try:
+                getattr(self, lockname).acquire()
+                ret = f(self,*args,**kws)
+            finally:
+                getattr(self, lockname).release()
+            return ret
+        return decorator(wrapper)
 #
 # Decorator for unimplement methods
 #
