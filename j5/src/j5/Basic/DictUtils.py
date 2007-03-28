@@ -181,6 +181,14 @@ class ordereddict(dict):
     if not alreadypresent: self.order.append(key)
     return result
 
+  def setdefault(self, key, default):
+    """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
+    if key in self:
+        return self[key]
+    else:
+        self[key] = default
+        return self[key]
+
   def update(self, updatedict):
     """D.update(E) -> None.  Update D from E: for k in E.keys(): D[k] = E[k]"""
     for key, value in updatedict.iteritems():

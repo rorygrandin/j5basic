@@ -40,6 +40,21 @@ class TestOrderedDict(object):
         assert list(d.itervalues()) == v
         assert list(d.iteritems()) == zip(k,v)
 
+    def test_setting(self):
+        k = [5,1,2,3,7,6]
+        v = ["a","b","c","d","e","f"]
+        d = DictUtils.ordereddict(zip(k,v))
+        d.setdefault(8,"g")
+        k.append(8)
+        v.append("g")
+
+        assert d.keys() == k
+        assert d.values() == v
+        assert d.items() == zip(k,v)
+        assert list(d.iterkeys()) == k
+        assert list(d.itervalues()) == v
+        assert list(d.iteritems()) == zip(k,v)
+
 class TestDictHelpers(object):
     def test_assert_dicts_equal(self):
         d1 = {1:2, 3:4}
@@ -50,4 +65,5 @@ class TestDictHelpers(object):
         DictUtils.assert_dicts_equal(d1, d2)
         DictUtils.assert_dicts_not_equal(d1, d3)
         DictUtils.assert_dicts_not_equal(d1, d4)
+
 
