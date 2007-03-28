@@ -1,7 +1,7 @@
 
 from j5.Basic import DictUtils
 
-class TestCIDict:
+class TestCIDict(object):
     def test_get(self):
         d = DictUtils.cidict()
         d["VaLuE"] = 5
@@ -14,7 +14,7 @@ class TestCIDict:
         assert "VaLuE" in d.keys()
         assert "value" not in d.keys()
 
-class TestAttrDict:
+class TestAttrDict(object):
     def test_attrs(self):
         d = DictUtils.attrdict()
         d["VaLuE"] = 5
@@ -27,7 +27,20 @@ class TestAttrDict:
         assert nested[0].a[0] == "nested"
         assert nested[0].a[1].dictionary == 4
 
-class TestDictHelpers:
+class TestOrderedDict(object):
+    def test_key_and_value_ordering(self):
+        k = [5,1,2,3,7,6]
+        v = ["a","b","c","d","e","f"]
+        d = DictUtils.ordereddict(zip(k,v))
+
+        assert d.keys() == k
+        assert d.values() == v
+        assert d.items() == zip(k,v)
+        assert list(d.iterkeys()) == k
+        assert list(d.itervalues()) == v
+        assert list(d.iteritems()) == zip(k,v)
+
+class TestDictHelpers(object):
     def test_assert_dicts_equal(self):
         d1 = {1:2, 3:4}
         d2 = {1:2, 3:4}

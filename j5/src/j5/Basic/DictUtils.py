@@ -223,6 +223,10 @@ class ordereddict(dict):
     """D.keys() -> list of D's keys"""
     return self.order[:]
 
+  def values(self):
+    """D.values() -> lif of D's values (in the same order as D.keys())"""
+    return [self[key] for key in self.order]
+
   def popitem(self):
     """D.popitem() -> (k, v), remove and return some (key, value) pair as a 2-tuple; but raise KeyError if D is empty"""
     if len(self.order) == 0:
