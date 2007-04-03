@@ -9,6 +9,7 @@ __all__ = ["decorator","SelfLocking"]
 
 import inspect, new, itertools
 import logging
+import time
 
 #
 # Utility Functions (for working with other functions)
@@ -260,7 +261,7 @@ def notimplemented(f):
     wrapper.func_name = f.func_name
 
     return wrapper
-    
+
 def wraptimer(function):
     """Log the time a function takes to run."""
     def timecall(self, *args, **kw):

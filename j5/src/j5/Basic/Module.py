@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 import logging
-import inspect
-import sys
 import os
-import traceback
 
 importedmodules = {}
 
