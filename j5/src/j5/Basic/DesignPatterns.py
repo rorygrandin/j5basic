@@ -20,13 +20,13 @@ class MultitonMetaclass(type):
 class Multiton(object):
     """Thread-safe multiton baseclass. Sub-classes return only one object per set of
        initialisation parameters. These parameters must all be hashable.
-       
+
        Instead of implementing __init__ sub-classes should implement multiton_setup
        which is only run when a new object instance is created. They may, of course,
        also implement __init__ which will be run every time someone attempts to
        instantiate the sub-class but this is usually not what you want. Note that
        multiton_setup will be called before __init__ if both are implemented.
-       
+
        Object creation is thread-safe. It is the sub-classes responsibility to ensure
        that any methods other than multiton_setup (which will be called while holding
        a sub-class wide lock) are thread-safe."""

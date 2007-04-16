@@ -180,14 +180,14 @@ class decorator(object):
        def caller(func, *args, **kw):
            # do something
            return func(*args, **kw)
-    
+
        Here is an example of usage:
 
            >>> @decorator
            ... def chatty(f, *args, **kw):
            ...     print "Calling %r" % f.__name__
            ...     return f(*args, **kw)
-    
+
            >>> @chatty
            ... def g(): pass
            ...
@@ -213,7 +213,7 @@ class SelfLocking(object):
            attribute which supports the acquire() and release() methods.
            The decorator acquires self.lock, runs the method and releases the lock
            afterwards.
-           
+
            Inside a method decorated with runwithlock, attempt to avoid calling other
            functions which obtain locks (including other methods wrapped with
            runwithlock). If you *really* have to do so, you are responsible for
@@ -293,7 +293,7 @@ def get_or_pop_arg(argname,args,kwargs,argspec):
     """Finds the value of argname by looking in args and kwargs. Is argname
        is present in argspec then the value is simply returned. If argname
        is not present, the value is removed from arg or kwargs as appropriate.
-       
+
        Note: If argname is not present in either argspec or kwargs then it is
              assumed to be the last element of args and is popped off (and added
              to kwargs if the argspec says a **keywords argument is present)."""
