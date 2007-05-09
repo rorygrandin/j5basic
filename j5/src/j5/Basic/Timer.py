@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 import time
 import logging
 
@@ -13,17 +14,23 @@ class Timer:
         self.kwargs = kwargs
         if self.kwargs is None:
             self.kwargs = {}
-        self.resolution = resolution
+        if isinstance(resolution, datetime.timedelta):
+            self.resolution = resolution
+        else:
+            self.resolution = datetime.timedelta(seconds=resolution)
 
     def start(self):
-        nexttime = time.time()
+        nexttime = datetime.datetime.now()
         self.stop = False
         while not self.stop:
             nexttime = nexttime + self.resolution
-            if nexttime < time.time():
-                logging.warning("Timer function too slow for resolution - attempting to catch up")
+            currenttime = datetime.datetime.now()
+            if nexttime < currenttime:
+                logging.info("Timer function missed %s (at %s) - running behind schedule" % (nexttime, currenttime))
             else:
-                time.sleep(nexttime - time.time())
+                waittime = nexttime - currenttime
+                waitseconds = waittime.days * (24*60*60) + waittime.seconds + waittime.microseconds * 0.000001
+                time.sleep(waitseconds)
             apply(self.target, self.args, self.kwargs)
 
 
