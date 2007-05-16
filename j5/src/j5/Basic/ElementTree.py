@@ -39,8 +39,11 @@ if not SomeElementTreeImported:
 try:
     # Try import extras from default location of ElementTree in Python >= 2.5
     from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
-                                      _encode, _escape_attrib, _encode_entity
+                                      _encode, _escape_attrib, _encode_entity, \
+                                      Comment
 except ImportError:
     # Try import extras from standalone ElementTree install
     from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
-                                        _encode, _escape_attrib, _encode_entity
+                                        _encode, _escape_attrib, _encode_entity, \
+                                        Comment
+
