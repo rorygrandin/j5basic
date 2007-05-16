@@ -30,8 +30,7 @@ if not SomeElementTreeImported:
     except ImportError:
         pass
 
-# TODO: check if these are necessary now that the above logic has changed
-# Import Extra Things from ElementTree if cElementTree Used
+# Import Extra Things from ElementTree that are private elements we need from outside
 
 try:
     # Try import extras from default location of ElementTree in Python >= 2.5
