@@ -11,19 +11,9 @@ if not SomeElementTreeImported:
         SomeElementTreeImported = True
     except ImportError:
         pass
-
-if not SomeElementTreeImported:
     try:
         # default location of ElementTree on Python >= 2.5
         from xml.etree.ElementTree import *
-        SomeElementTreeImported = True
-    except ImportError:
-        pass
-
-if not SomeElementTreeImported:
-    try:
-        # try standalone cElementTree install
-        from cElementTree import *
         SomeElementTreeImported = True
     except ImportError:
         pass
@@ -33,17 +23,22 @@ if not SomeElementTreeImported:
     # try standalone ElementTree install
     from elementtree.ElementTree import *
     SomeElementTreeImported = True
+    try:
+        # try standalone cElementTree install
+        from cElementTree import *
+        SomeElementTreeImported = True
+    except ImportError:
+        pass
 
+# TODO: check if these are necessary now that the above logic has changed
 # Import Extra Things from ElementTree if cElementTree Used
 
 try:
     # Try import extras from default location of ElementTree in Python >= 2.5
     from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
-                                      _encode, _escape_attrib, _encode_entity, \
-                                      Comment
+                                      _encode, _escape_attrib, _encode_entity
 except ImportError:
     # Try import extras from standalone ElementTree install
     from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
-                                        _encode, _escape_attrib, _encode_entity, \
-                                        Comment
+                                        _encode, _escape_attrib, _encode_entity
 
