@@ -16,3 +16,7 @@ def localsecondnow():
 def totalseconds(timedelta):
     """Return the total number of seconds represented by a datetime.timedelta object."""
     return timedelta.seconds + (timedelta.days * 24 * 60 * 60)
+
+def totalhours(timedelta):
+    """Return the total number of hours represented by a datetime.timedelta object."""
+    return float(totalseconds(timedelta)) / 3600
