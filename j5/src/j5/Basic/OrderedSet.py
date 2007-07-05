@@ -18,9 +18,9 @@ class OrderedSet(list):
         self._existing = {}
         self._append = super(OrderedSet,self).append
 
-    def __del__(self,i):
+    def __delitem__(self,i):
         del self._existing[self[i]]
-        super(OrderedSet,self).__del__(i)
+        super(OrderedSet,self).__delitem__(i)
 
     def extend(self,iterable):
         existing = self._existing
