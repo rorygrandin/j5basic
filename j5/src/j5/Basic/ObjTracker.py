@@ -10,16 +10,16 @@ import gc
 
 class ObjTracker(object):
     """Tracker for watching changes in program object usage.
-    
+
        To use, add something like:
 
          from j5.Basic import ObjTracker
          ot = ObjTracker.ObjTracker()
-       
+
        to the top of a module, and then call
-       
+
          ot.print_changes()
-       
+
        where you want the changes in object usage to be printed out.
        """
 
@@ -29,11 +29,11 @@ class ObjTracker(object):
     def _gather_changes(self):
         """Create a dictionary containing the changes in object usage
            (by object type) since the last call to this method.
-           
-           Returns (diff dictionary, number of objects garbage collected, number of objects in gc.garbage).
+
+           Returns (diff dictionary, number of unreachable objects found by gc.collect, number of objects in gc.garbage).
            """
-        collected = gc.collect()
-        in_garbage = len(gc.garbage)
+        unreachable = gc.collect()
+        garbage = len(gc.garbage)
         objs = gc.get_objects()
 
         usage = {}
@@ -55,11 +55,11 @@ class ObjTracker(object):
 
         self._prev_objs = usage
 
-        return diff, collected, in_garbage
+        return diff, unreachable, garbage
 
     def top_items(self,diff,size):
         """Return the object types whose usage has increased the most (or decreased the least).
-        
+
            Returns a list (length=size) of (type, increase) tuples.
            """
         top_items = diff.items()
@@ -69,7 +69,7 @@ class ObjTracker(object):
 
     def bottom_items(self,diff,size):
         """Return the object types whose usage has decreased the most (or increased the least).
-        
+
            Returns a list (length=size) of (type, -decrease) tuples.
            """
         bottom_items = diff.items()
@@ -79,7 +79,7 @@ class ObjTracker(object):
         return bottom_items
 
     def print_changes(self):
-        diff, collected, in_garbage = self._gather_changes()
+        diff, unreachable, garbage = self._gather_changes()
 
         print "BIGGEST INCREASES:"
         for objtype, inc in self.top_items(diff,10):
@@ -89,7 +89,7 @@ class ObjTracker(object):
         for objtype, inc in self.bottom_items(diff,10):
             print "\t", inc, objtype
 
-        print "# COLLECTED:", collected
-        print "# GC.GARBAGE:", in_garbage
+        print "# COLLECTED:", unreachable - garbage
+        print "# GC.GARBAGE:", garbage
 
         print "----"
