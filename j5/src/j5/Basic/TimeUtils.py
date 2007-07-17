@@ -20,3 +20,12 @@ def totalseconds(timedelta):
 def totalhours(timedelta):
     """Return the total number of hours represented by a datetime.timedelta object."""
     return float(totalseconds(timedelta)) / 3600
+
+def hoursandminutes(timedelta):
+    """Expresses a timedelta object as a tuple containing hours and minutes.  Seconds are rounded."""
+    th = totalhours(timedelta)
+    wh = round(th,0)
+    tm = (th - wh) * 60
+    wm = round(tm,0)
+
+    return (wh,wm)
