@@ -1,6 +1,5 @@
 from j5.Basic import TzInfo
 import datetime
-import time
 
 """Utilities for dealing with time."""
 
@@ -34,4 +33,4 @@ def hoursandminutes(timedelta):
 def timetuple2datetime(t):
     """Convert a timetuple to a datetime object.
        """
-    return datetime.datetime.fromtimestamp(time.mktime(t))
+    return datetime.datetime(*(t[:6]))
