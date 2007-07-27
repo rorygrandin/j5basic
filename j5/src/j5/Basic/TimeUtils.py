@@ -28,9 +28,9 @@ def totalhours(timedelta):
 def hoursandminutes(timedelta):
     """Expresses a timedelta object as a tuple containing hours and minutes.  Seconds are rounded."""
     th = totalhours(timedelta)
-    wh = round(th,0)
+    wh = int(th)
     tm = (th - wh) * 60
-    wm = round(tm,0)
+    wm = int(tm)
 
     return (wh,wm)
 
