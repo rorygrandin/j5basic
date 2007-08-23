@@ -27,11 +27,21 @@ class FormattedDatetime(StrftimeFormattedTypeMixIn,datetime.datetime):
         self.format_str = format_str
         return self
 
+    def replace(self,*args,**kwargs):
+        res = super(FormattedDatetime,self).replace(*args,**kwargs)
+        res.format_str = self.format_str
+        return res
+
 class FormattedDate(StrftimeFormattedTypeMixIn,datetime.date):
     def __new__(cls,format_str,*args,**kwargs):
         self = super(FormattedDate,cls).__new__(cls,*args,**kwargs)
         self.format_str = format_str
         return self
+
+    def replace(self,*args,**kwargs):
+        res = super(FormattedDate,self).replace(*args,**kwargs)
+        res.format_str = self.format_str
+        return res
 
 class FormattedTime(StrftimeFormattedTypeMixIn,datetime.time):
     def __new__(cls,format_str,*args,**kwargs):

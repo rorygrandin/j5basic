@@ -61,3 +61,25 @@ class TestFormatters(IterativeTester.IterativeTester):
             else:
                 assert type(result) == result_type
                 assert str(result) == expected
+
+    def ftest_datetime_replace(self,formatresource):
+        """Calling .replace(...) on FormattedDate* objects can result in
+           FormattedDate* objects with missing attributes (unless prevented).
+           """
+        formatter = formatresource.formatter
+        result_type = formatresource.result_type
+
+        if not issubclass(result_type,datetime.date):
+            return
+
+        for i, (data, expected) in enumerate(formatresource.data_result_list):
+            if expected is None:
+                continue
+
+            result = formatter.format(data)
+            new = result.replace(year=result.year)
+
+            if type(formatter) is Formatters.LooseDatetimeFormatter:
+                assert(new.format_str)
+            else:
+                assert(new.format_str == result.format_str)
