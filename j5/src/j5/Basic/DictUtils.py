@@ -231,11 +231,11 @@ class ordereddict(dict):
 
 class attrdict(dict):
     """Dictionary that also allows access to keys using attributes"""
-    def __getattr__(self, attr, default=None):
+    def __getattr__(self, attr):
         if attr in self:
             return self[attr]
         else:
-            return default
+            return None
 
 def attribify(context):
     """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
