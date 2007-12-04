@@ -55,6 +55,12 @@ class FormattedFloat(StrFormattedMixIn,float):
         self.format_str = format_str
         return self
 
+class FormattedInt(StrFormattedMixIn,int):
+    def __new__(cls,format_str,*args,**kwargs):
+        self = super(FormattedInt,cls).__new__(cls,*args,**kwargs)
+        self.format_str = format_str
+        return self
+
 # Formatters
 
 class FormatterBase(object):
@@ -110,6 +116,22 @@ class FloatFormatter(FormatterStrBase):
     def _parseString(self, value):
         try:
             return FormattedFloat(self.format_str,value)
+        except (TypeError,ValueError):
+            return None
+
+class IntFormatter(FormatterStrBase):
+    """Formats an int for user interaction.
+       format_str is a Python %-string."""
+
+    FormattedType = FormattedInt
+    UnformattedType = int
+
+    def _parseUnformattedType(self, value):
+        return FormattedInt(self.format_str,value)
+
+    def _parseString(self, value):
+        try:
+            return FormattedInt(self.format_str,value)
         except (TypeError,ValueError):
             return None
 
