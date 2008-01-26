@@ -23,7 +23,7 @@ class CleanupIterator(object):
             raise StopIteration()
         try:
             return self.iterator.next()
-        except Exception:
+        except StandardError:
             self.cleaned_up = True
             # if a clean up error happens, it will be raised instead of the iterator error
             self.cleanup_call(*self.cleanup_args, **self.cleanup_kwargs)

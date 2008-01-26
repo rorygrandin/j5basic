@@ -48,7 +48,7 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
             # if we get an import error on the parent module, we're unlikely to be able to import the child
             logging.log(loglevel, "Import Error attempting to import %s (parent of %s): %s" % (parentmodulename, modulename, error))
             raise
-        except Exception, error:
+        except StandardError, error:
             logging.debug("Error attempting to import %s: %s" % (parentmodulename, error))
             raise
     try:
@@ -59,7 +59,7 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
         if component_depth > 1:
             return parentmodule
         raise
-    except Exception, error:
+    except StandardError, error:
         logging.debug("Error attempting to import %s: %s" % (modulename, error))
         raise
 
