@@ -11,9 +11,11 @@ class CleanupIterator(object):
         self.cleanup_args = cleanup_args
         self.cleanup_kwargs = cleanup_kwargs
         self.cleaned_up = False
+
     def __iter__(self):
         """Mark that we are our own iterator"""
         return self
+
     def next(self):
         """return the next result for the iterator, and call cleanup_call once the iterator stops, or if an error is raised"""
         if self.cleaned_up:
@@ -23,7 +25,7 @@ class CleanupIterator(object):
             raise StopIteration()
         try:
             return self.iterator.next()
-        except StandardError:
+        except (StandardError, StopIteration):
             self.cleaned_up = True
             # if a clean up error happens, it will be raised instead of the iterator error
             self.cleanup_call(*self.cleanup_args, **self.cleanup_kwargs)
