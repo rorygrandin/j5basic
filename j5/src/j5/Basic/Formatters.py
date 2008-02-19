@@ -13,6 +13,9 @@ class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
+        if isinstance(self.format_str, unicode):
+            # flip through into string world and back again
+            return self.strftime(self.format_str.encode("UTF-8")).decode("UTF-8")
         return self.strftime(self.format_str)
 
 class StrFormattedMixIn(object):
