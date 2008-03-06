@@ -231,11 +231,18 @@ class ordereddict(dict):
 
 class attrdict(dict):
     """Dictionary that also allows access to keys using attributes"""
+    def set_default_value(self, default_value):
+        """sets a default value that will be returned for missing attributes"""
+        self.__dict__["__default__"] = default_value
+
     def __getattr__(self, attr):
+        """Looks up attributes in the dictionary keys, returning the default only if set"""
         if attr in self:
             return self[attr]
+        elif "__default__" in self.__dict__:
+            return self.__dict__["__default__"]
         else:
-            return None
+            raise AttributeError("Attribute %s not found" % attr)
 
 def attribify(context):
     """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""

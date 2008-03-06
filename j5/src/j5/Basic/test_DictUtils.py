@@ -1,5 +1,6 @@
 
 from j5.Basic import DictUtils
+from j5.Test.Utils import raises
 
 class TestCIDict(object):
     def test_get(self):
@@ -26,6 +27,25 @@ class TestAttrDict(object):
         assert nested[0].this == "is"
         assert nested[0].a[0] == "nested"
         assert nested[0].a[1].dictionary == 4
+
+    def test_missing_attr(self):
+        d = DictUtils.attrdict()
+        d["VaLuE"] = 5
+        assert "HeGeMoNy" not in d.keys()
+        assert d.get("HeGeMoNy", 5) == 5
+        assert raises(KeyError, d.__getitem__, "HeGeMoNy")
+        assert getattr(d, "HeGeMoNy", 9) == 9
+        assert raises(AttributeError, getattr, d, "HeGeMoNy")
+
+    def test_default_attr(self):
+        d = DictUtils.attrdict()
+        d["VaLuE"] = 5
+        d.set_default_value(32)
+        assert "HeGeMoNy" not in d.keys()
+        assert d.get("HeGeMoNy", 5) == 5
+        assert raises(KeyError, d.__getitem__, "HeGeMoNy")
+        assert getattr(d, "HeGeMoNy") == 32
+        assert getattr(d, "HeGeMoNy", 9) == 32
 
 class TestOrderedDict(object):
     def test_key_and_value_ordering(self):
