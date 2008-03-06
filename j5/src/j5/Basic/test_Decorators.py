@@ -3,7 +3,7 @@
 from j5.Basic import Decorators
 import threading
 import time
-import py.test
+from j5.Test.Utils import method_raises, raises
 
 class TestDecoratorDecorator(object):
 
@@ -125,8 +125,8 @@ class TestDecoratorDecorator(object):
         assert call_frame.f_code.co_name == "test_decorator_calling_frame_arg"
         # check that calling_frame can't be overridden
         some_frame = Decorators.inspect.currentframe()
-        assert py.test.raises(TypeError, callf_g, 100, 4, calling_frame=some_frame)
-        assert py.test.raises(TypeError, callf_g, 100, 4, some_frame)
+        raises(TypeError, callf_g, 100, 4, calling_frame=some_frame)
+        raises(TypeError, callf_g, 100, 4, some_frame)
 
     def test_decorator_calling_frame_extendedarg(self):
         """tests that a decorated function can get the frame of the calling function and pass it as an extended argument"""
@@ -160,8 +160,8 @@ class TestDecoratorDecorator(object):
         assert call_frame.f_code.co_name == "test_decorator_lambda_calling_frame_arg"
         # check that calling_frame can't be overridden
         some_frame = Decorators.inspect.currentframe()
-        assert py.test.raises(TypeError, callf_l, 100, 4, calling_frame=some_frame)
-        assert py.test.raises(TypeError, callf_l, 100, 4, some_frame)
+        raises(TypeError, callf_l, 100, 4, calling_frame=some_frame)
+        raises(TypeError, callf_l, 100, 4, some_frame)
 
     def test_decorator_lambda_calling_frame_extendedarg(self):
         """tests that a decorated function can get the frame of the calling function when a lambda is being decorated, and pass it as an extended argument"""
@@ -269,12 +269,14 @@ class TestSelfLocking(object):
         for i in range(THREADS):
             assert Foo.res[2*i] == Foo.res[2*i+1]
 
-def TestNotImplemented(object):
+class TestNotImplemented(object):
 
+    @method_raises(NotImplementedError)
     def test_noimp(self):
         @Decorators.notimplemented
         def f(x,y):
             """Should be overridden elsewhere."""
             pass
 
-        py.test.raises(NotImplementedError,f,1,2)
+        f(1,2)
+

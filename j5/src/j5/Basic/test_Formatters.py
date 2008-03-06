@@ -119,3 +119,5 @@ class TestFormatters(IterativeTester.IterativeTester):
                 assert(new.format_str)
             else:
                 assert(new.format_str == result.format_str)
+
+
