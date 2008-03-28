@@ -22,10 +22,10 @@ class Timer:
             self.resolution = resolution
         else:
             self.resolution = datetime.timedelta(seconds=resolution)
+        self.stop = False
 
     def start(self):
         nexttime = datetime.datetime.now()
-        self.stop = False
         while not self.stop:
             nexttime = nexttime + self.resolution
             currenttime = datetime.datetime.now()
