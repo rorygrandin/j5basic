@@ -244,6 +244,11 @@ class attrdict(dict):
         else:
             raise AttributeError("Attribute %s not found" % attr)
 
+class setattrdict(attrdict):
+    def __setattr__(self, attr, value):
+        """Sets the attribute by setting the value in the dictionary"""
+        self[attr] = value
+
 def attribify(context):
     """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
     # We shouldn't convert Config nodes

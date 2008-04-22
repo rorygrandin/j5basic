@@ -47,6 +47,36 @@ class TestAttrDict(object):
         assert getattr(d, "HeGeMoNy") == 32
         assert getattr(d, "HeGeMoNy", 9) == 32
 
+class TestSetAttrDict(object):
+    def test_set_attrs(self):
+        """tests setting attributes both dict- and object-style"""
+        d = DictUtils.setattrdict()
+        d["VaLuE"] = 5
+        assert d["VaLuE"] == 5
+        assert d.VaLuE == 5
+        d.ReDeeM = "price"
+        assert d["ReDeeM"] == "price"
+        assert d.ReDeeM == "price"
+
+    def test_missing_attr(self):
+        d = DictUtils.setattrdict()
+        d.VaLuE = 5
+        assert "HeGeMoNy" not in d.keys()
+        assert d.get("HeGeMoNy", 5) == 5
+        assert raises(KeyError, d.__getitem__, "HeGeMoNy")
+        assert getattr(d, "HeGeMoNy", 9) == 9
+        assert raises(AttributeError, getattr, d, "HeGeMoNy")
+
+    def test_default_attr(self):
+        d = DictUtils.attrdict()
+        d.VaLuE = 5
+        d.set_default_value(32)
+        assert "HeGeMoNy" not in d.keys()
+        assert d.get("HeGeMoNy", 5) == 5
+        assert raises(KeyError, d.__getitem__, "HeGeMoNy")
+        assert getattr(d, "HeGeMoNy") == 32
+        assert getattr(d, "HeGeMoNy", 9) == 32
+
 class TestOrderedDict(object):
     def test_key_and_value_ordering(self):
         k = [5,1,2,3,7,6]
