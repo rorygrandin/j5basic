@@ -8,7 +8,6 @@ importedmodules = {}
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
     if importedmodules.has_key(modulename):
-        logging.debug("Returning cached object %s for %s" % (importedmodules[modulename],modulename))
         return importedmodules[modulename]
 
     try:
@@ -16,14 +15,12 @@ def resolvemodule(modulename, loglevel=logging.WARN):
     except (ImportError, SyntaxError), e:
         logging.log(loglevel, "Could not import module for %s" % (modulename))
         raise AttributeError(str(e))
-    logging.debug("parentmodule for %s is %s" % (modulename, str(parentmodule)))
     try:
         module = getpart(parentmodule, modulename)
     except AttributeError, e:
         logging.log(loglevel, "Could not resolve modulename %s" % (modulename))
         raise
     importedmodules[modulename] = module
-    logging.debug("Returning object %s for %s" % (module, modulename))
     return module
 
 def canonicalize(path):
@@ -66,7 +63,6 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
 def getpart(module, partname):
     components = partname.split('.')
     for component in components[1:]:
-        logging.debug("Getting part %s from module %s" % (component, str(module)))
         module = getattr(module, component)
     return module
 
