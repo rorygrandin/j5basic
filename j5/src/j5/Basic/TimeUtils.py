@@ -34,6 +34,50 @@ def hoursandminutes(timedelta):
 
     return (wh,wm)
 
+def timedelta_to_tuple(timedelta):
+    """Expresses a timedelta object as a tuple containing days, hours, minutes and seconds (rounded)"""
+    d = timedelta.days
+    s_total = timedelta.seconds
+    h = s_total / 3600
+    m = (s_total / 60) % 60
+    s = s_total % 60
+    return (d, h, m, s)
+
+def tuple_to_timedelta(td_tuple):
+    """Converts a days, hours, minutes and seconds tuple to a timedelta object"""
+    d, h, m, s = td_tuple
+    return datetime.timedelta(days=d, hours=h, minutes=m, seconds=s)
+
+def timedelta_to_str(timedelta):
+    """Expresses a timedelta as a human-readable string"""
+    d, h, m, s = timedelta_to_tuple(timedelta)
+    if d:
+        return "%dd %02d:%02d:%02d" % (d, h, m, s)
+    else:
+        return "%02d:%02d:%02d" % (h, m, s)
+
+def str_to_timedelta(td_str):
+    """Parses a human-readable time delta string to a timedelta"""
+    if "d" in td_str:
+        day_str, time_str = td_str.split("d", 1)
+        d = int(day_str.strip())
+    else:
+        time_str = td_str
+        d = 0
+    time_str = time_str.strip()
+    if not time_str:
+        return datetime.timedelta(days=d)
+    colon_count = time_str.count(":")
+    if (not colon_count) or colon_count > 2:
+        raise ValueError("Time format [dd d] hh:mm[:ss] or dd d")
+    elif colon_count == 1:
+        h_str, m_str = time_str.split(":", 1)
+        h, m, s = int(h_str.strip()), int(m_str.strip()), 0
+    elif colon_count == 2:
+        h_str, m_str, s_str = time_str.split(":", 2)
+        h, m, s = int(h_str.strip()), int(m_str.strip()), int(s_str.strip())
+    return tuple_to_timedelta((d, h, m, s))
+
 def timetuple2datetime(t):
     """Convert a timetuple to a datetime object.
        """
