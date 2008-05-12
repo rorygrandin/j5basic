@@ -64,7 +64,7 @@ def subtractdicts(ldict, rdict):
             diffdict[key] = ldict[key]
     return diffdict
 
-def mapdict(thedict, keymap, valuemap):
+def mapdict(thedict, keymap=None, valuemap=None):
     """ returns a dictionary with the keys mapped using keymap, the values using valuemap """
     if keymap is None:
         if valuemap is None:
