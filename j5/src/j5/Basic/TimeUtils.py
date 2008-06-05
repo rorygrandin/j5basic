@@ -78,7 +78,11 @@ def str_to_timedelta(td_str):
         h, m, s = int(h_str.strip()), int(m_str.strip()), int(s_str.strip())
     return tuple_to_timedelta((d, h, m, s))
 
-def timetuple2datetime(t):
+def timetuple_to_datetime(t):
     """Convert a timetuple to a datetime object.
        """
     return datetime.datetime(*(t[:6]))
+
+# deprecated alias
+timetuple2datetime = timetuple_to_datetime
+
