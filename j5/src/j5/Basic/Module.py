@@ -14,7 +14,7 @@ def resolvemodule(modulename, loglevel=logging.WARN):
         parentmodule = getimportablemodule(modulename, loglevel)
     except (ImportError, SyntaxError), e:
         logging.log(loglevel, "Could not import module for %s" % (modulename))
-        raise AttributeError(str(e))
+        raise
     try:
         module = getpart(parentmodule, modulename)
     except AttributeError, e:
