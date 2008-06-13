@@ -202,6 +202,20 @@ class decorator(object):
     def __call__(self, func):
         return decorator_helpers._decorate(func, self.caller, self.extendedargs, self.calling_frame_arg)
 
+def chain_decorators(*decorators):
+    """returns a decorator that functions as the chain of the given decorators
+
+    @chain_decorators(f1, f2, f3) is equivalent to:
+    @f1
+    @f2
+    @f3"""
+    @decorator
+    def chained_decorator(f, *args, **kw):
+        for decorator in reversed(decorators):
+            f = decorator(f)
+        return f(*args, **kw)
+    return chained_decorator
+
 #
 # Decorators for Self Locking objects.
 #

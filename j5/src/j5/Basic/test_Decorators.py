@@ -280,3 +280,16 @@ class TestNotImplemented(object):
 
         f(1,2)
 
+def test_chain_decorators():
+    @Decorators.decorator
+    def increase_result(f, *args, **kwargs):
+        return f(*args, **kwargs) + 1
+    @Decorators.decorator
+    def double_result(f, *args, **kwargs):
+        return f(*args, **kwargs)*2
+    @Decorators.chain_decorators(increase_result, double_result)
+    def underlying(x):
+        return x * 6
+
+    assert underlying(3) == ((3*6)*2) + 1
+
