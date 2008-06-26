@@ -86,6 +86,18 @@ def timetuple_to_datetime(t):
 # deprecated alias
 timetuple2datetime = timetuple_to_datetime
 
+def _findall(text, substr):
+     # Also finds overlaps
+     sites = []
+     i = 0
+     while 1:
+         j = text.find(substr, i)
+         if j == -1:
+             break
+         sites.append(j)
+         i=j+1
+     return sites
+
 def strftime(d, format_str):
     """Adjusted version of datetime's strftime that handles dates before 1900"""
     if hasattr(d, "year") and d.year < 1900:
@@ -94,9 +106,24 @@ def strftime(d, format_str):
         # and adjust the year directly in the format string
         year = d.year
         while year < 1900: year += 400
-        # TODO: perform the adjustment more rigorously, and raise an error if %c is present
-        format_str1 = format_str.replace("%Y", "%d" % d.year)
         d1 = d.replace(year=year)
-        return d1.strftime(format_str1)
+        d2 = d.replace(year=year+400)
+        ys1 = "%04d" % year
+        ys2 = "%04d" % (year + 400)
+        y = "%d" % d.year
+        replacers = {(ys1, ys2): "%d" % d.year}
+        s1 = d1.strftime(format_str)
+        s2 = d2.strftime(format_str)
+        p1 = _findall(s1, ys1)
+        p2 = _findall(s2, ys2)
+        sites = [site for site in p1 if site in p2]
+        rs1 = list(s1)
+        rs2 = list(s2)
+        for site in sites:
+            rs1[site:site+len(ys1)] = list(y)
+            rs2[site:site+len(ys2)] = list(y)
+        if rs1 != rs2:
+            raise ValueError("Error trying to calculate strftime(%r, %s): unexpected underlying values" % (d, format_str))
+        return "".join(rs1)
     return d.strftime(format_str)
 
