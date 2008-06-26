@@ -86,3 +86,17 @@ def timetuple_to_datetime(t):
 # deprecated alias
 timetuple2datetime = timetuple_to_datetime
 
+def strftime(d, format_str):
+    """Adjusted version of datetime's strftime that handles dates before 1900"""
+    if hasattr(d, "year") and d.year < 1900:
+        # Python datetime doesn't support formatting dates before 1900.
+        # Since the Gregorian calendar has a cycle of 400 years, flip the date into the future
+        # and adjust the year directly in the format string
+        year = d.year
+        while year < 1900: year += 400
+        # TODO: perform the adjustment more rigorously, and raise an error if %c is present
+        format_str1 = format_str.replace("%Y", "%d" % d.year)
+        d1 = d.replace(year=year)
+        return d1.strftime(format_str1)
+    return d.strftime(format_str)
+

@@ -6,6 +6,7 @@
 import datetime
 import logging
 import time
+from j5.Basic import TimeUtils
 
 # Formatted Types
 
@@ -13,21 +14,10 @@ class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
-        if hasattr(self, "year") and self.year < 1900:
-            # Python datetime doesn't support formatting dates before 1900.
-            # Since the Gregorian calendar has a cycle of 400 years, flip the date into the future
-            # and adjust the year directly in the format string
-            year = self.year
-            while year < 1900: year += 400
-            # TODO: perform the adjustment more rigorously, and raise an error if %c is present
-            format_str = self.format_str.replace("%Y", "%d" % self.year)
-            adjusted_date = self.replace(year=year)
-            adjusted_date.format_str = format_str
-            return str(adjusted_date)
         if isinstance(self.format_str, unicode):
             # flip through into string world and back again
-            return self.strftime(self.format_str.encode("UTF-8")).decode("UTF-8")
-        return self.strftime(self.format_str)
+            return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
+        return TimeUtils.strftime(self, self.format_str)
 
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
