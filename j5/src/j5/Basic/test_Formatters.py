@@ -31,7 +31,8 @@ class TestFormatters(IterativeTester.IterativeTester):
                     (datetime.datetime(1993,11,3,12,51,50),"1993:11:03 12:51:50"),
                     ("1994:12:07 13:17:25","1994:12:07 13:17:25"),
                     ("1994:15:09 13:51:19",None),
-                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1996,9,3,12,51,50),"1996:09:03 12:51:50")
+                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1996,9,3,12,51,50),"1996:09:03 12:51:50"),
+                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1896,9,3,12,51,50),"1896:09:03 12:51:50"),
                  ]),
         'time': FormatTestResource(Formatters.TimeFormatter("%H %S %M"),Formatters.FormattedTime,[
                     (datetime.time(21,51,12),"21 12 51"),
@@ -43,7 +44,8 @@ class TestFormatters(IterativeTester.IterativeTester):
                     (datetime.date(1987,11,30),"1987 30 11"),
                     ("1990 13 12","1990 13 12"),
                     ("moo",None),
-                    (Formatters.FormattedDate("%Y %d %m",2001,11,5),"2001 05 11")
+                    (Formatters.FormattedDate("%Y %d %m",2001,11,5),"2001 05 11"),
+                    (Formatters.FormattedDate("%Y %d %m",1801,11,5),"1801 05 11"),
                  ]),
         'loosedatetime': FormatTestResource(Formatters.LooseDatetimeFormatter("%Y:%m:%d %H:%M:%S"),Formatters.FormattedDatetime,[
                     (datetime.datetime(1994,12,6,15,51,52),"1994:12:06 15:51:52"),
@@ -52,7 +54,8 @@ class TestFormatters(IterativeTester.IterativeTester):
                     ("15:51:02","15:51:02"),
                     ("12:01",None),
                     ("moo",None),
-                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1999,6,7,16,15,47),"1999:06:07 16:15:47")
+                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1999,6,7,16,15,47),"1999:06:07 16:15:47"),
+                    (Formatters.FormattedDatetime("%Y:%m:%d %H:%M:%S",1799,6,7,16,15,47),"1799:06:07 16:15:47"),
                  ]),
         # test unicode format strings. Some of the formatted times are unicode and some are not...
         'udatetime': FormatTestResource(Formatters.DatetimeFormatter(u"%Y:%m:%d %H:%M:%S"),Formatters.FormattedDatetime,[
