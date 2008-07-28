@@ -8,7 +8,7 @@ def to_seconds(timedelta):
     """Converts timedelta to a float number of seconds"""
     return timedelta.days * (24*60*60) + timedelta.seconds + timedelta.microseconds * 0.000001
 
-class Timer:
+class Timer(object):
     """Accurate timer of resolution minimum 1 second - the idea is to guarantee accuracy"""
     def __init__(self, target, args=None, kwargs=None, resolution=1):
         self.target = target
