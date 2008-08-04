@@ -17,6 +17,10 @@ def localminutenow():
     """Provides the current local time with seconds and microseconds set to 0."""
     return datetime.datetime.now().replace(second=0,microsecond=0)
 
+def totalmilliseconds(timedelta):
+    """Return the total number of milliseconds represented by a datetime.timedelta object."""
+    return timedelta.microseconds/1000.0 + (totalseconds(timedelta) * 1000)
+
 def totalseconds(timedelta):
     """Return the total number of seconds represented by a datetime.timedelta object."""
     return timedelta.seconds + (timedelta.days * 24 * 60 * 60)
