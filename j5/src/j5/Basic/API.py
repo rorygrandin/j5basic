@@ -20,6 +20,8 @@
 # Author: Jonas Borgström <jonas@edgewall.com>
 #         Christopher Lenz <cmlenz@gmx.de>
 
+import inspect
+
 class APIError(Exception):
     """Exception base class for errors with APIs."""
     pass
@@ -50,8 +52,15 @@ class APIMeta(type):
 
         for interface in check_interfaces:
             for method in dir(interface):
+                interface_method = getattr(interface, method)
+                if not inspect.ismethod(interface_method):
+                    continue
                 if not hasattr(new_class, method):
                     raise APIError("Class %s does not implement method %s from API %s" % (new_class, method, interface))
+                interface_spec = inspect.getargspec(interface_method)
+                new_class_spec = inspect.getargspec(getattr(new_class, method))
+                if interface_spec != new_class_spec:
+                    raise APIError("Class %s has a different signature for method %s from the declaration in API %s" % (new_class, method, interface))
         return new_class
 
 def supports(cls, *interfaces):

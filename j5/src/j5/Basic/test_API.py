@@ -74,6 +74,15 @@ class TestAPI(object):
             API.implements(ArbAPI)
         return LiarAndFraud
 
+    def declare_ill_support(self):
+        """Try and declare a class as implementing an API but the method signatures are wrong"""
+        class SlightlyDeceptive(object):
+            __metaclass__ = API.APIMeta
+            API.implements(ArbAPI)
+            def i_support_api(self, x):
+                return True
+        return LiarAndFraud
+
     def declare_false_inherited_support(self):
         """Check that declarations of support fail even if the API is declared implemented in parent classes"""
         class Parent(object):
@@ -88,4 +97,5 @@ class TestAPI(object):
         assert Utils.not_raises(API.APIError, self.declare_inherited_support)
         assert Utils.raises(API.APIError, self.declare_false_support)
         assert Utils.raises(API.APIError, self.declare_false_inherited_support)
+        assert Utils.raises(API.APIError, self.declare_ill_support)
 
