@@ -224,7 +224,7 @@ class TestSelfLocking(object):
             @Decorators.SelfLocking.runwithlock
             def haslock(self,i):
                 self.res.append(i)
-                time.sleep(0.5)
+                time.sleep(0.1)
                 self.res.append(i)
 
         threads = []
@@ -252,7 +252,7 @@ class TestSelfLocking(object):
             @Decorators.SelfLocking.runwithnamedlock('other_lock')
             def hasotherlock(self,i):
                 self.res.append(i)
-                time.sleep(0.5)
+                time.sleep(0.1)
                 self.res.append(i)
 
         threads = []
