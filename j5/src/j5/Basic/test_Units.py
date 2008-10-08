@@ -2,7 +2,29 @@
 
 from __future__ import division
 from j5.Basic import Units
+from j5.Test import Utils
 import operator
+
+# TODO: Design decisions:
+#  * How should Units and Scalars (Units with values) relate?
+#    * What should arithmetic operations on Units do? Produce Scalars or derived Units
+#    * Should we have Scalar classes derived from the numeric classes?
+#  * How should derived Units be created?
+#    * Units that are simply a scale of another (e.g. milli-X)
+#    * Units that are combinations of others (e.g. meters per second squared)
+#  * Should we have a registry of Units?
+#    * This could use cached Units when they are automatically derived
+#  * How are we going to handle string formatting?
+#  * Should we use implementing-an-API as a way of declaring Units?
+# Things to implement later:
+#  * Families of related units (milli, centi, etc, etc for SI, feet, inches, etc for UK)
+#  * Ways of setting up modules declaring sets of Units
+#  * Handle composite units (pounds and cents, hours minutes and seconds, etc)
+
+# Decisions:
+#  * It makes more sense for operations on Units to produce Scalars, since that's the more common case
+#  * We still need a way of declaring Units operationally
+#  * An API-way of declaring Units would rock (i.e. them registering themselves)
 
 def test_unit_class_creation():
     """Creation of Unit classes should successfully produce types"""
@@ -28,13 +50,27 @@ def test_unit_class_calculation():
     assert m_sq == m * m
     assert isinstance(m_sq, Units.Unit)
     # assert not issubclass(m_sq, m)
+    s = Units.BaseUnit("s")
+    h = s * 3600
+    assert 1/s == 3600/h
 
 def test_unit_calculation():
     """tests that units created can be used in calculations"""
     m = Units.BaseUnit("m")
+    s = Units.BaseUnit("s")
     mm = m / 1000
     x = m(35)
     assert x == mm(35000)
+    assert m(35) + m(3) == m(38)
+    assert m(35) - mm(3) == mm(34997)
+    assert Utils.raises(ValueError, operator.add, m(35), 3)
+    assert m(35) * 3 == m(105)
+    assert m(35) * m(3) == (m*m)(35*3)
+    assert Utils.raises(ValueError, operator.add, 3, m(35))
+    assert 3 * m(35) == m(105)
+    assert m(35) * m(3) == (m*m)(35*3)
+    assert s(12.0) / 4.0 == s(3.0)
+    assert 12.0 / s(4.0) == (1/s)(3.0)
 
 def test_unit_class_combination():
     """Calculations involving multiple Units should be consistent"""

@@ -149,6 +149,7 @@ class Unit(object):
     """A Base Unit that can be used in calculations"""
     def __init__(self, name, base_units, op):
         """Constructs a Unit with the given name"""
+        # TODO: handle abbreviations too
         self.name = name
         self.base_units = base_units
         self.op = op
@@ -204,6 +205,15 @@ class Unit(object):
         else:
             raise NotImplementedError("Cannot calculate division of %r by %r" % (type(self), type(other)))
 
+    def __rtruediv__(self, other):
+        """Calculates a derived unit by division"""
+        if isinstance(other, numbers):
+            return Unit("%s/%r" % (self.name, other), self.base_units, SequentialConversion(self.op, Conversion(operator.truediv, other)))
+        elif isinstance(other, Unit):
+            raise TypeError("Unexpected reverse division call on %r, %r" % (self, other))
+        else:
+            raise NotImplementedError("Cannot calculate division of %r by %r" % (type(self), type(other)))
+
     def __mul__(self, other):
         """Calculates a derived unit by multiplication"""
         if isinstance(other, numbers):
@@ -223,6 +233,8 @@ class Unit(object):
         """Calculates a derived unit by multiplication"""
         if isinstance(other, numbers):
             return self.__mul__(other)
+        elif isinstance(other, Unit):
+            raise TypeError("Unexpected reverse multiplication call on %r, %r" % (self, other))
         else:
             raise NotImplementedError("Cannot calculate multiplication of %r by %r" % (type(other), type(self)))
 
@@ -237,6 +249,40 @@ class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
     def __init__(self, name):
         super(BaseUnit, self).__init__(name, {self: 1}, identity)
+
+def scalar_operation(operation, unit_combination, reversed=False):
+    """returns a method that can be used for operations on Scalars"""
+    def __operation__(self, other):
+        if isinstance(other, numbers):
+            if unit_combination in (None, operator.mul, operator.truediv):
+                return type(self)(operation(self.value, other), self.unit)
+            raise ValueError("Cannot perform %s on %r and %r - RHS cannot be number" % (operation, self, other))
+        elif isinstance(other, Scalar):
+            units_ratio = other.unit / self.unit
+            if unit_combination is Identity:
+                if units_ratio.base_units:
+                    raise ValueError("Cannot perform %s on %r and %r" % (operation, self, other))
+                adjusted_value = units_ratio.op(other.value)
+                return type(self)(operation(self.value, adjusted_value), self.unit)
+            elif unit_combination is None:
+                raise ValueError("Cannot perform %s on %r and %r - RHS must be number" % (operation, self, other))
+            else:
+                return type(self)(operation(self.value, other.value), unit_combination(self.unit, other.unit))
+        else:
+            raise ValueError("Cannot perform %s on %r and %r - RHS must be number or Scalar" % (operation, self, other))
+    def __reversedoperation__(self, other):
+        if isinstance(other, numbers):
+            if unit_combination in (None, operator.mul, operator.truediv):
+                return type(self)(operation(other, self.value), self.unit)
+            raise ValueError("Cannot perform %s on %r and %r - RHS cannot be number" % (operation, self, other))
+        elif isinstance(other, Scalar):
+            raise ValueError("Unexpected reversed operation %s on %r and %r" % (operation, self, other))
+        else:
+            raise ValueError("Cannot perform %s on %r and %r - RHS must be number or Scalar" % (operation, self, other))
+    if reversed:
+        return __reversedoperation__
+    else:
+        return __operation__
 
 class Scalar(object):
     """An object representing a value with units"""
@@ -271,4 +317,33 @@ class Scalar(object):
             return False
         adjusted_value = units_ratio.op(self.value)
         return cmp(adjusted_value, other.value)
+
+    __add__ = scalar_operation(operator.add, Identity)
+    __radd__ = scalar_operation(operator.add, Identity, reversed=True)
+    __sub__ = scalar_operation(operator.sub, Identity)
+    __rsub__ = scalar_operation(operator.sub, Identity, reversed=True)
+    __mul__ = scalar_operation(operator.mul, operator.mul)
+    __rmul__ = scalar_operation(operator.mul, operator.mul, reversed=True)
+    # __floordiv__ not defined
+    # __rfloordiv__ not defined
+    # __div__ not defined - we only support true division
+    # __rdiv__ not defined - we only support true division
+    __truediv__ = scalar_operation(operator.truediv, operator.truediv)
+    __rtruediv__ = scalar_operation(operator.truediv, operator.truediv, reversed=True)
+    # __mod__ not defined
+    # __rmod__ not defined
+    # __divmod__ not defined
+    # __rdivmod__ not defined
+    __pow__ = scalar_operation(operator.pow, None)
+    # __rpow__ not defined
+    # __lshift__ not defined
+    # __rlshift__ not defined
+    # __rshift__ not defined
+    # __rrshift__ not defined
+    # __and__ not defined
+    # __rand__ not defined
+    # __xor__ not defined
+    # __rxor__ not defined
+    # __or__ not defined
+    # __ror__ not defined
 
