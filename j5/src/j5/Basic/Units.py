@@ -284,6 +284,18 @@ def scalar_operation(operation, unit_combination, reversed=False):
     else:
         return __operation__
 
+def scalar_unary_operation(operation):
+    """returns a method that can be used for unary operations on Scalars"""
+    def __operation__(self):
+        return type(self)(operation(self.value), self.unit)
+    return __operation__
+
+def scalar_conversion(target_type):
+    """returns a method that converts the scalar to the target numeric type (by just returning the value)"""
+    def __conversion__(self):
+        return target_type(self.value)
+    return __conversion__
+
 class Scalar(object):
     """An object representing a value with units"""
     def __init__(self, value, unit):
@@ -346,4 +358,22 @@ class Scalar(object):
     # __rxor__ not defined
     # __or__ not defined
     # __ror__ not defined
+
+    # unary operations on the values
+    __neg__ = scalar_unary_operation(operator.neg)
+    __pos__ = scalar_unary_operation(operator.pos)
+    __abs__ = scalar_unary_operation(operator.abs)
+    # __invert__ not defined
+
+    # conversions back to values
+    # These conversions are of debatable value, but are included at the moment
+    __complex__ = scalar_conversion(complex)
+    __int__ = scalar_conversion(int)
+    __long__ = scalar_conversion(long)
+    __float__ = scalar_conversion(float)
+
+    # __oct__ not defined
+    # __hex__ not defined
+    # __index__ not defined
+    # __coerce__ not defined
 

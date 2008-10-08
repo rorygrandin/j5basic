@@ -54,8 +54,8 @@ def test_unit_class_calculation():
     h = s * 3600
     assert 1/s == 3600/h
 
-def test_unit_calculation():
-    """tests that units created can be used in calculations"""
+def test_scalar_calculation():
+    """tests that scalars created from units can be used in calculations"""
     m = Units.BaseUnit("m")
     s = Units.BaseUnit("s")
     mm = m / 1000
@@ -71,6 +71,13 @@ def test_unit_calculation():
     assert m(35) * m(3) == (m*m)(35*3)
     assert s(12.0) / 4.0 == s(3.0)
     assert 12.0 / s(4.0) == (1/s)(3.0)
+    assert -s(5) == s(1) - s(6)
+    assert +s(5) == s(1) + s(4)
+    assert abs(s(-4)) == s(4)
+    # These conversions are of debatable value, but are included at the moment
+    assert float(m(35.0)) == 35.0
+    assert int(m(35.2)) == 35
+    assert int(mm(33000)) == 33000
 
 def test_unit_class_combination():
     """Calculations involving multiple Units should be consistent"""
