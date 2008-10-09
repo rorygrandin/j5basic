@@ -280,6 +280,13 @@ class Unit(object):
         """Generates a Scalar from this Unit"""
         if isinstance(value, numbers):
             return Scalar(value, self)
+        elif isinstance(value, Scalar):
+            # convert scalar to this unit
+            units_ratio = value.unit / self
+            if units_ratio.base_units:
+                raise ValueError("Cannot convert %s from %r to %r" % (value, value.unit, self))
+            adjusted_value = units_ratio.op(value.value)
+            return Scalar(adjusted_value, self)
         else:
             raise NotImplementedError("Can only generate Scalars for %r with numbers - got %r of type %r" % (self, value, type(value)))
 
@@ -306,7 +313,8 @@ def scalar_operation(operation, unit_combination, reversed=False):
             elif unit_combination is None:
                 raise ValueError("Cannot perform %s on %r and %r - RHS must be number" % (operation, self, other))
             else:
-                return type(self)(operation(self.value, other.value), unit_combination(self.unit, other.unit))
+                new_units = unit_combination(self.unit, other.unit)
+                return type(self)(operation(self.value, other.value), new_units)
         else:
             raise ValueError("Cannot perform %s on %r and %r - RHS must be number or Scalar" % (operation, self, other))
     def __reversedoperation__(self, other):
