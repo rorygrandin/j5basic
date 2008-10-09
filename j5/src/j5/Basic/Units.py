@@ -243,7 +243,7 @@ class Unit(object):
         if isinstance(value, numbers):
             return Scalar(value, self)
         else:
-            raise NotImplementedError("Can only generate Scalars for %r with numbers" % (self,))
+            raise NotImplementedError("Can only generate Scalars for %r with numbers - got %r of type %r" % (self, value, type(value)))
 
 class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
