@@ -121,6 +121,20 @@ class SequentialConversion(Conversion):
         """Represents the conversion"""
         return "%s(%s)" % (type(self).__name__, ",".join([repr(c) for c in self.conversions]))
 
+    def __str__(self):
+        """Simpler representation of conversion"""
+        s = []
+        for c in self.conversions:
+            if type(c) == Conversion and c.f == operator.mul:
+                s.append("*%s" % (c.args[0],))
+            elif type(c) == Conversion and c.f == operator.truediv:
+                s.append("/%s" % (c.args[0],))
+            elif type(c) == Conversion and c.f == Identity:
+                pass
+            else:
+                s.append(str(c))
+        return "".join(s)
+
     def __eq__(self, other):
         """Compare to another Conversion"""
         if type(other) == Conversion:
@@ -151,6 +165,7 @@ class Unit(object):
         """Constructs a Unit with the given name"""
         # TODO: handle abbreviations too
         self.name = name
+        self.native_name = False
         self.base_units = base_units
         self.op = op
 
@@ -174,7 +189,30 @@ class Unit(object):
                 s += "/ (%s)" % (" * ".join(d))
             else:
                 s += "/ %s" % (d[0])
-        return "%s(%s, %s)" % (type(self).__name__, s, self.op)
+        return "%s(%s, %r)" % (type(self).__name__, s, self.op)
+
+    def __str__(self):
+        if self.native_name:
+            return self.name
+        n, d = [], []
+        for base, exponent in self.base_units.items():
+            if exponent == 1:
+                n.append(base.name)
+            elif exponent > 0:
+                n.append("%s^%s" % (base.name, exponent))
+            elif exponent == -1:
+                d.append(base.name)
+            elif exponent < 0:
+                d.append("%s^%s" % (base.name, exponent))
+        if not n:
+            n = ["1"]
+        s = "*".join(n)
+        if d:
+            if len(d) > 1:
+                s += "/(%s)" % ("*".join(d))
+            else:
+                s += "/%s" % (d[0])
+        return ("%s %s") % (s, self.op)
 
     def __eq__(self, other):
         """Compares self to other and returns whether they are equal"""
@@ -249,6 +287,7 @@ class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
     def __init__(self, name):
         super(BaseUnit, self).__init__(name, {self: 1}, identity)
+        self.native_name = True
 
 def scalar_operation(operation, unit_combination, reversed=False):
     """returns a method that can be used for operations on Scalars"""
@@ -305,6 +344,9 @@ class Scalar(object):
 
     def __repr__(self):
         return "%s(%s, %s)" % (type(self).__name__, self.value, self.unit)
+
+    def __str__(self):
+        return "%s %s" % (self.value, self.unit.name)
 
     def __eq__(self, other):
         """Checks whether this has a value equivalent to that represented by other"""
