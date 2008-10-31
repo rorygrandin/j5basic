@@ -17,12 +17,21 @@ __all__ = ["str_uid"]
 
 import time
 import random
+import sys
+
+if sys.platform == "win32":
+    # on Windows, time.time() returns millisecond resolution, but seems to only be updated on a roughly 10-millisecond timer
+    TIME_PRECISION = 2
+else:
+    TIME_PRECISION = 6
+RAND_PRECISION = 12-TIME_PRECISION
+RAND_FORMAT = "%0"+str(RAND_PRECISION)+"d"
 
 def uid_digit_str():
     """Returns a unique string consisting only of digits.
        Generated using the current time and a random integer
-       between 1 and 10**6."""
-    return str(int(time.time()*10**6)) + str(random.randint(1,10**6))
+       to complete it to 22 digits"""
+    return str(int(time.time()*10**TIME_PRECISION)) + (RAND_FORMAT % random.randint(1,10**RAND_PRECISION))
 
 def uid_id_str():
     """Returns a unique string consisting of the prefix ID followed by only digits.
