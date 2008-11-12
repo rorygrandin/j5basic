@@ -5,8 +5,6 @@
 
 # Copyright 2002, 2003 St James Software
 
-# TODO: write test class
-
 import datetime
 
 class timecache(dict):
@@ -20,9 +18,14 @@ class timecache(dict):
     """checks if self.timestamp is older than self.expiryperiod"""
     return timestamp < self.gettimestamp() - self.expiryperiod
 
+  def cleanup_key(self, key, value):
+    """Performs any cleanup needed when a key is expired (for derived classes)"""
+    pass
+
   def expire(self, key):
-    """expires the key, removing the associated item"""
-    self.__delitem__(key)
+    """expires the key, removing the associated item. Calls self.cleanup_key(key, value) after removal"""
+    timestamp, value = self.pop(key)
+    self.cleanup_key(key, value)
 
   def gettimestamp(self):
     """returns a new timestamp for the current time..."""
