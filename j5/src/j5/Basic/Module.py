@@ -45,19 +45,20 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
             # if we get an import error on the parent module, we're unlikely to be able to import the child
             logging.log(loglevel, "Import Error attempting to import %s (parent of %s): %s" % (parentmodulename, modulename, error))
             raise
-        except StandardError, error:
-            logging.debug("Error attempting to import %s: %s" % (parentmodulename, error))
+        except Exception, error:
+            logging.log(loglevel, "Error attempting to import %s: %s" % (parentmodulename, error))
             raise
     try:
         module = __import__(modulename)
         return module
     except ImportError, error:
-        logging.debug("Import Error attempting to import %s (but have parent module to return): %s" % (modulename, error))
         if component_depth > 1:
+            logging.debug("Import Error attempting to import %s (but have parent module to return): %s" % (modulename, error))
             return parentmodule
+        logging.log(loglevel, "Error attempting to import %s: %s" % (modulename, error))
         raise
-    except StandardError, error:
-        logging.debug("Error attempting to import %s: %s" % (modulename, error))
+    except Exception, error:
+        logging.log(loglevel, "Error attempting to import %s: %s" % (modulename, error))
         raise
 
 def getpart(module, partname):
