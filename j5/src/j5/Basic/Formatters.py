@@ -93,6 +93,8 @@ class FormatterStrBase(FormatterBase):
         return self.format_str
 
     def format(self,value):
+        if value is None:
+            return value
         if isinstance(value, self.FormattedType):
             return value
         elif isinstance(value, self.UnformattedType):
@@ -201,6 +203,8 @@ class LooseDatetimeFormatter(DatetimeFormatter):
 
     def format(self,value):
         # try be strict
+        if value is None:
+            return None
         result = super(LooseDatetimeFormatter,self).format(value)
         if result:
             return result
