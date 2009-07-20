@@ -24,7 +24,7 @@ class timecache(dict):
 
   def expire(self, key):
     """expires the key, removing the associated item. Calls self.cleanup_key(key, value) after removal"""
-    timestamp, value = self.pop(key)
+    timestamp, value = self.pop(key, (None, None))
     self.cleanup_key(key, value)
 
   def gettimestamp(self):
