@@ -64,6 +64,13 @@ def subtractdicts(ldict, rdict):
             diffdict[key] = ldict[key]
     return diffdict
 
+def merge_dicts(dict1, *dicts):
+    """returns a dictionary consisting of all the dicts, overriding key values in the order they're passed in"""
+    merged = dict1.copy()
+    for d in dicts:
+        merged.update(d)
+    return merged
+
 def mapdict(thedict, keymap=None, valuemap=None):
     """ returns a dictionary with the keys mapped using keymap, the values using valuemap """
     if keymap is None:
