@@ -81,7 +81,7 @@ class TestAPI(object):
             API.implements(ArbAPI)
             def i_support_api(self, x):
                 return True
-        return LiarAndFraud
+        return SlightlyDeceptive
 
     def declare_false_inherited_support(self):
         """Check that declarations of support fail even if the API is declared implemented in parent classes"""
