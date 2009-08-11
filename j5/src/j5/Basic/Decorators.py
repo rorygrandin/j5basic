@@ -58,7 +58,7 @@ class decorator_helpers(object):
        Print lambda_src in _decorate to understand what is going on."""
 
     @staticmethod
-    def getinfo(func, extendedargs=[]):
+    def getinfo(func, extendedargs=None):
         """Return an info dictionary containing:
            - name (the name of the function : str)
            - argnames (the names of the arguments : list)
@@ -128,7 +128,7 @@ class decorator_helpers(object):
         return "_call_" in dic or "_func_" in dic
 
     @staticmethod
-    def _decorate(func, caller, extendedargs=[], calling_frame_arg=None):
+    def _decorate(func, caller, extendedargs=None, calling_frame_arg=None):
         """Takes a function and a caller and returns the function
            decorated with that caller. The decorated function is obtained
            by evaluating a lambda function with the correct signature.
@@ -194,9 +194,9 @@ class decorator(object):
            >>> g()
            Calling 'g'"""
 
-    def __init__(self, caller, extendedargs=[], calling_frame_arg=None):
+    def __init__(self, caller, extendedargs=None, calling_frame_arg=None):
         self.caller = caller
-        self.extendedargs = extendedargs
+        self.extendedargs = extendedargs or []
         self.calling_frame_arg = calling_frame_arg
 
     def __call__(self, func):
