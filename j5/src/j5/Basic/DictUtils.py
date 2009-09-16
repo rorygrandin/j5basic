@@ -7,6 +7,14 @@
 
 from j5.Config import ConfigTree
 
+def unique_items(list1):
+    """generates unique hashable items in list1, in the same order they were given in"""
+    seen = set()
+    for item in list1:
+        if item not in seen:
+            seen.add(item)
+            yield item
+
 def assert_dicts_equal(dict1,dict2):
     """tests equality of two dicts"""
     k1, k2 = dict1.keys(), dict2.keys()

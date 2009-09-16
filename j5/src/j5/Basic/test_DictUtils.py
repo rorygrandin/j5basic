@@ -2,6 +2,11 @@
 from j5.Basic import DictUtils
 from j5.Test.Utils import raises
 
+class TestUniqueItems(object):
+    def test_unique_items(self):
+        l = [9, 3, 4, 2, 4, 5, 3, 9]
+        assert list(DictUtils.unique_items(l)) == [9, 3, 4, 2, 5]
+
 class TestCIDict(object):
     def test_get(self):
         d = DictUtils.cidict()
