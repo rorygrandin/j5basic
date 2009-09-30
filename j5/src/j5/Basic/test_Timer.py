@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from j5.Basic import Timer
+from j5.Test import Utils
 import threading
 import time
 
@@ -31,6 +32,7 @@ class TimerDriver:
             time.sleep(next_sleep)
 
 class TestTimer:
+    @Utils.if_long_test_run()
     def test_onesec(self):
         """Test the one second resolution"""
         tm = TimerDriver()
@@ -42,6 +44,7 @@ class TestTimer:
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
 
+    @Utils.if_long_test_run()
     def test_twosec(self):
         """Test a non one second resolution"""
         tm = TimerDriver(2)
@@ -53,6 +56,7 @@ class TestTimer:
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
 
+    @Utils.if_long_test_run()
     def test_args(self):
         """Test passing args"""
         tm = TimerDriver(expectarg=True)
@@ -63,6 +67,7 @@ class TestTimer:
         timer.stop = True
         assert tm.lasttime is not None
 
+    @Utils.if_long_test_run()
     def test_missed(self):
         """Test missing time events by sleeping in the target function"""
         tm = TimerDriver(1)
@@ -78,6 +83,7 @@ class TestTimer:
         assert tm.lasttime is not None
         assert 4 <= tm.ticks <= 5
 
+    @Utils.if_long_test_run()
     def test_kwargs(self):
         """Test passing kwargs"""
         tm = TimerDriver(expectarg=True)
