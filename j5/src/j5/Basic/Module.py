@@ -1,9 +1,21 @@
 #!/usr/bin/env python
 
+import imp
 import logging
 import os
 
 importedmodules = {}
+
+def find_module(modulename):
+    """finds the filename of the module with the given name (supports submodules)"""
+    module_parts = modulename.split(".")
+    search_path = None
+    for part in module_parts:
+        next_path = imp.find_module(part, search_path)[1]
+        if next_path is None:
+            raise ValueError("Could not find %s (reached %s at %s)" % (modulename, part, search_path))
+        search_path = [next_path]
+    return search_path[0]
 
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
