@@ -67,7 +67,7 @@ class decorator_helpers(object):
            - shortsign (the short signature : str)
            - arg0 ... argn (shortcuts for the names of the arguments)"""
 
-        assert inspect.ismethod(func) or inspect.isfunction(func) or isinstance(func, classmethod)
+        assert inspect.ismethod(func) or inspect.isfunction(func) or isinstance(func, classmethod), "getinfo can only be used with a function or class method"
         regargs, varargs, varkwargs, defaults = inspect.getargspec(func)
         if extendedargs:
             if defaults is None:
