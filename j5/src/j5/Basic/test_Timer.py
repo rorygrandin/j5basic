@@ -94,3 +94,12 @@ class TestTimer:
         timer.stop = True
         assert tm.lasttime is not None
 
+    def test_short_run(self):
+        """Test stopping immediately"""
+        tm = TimerDriver(expectarg=True)
+        timer = Timer.Timer(tm.timefunc, kwargs={"testarg":True}, resolution=10)
+        thread = threading.Thread(target=timer.start)
+        thread.start()
+        timer.stop = True
+        assert tm.lasttime is None
+
