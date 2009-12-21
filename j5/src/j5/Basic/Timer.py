@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import datetime
-import time
 import logging
+import time
+import threading
 
 def to_seconds(timedelta):
     """Converts timedelta to a float number of seconds"""
@@ -11,6 +12,7 @@ def to_seconds(timedelta):
 class Timer(object):
     """Accurate timer of resolution minimum 1 second - the idea is to guarantee accuracy"""
     def __init__(self, target, args=None, kwargs=None, resolution=1):
+        self.stop_event = threading.Event()
         self.target = target
         self.args = args
         if self.args is None:
@@ -22,11 +24,21 @@ class Timer(object):
             self.resolution = resolution
         else:
             self.resolution = datetime.timedelta(seconds=resolution)
-        self.stop = False
+
+    def get_stop(self):
+        return self.stop_event.is_set()
+
+    def set_stop(self, new_stop):
+        if new_stop:
+            self.stop_event.set()
+        else:
+            self.stop_event.clear()
+
+    stop = property(get_stop, set_stop)
 
     def start(self):
         nexttime = datetime.datetime.now()
-        while not self.stop:
+        while not self.stop_event.is_set():
             nexttime = nexttime + self.resolution
             currenttime = datetime.datetime.now()
             if nexttime < currenttime:
@@ -40,8 +52,9 @@ class Timer(object):
             else:
                 waittime = nexttime - currenttime
                 waitseconds = to_seconds(waittime)
-                time.sleep(waitseconds)
-            apply(self.target, self.args, self.kwargs)
+                self.stop_event.wait(waitseconds)
+            if not self.stop_event.is_set():
+                apply(self.target, self.args, self.kwargs)
 
 
 if __name__ == "__main__":
