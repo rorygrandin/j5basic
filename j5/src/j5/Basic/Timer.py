@@ -26,7 +26,7 @@ class Timer(object):
             self.resolution = datetime.timedelta(seconds=resolution)
 
     def get_stop(self):
-        return self.stop_event.is_set()
+        return self.stop_event.isSet()
 
     def set_stop(self, new_stop):
         if new_stop:
@@ -38,7 +38,7 @@ class Timer(object):
 
     def start(self):
         nexttime = datetime.datetime.now()
-        while not self.stop_event.is_set():
+        while not self.stop_event.isSet():
             nexttime = nexttime + self.resolution
             currenttime = datetime.datetime.now()
             if nexttime < currenttime:
@@ -53,7 +53,7 @@ class Timer(object):
                 waittime = nexttime - currenttime
                 waitseconds = to_seconds(waittime)
                 self.stop_event.wait(waitseconds)
-            if not self.stop_event.is_set():
+            if not self.stop_event.isSet():
                 apply(self.target, self.args, self.kwargs)
 
 

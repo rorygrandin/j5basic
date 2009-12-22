@@ -86,10 +86,10 @@ class TestTimedLock(object):
         bt2_er.wait(0.4)
         self.ensure_stopped(bt1)
         self.ensure_stopped(bt2)
-        assert bt1_ea.is_set()
-        assert bt1_er.is_set()
-        assert not bt2_ea.is_set()
-        assert bt2_er.is_set()
+        assert bt1_ea.isSet()
+        assert bt1_er.isSet()
+        assert not bt2_ea.isSet()
+        assert bt2_er.isSet()
 
     def test_wait_success(self):
         """tests that the acquire with a wait parameter actually acquires the lock and doesn't wait the expected period of time"""
@@ -103,10 +103,10 @@ class TestTimedLock(object):
         bt2_er.wait(1.2)
         self.ensure_stopped(bt1)
         self.ensure_stopped(bt2)
-        assert bt1_ea.is_set()
-        assert bt1_er.is_set()
-        assert bt2_ea.is_set()
-        assert bt2_er.is_set()
+        assert bt1_ea.isSet()
+        assert bt1_er.isSet()
+        assert bt2_ea.isSet()
+        assert bt2_er.isSet()
         # check that we didn't wait very long to catch the event
         assert bt2_ea.ts - bt1_er.ts < 0.01
 
@@ -127,11 +127,11 @@ class TestTimedLock(object):
             return ts - start_time if ts else None
         print "n, acquired, ts, released, ts"
         for i in range(thread_count):
-            print i, bt_ea[i].is_set(), elapsed_time(bt_ea[i]), bt_er[i].is_set(), elapsed_time(bt_er[i])
+            print i, bt_ea[i].isSet(), elapsed_time(bt_ea[i]), bt_er[i].isSet(), elapsed_time(bt_er[i])
         for i in range(thread_count):
             print i
-            assert bt_ea[i].is_set()
-            assert bt_er[i].is_set()
+            assert bt_ea[i].isSet()
+            assert bt_er[i].isSet()
         # check that we didn't wait very long to catch the event
         final_er = max(bt_er_n.ts for bt_er_n in bt_er)
         first_ea = min(bt_ea_n.ts for bt_ea_n in bt_ea)
