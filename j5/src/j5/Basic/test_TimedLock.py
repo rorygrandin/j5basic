@@ -108,7 +108,8 @@ class TestTimedLock(object):
         assert bt2_ea.isSet()
         assert bt2_er.isSet()
         # check that we didn't wait very long to catch the event
-        assert bt2_ea.ts - bt1_er.ts < 0.01
+        print "delay time", bt2_ea.ts - bt1_er.ts
+        assert bt2_ea.ts - bt1_er.ts < 0.03
 
     def test_wait_multi(self):
         """tests that the acquire with a wait parameter actually works with multiple threads"""
