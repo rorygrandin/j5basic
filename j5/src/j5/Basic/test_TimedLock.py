@@ -138,4 +138,23 @@ class TestTimedLock(object):
         print "elapsed time", final_er - first_ea
         assert final_er - first_ea < 0.03*thread_count*3
 
+    def test_wait_blocking_success(self):
+        """tests that the acquire with a wait parameter of True actually acquires the lock and doesn't wait the expected period of time"""
+        lock = TimedLock.TimedLock()
+        bt1_ea, bt1_er, bt2_ea, bt2_er = threading.Event(), threading.Event(), threading.Event(), threading.Event()
+        bt1 = threading.Thread(target=schedule_acquire_release, name="bt1", args=(lock, 0, None, 1.1), kwargs=dict(ea=bt1_ea, er=bt1_er))
+        bt2 = threading.Thread(target=schedule_acquire_release, name="bt2", args=(lock, 0.1, True, 0), kwargs=dict(ea=bt2_ea, er=bt2_er))
+        bt2.start()
+        bt1.start()
+        bt1_er.wait(0.2)
+        # we test waiting for more than a second because True == 1
+        bt2_er.wait(2.2)
+        self.ensure_stopped(bt1)
+        self.ensure_stopped(bt2)
+        assert bt1_ea.isSet()
+        assert bt1_er.isSet()
+        assert bt2_ea.isSet()
+        assert bt2_er.isSet()
+        # check that we didn't wait very long to catch the event
+        assert bt2_ea.ts - bt1_er.ts < 1.11
 

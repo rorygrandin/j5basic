@@ -10,10 +10,22 @@ class TimedLock(threading._RLock):
         self._wait_event.set()
         super(TimedLock, self).__init__()
 
-    def acquire(self, wait=None):
-        """Tries to acquire the lock. If a wait is specified, wait the given amount of time before giving up. Otherwise, is non-blocking"""
+    def acquire(self, wait=True):
+        """Tries to acquire the lock
+        If wait is True (default), block until the lock is available
+        If wait is a number, wait the given number of seconds before giving up
+        If wait is non-True (None, False, or zero), acquire non-blocking"""
         name = threading.current_thread().name
-        if wait is not None:
+        if wait is True:
+            super(TimedLock, self).acquire(True)
+            self._wait_event.clear()
+            return True
+        elif not wait:
+            if super(TimedLock, self).acquire(False):
+                self._wait_event.clear()
+                return True
+            return False
+        else:
             start_time = time.time()
             elapsed_time = 0
             while elapsed_time < wait:
@@ -22,11 +34,6 @@ class TimedLock(threading._RLock):
                     self._wait_event.clear()
                     return True
                 elapsed_time = time.time() - start_time
-            return False
-        else:
-            if super(TimedLock, self).acquire(False):
-                self._wait_event.clear()
-                return True
             return False
 
     def release(self):
