@@ -15,7 +15,7 @@ class TimedLock(threading._RLock):
         If wait is True (default), block until the lock is available
         If wait is a number, wait the given number of seconds before giving up
         If wait is non-True (None, False, or zero), acquire non-blocking"""
-        name = threading.current_thread().name
+        name = threading.currentThread().getName()
         if wait is True:
             super(TimedLock, self).acquire(True)
             self._wait_event.clear()

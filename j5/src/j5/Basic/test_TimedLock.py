@@ -23,7 +23,7 @@ def reentrant_acquire_release(lock):
 
 def schedule_acquire_release(lock, t1, t2, t3, ea=None, er=None):
     """simple acquire and release of object from one thread, with pauses and notification on acquire and release (sets er if fails to acquire) - events receive timestamps too"""
-    name = threading.current_thread().name
+    name = threading.currentThread().getName()
     start_time = time.time()
     def elapsed_time():
         return "%0.3f" % (time.time() - start_time)
