@@ -53,10 +53,10 @@ class TestTimedLock(object):
         threads_stopped = []
         for thread in threads:
             if thread.isAlive():
-                threads_stopped.append(thread)
+                threads_stopped.append(str(thread))
                 ThreadControl.stop_thread(thread)
         if threads_stopped:
-            raise ValueError("Threads %s did not release lock in expected time", ", ".join(str(thread) for thread in threads_stopped))
+            raise ValueError("Threads %s did not release lock in expected time", ", ".join(threads_stopped))
 
     def test_simple(self):
         """tests that the locks basically work in a single thread"""
@@ -121,8 +121,11 @@ class TestTimedLock(object):
         start_time = time.time()
         [bt_n.start() for bt_n in bt]
         [e.wait(1*thread_count*3) for e in bt_er]
-        for bt_n in bt:
-            self.ensure_stopped(bt_n)
+        wait_complete_time = time.time()
+        print "wait completed at %0.2f" % time.time()
+        # allow a short amount of time for threads to exit after setting the event
+        time.sleep(0.01)
+        self.ensure_stopped(*bt)
         def elapsed_time(e):
             ts = getattr(e, "ts", None)
             return ts - start_time if ts else None
