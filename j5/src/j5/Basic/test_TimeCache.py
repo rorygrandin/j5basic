@@ -26,11 +26,13 @@ class TestTimeCache(object):
 
     @classmethod
     def setup_method(self, method):
-        self.orig_disabled = TimeCache.GLOBAL_CACHE_DISABLED
+        self.orig_global_disabled = TimeCache.GLOBAL_CACHE_DISABLED
+        self.orig_local_disabled = TimeCache.LOCAL_CACHE_DISABLED
 
     @classmethod
     def teardown_method(self, method):
-        TimeCache.GLOBAL_CACHE_DISABLED = self.orig_disabled
+        TimeCache.GLOBAL_CACHE_DISABLED = self.orig_global_disabled
+        TimeCache.LOCAL_CACHE_DISABLED = self.orig_local_disabled
 
     def test_global_disable(self):
         d = TimeCache.timecache(10)
@@ -43,3 +45,24 @@ class TestTimeCache(object):
         TimeCache.GLOBAL_CACHE_DISABLED = False
         assert d[1] == "test"
         assert 2 not in d
+
+    def test_local_disable(self):
+        d = TimeCache.timecache(10)
+        e = TimeCache.timecache(10)
+        d.LOCAL_CACHE = True
+        d[1] = "test"
+        e[1] = "test"
+        assert 1 in d
+        assert 1 in e
+        TimeCache.LOCAL_CACHE_DISABLED = True
+        assert 1 not in d
+        assert 1 in e
+        d[2] = "missing"
+        e[2] = "missing"
+        assert not d.items()
+        assert sorted(e.items()) == [(1, "test"), (2, "missing")]
+        TimeCache.LOCAL_CACHE_DISABLED = False
+        assert d[1] == "test"
+        assert 2 not in d
+        assert sorted(e.items()) == [(1, "test"), (2, "missing")]
+
