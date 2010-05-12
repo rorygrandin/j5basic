@@ -24,3 +24,22 @@ class TestTimeCache(object):
         # check that the cleanup was called after the removal (hence False), with the correct values
         assert cleanups_called == [(False, 1, "test")]
 
+    @classmethod
+    def setup_method(self, method):
+        self.orig_disabled = TimeCache.GLOBAL_CACHE_DISABLED
+
+    @classmethod
+    def teardown_method(self, method):
+        TimeCache.GLOBAL_CACHE_DISABLED = self.orig_disabled
+
+    def test_global_disable(self):
+        d = TimeCache.timecache(10)
+        d[1] = "test"
+        assert 1 in d
+        TimeCache.GLOBAL_CACHE_DISABLED = True
+        assert 1 not in d
+        d[2] = "missing"
+        assert not d.items()
+        TimeCache.GLOBAL_CACHE_DISABLED = False
+        assert d[1] == "test"
+        assert 2 not in d

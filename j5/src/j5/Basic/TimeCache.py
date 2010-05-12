@@ -7,6 +7,9 @@
 
 import datetime
 
+# a global variable which makes all time caches behave as though they are empty, and remember no new data
+GLOBAL_CACHE_DISABLED = False
+
 class timecache(dict):
   """caches objects, remembers time, and dumps when neccessary..."""
   def __init__(self, expiryperiod):
@@ -42,6 +45,8 @@ class timecache(dict):
 
   def __contains__(self, key):
     """in operator"""
+    if GLOBAL_CACHE_DISABLED:
+      return 0
     if dict.__contains__(self, key):
       timestamp, value = dict.__getitem__(self, key)
       if self.expired(timestamp):
@@ -53,6 +58,8 @@ class timecache(dict):
 
   def __getitem__(self, key):
     """[] access of items"""
+    if GLOBAL_CACHE_DISABLED:
+      raise KeyError, key
     timestamp, value = dict.__getitem__(self, key)
     if self.expired(timestamp):
       self.expire(key)
@@ -64,25 +71,48 @@ class timecache(dict):
 
   def __iter__(self):
     """iterator access of items"""
+    if GLOBAL_CACHE_DISABLED:
+      return dict.__iter__({})
     self.purge()
     return dict.__iter__(self)
 
   def __repr__(self):
     """x.__repr__() <==> repr(x)"""
+    if GLOBAL_CACHE_DISABLED:
+      return "<GLOBAL_CACHE_DISABLED>"
     self.purge()
     return repr(dict(self.items()))
 
   def __setitem__(self, key, value):
     """[] setting of items"""
+    if GLOBAL_CACHE_DISABLED:
+      return
+    self.purge()
+    return repr(dict(self.items()))
+
+  def __setitem__(self, key, value):
+    """[] setting of items"""
+    if GLOBAL_CACHE_DISABLED:
+      return
     timestamp = self.gettimestamp()
     dict.__setitem__(self, key, (timestamp, value))
 
   def has_key(self, key):
     """check if key is present"""
+    if GLOBAL_CACHE_DISABLED:
+      return False
+    return self.__contains__(key)
+
+  def has_key(self, key):
+    """check if key is present"""
+    if GLOBAL_CACHE_DISABLED:
+      return False
     return self.__contains__(key)
 
   def get(self, key, default=None):
     """D.get(k[,d]) -> D[k] if D.has_key(k), else d.  d defaults to None."""
+    if GLOBAL_CACHE_DISABLED:
+      return default
     timestamp, value = dict.get(self, key, (None, default))
     if timestamp is None:
       return value
@@ -94,45 +124,59 @@ class timecache(dict):
 
   def items(self):
     """D.items() -> list of D's (key, value) pairs, as 2-tuples"""
+    if GLOBAL_CACHE_DISABLED:
+      return []
     self.purge()
     return [(key, value) for (key, (timestamp, value)) in dict.items(self)]
 
   def iteritems(self):
     """D.iteritems() -> an iterator over the (key, value) items of D"""
-    self.purge()
-    for key, (timestamp, value) in dict.iteritems(self):
-      yield (key, value)
+    if not GLOBAL_CACHE_DISABLED:
+      self.purge()
+      for key, (timestamp, value) in dict.iteritems(self):
+        yield (key, value)
 
   def iterkeys(self):
     """D.iterkeys() -> an iterator over the keys of D"""
+    if GLOBAL_CACHE_DISABLED:
+      return dict.iterkeys({})
     self.purge()
     return dict.iterkeys(self)
 
   def itervalues(self):
     """D.itervalues() -> an iterator over the values of D"""
-    self.purge()
-    for timestamp, value in dict.itervalues(self):
-      yield value
+    if not GLOBAL_CACHE_DISABLED:
+      self.purge()
+      for timestamp, value in dict.itervalues(self):
+        yield value
 
   def keys(self):
     """D.keys() -> list of D's keys"""
+    if GLOBAL_CACHE_DISABLED:
+      return []
     self.purge()
     return dict.keys(self)
 
   def values(self):
     """D.values() -> list of D's values"""
+    if GLOBAL_CACHE_DISABLED:
+      return []
     self.purge()
     return [value for (timestamp, value) in dict.values(self)]
 
   def popitem(self):
     """D.popitem() -> (k, v), remove and return some (key, value) pair as a
     2-tuple; but raise KeyError if D is empty"""
+    if GLOBAL_CACHE_DISABLED:
+      raise KeyError("popitem(): cache is disabled")
     self.purge()
     key, (timestamp, value) = dict.popitem(self)
     return (key, value)
 
   def setdefault(self, key, failobj=None):
     """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
+    if GLOBAL_CACHE_DISABLED:
+      return failobj
     newtimestamp = self.gettimestamp()
     oldtimestamp, value = dict.setdefault(self, key, (newtimestamp, failobj))
     if self.expired(oldtimestamp):
@@ -142,6 +186,8 @@ class timecache(dict):
 
   def update(self, updatedict):
     """D.update(E) -> None.  Update D from E: for k in E.keys(): D[k] = E[k]"""
+    if GLOBAL_CACHE_DISABLED:
+      return
     for key in updatedict.keys():
       self[key] = updatedict[key]
 
