@@ -1,5 +1,7 @@
 from j5.Basic import TzInfo
 import datetime
+import threading
+import time
 
 """Utilities for dealing with time."""
 
@@ -130,4 +132,12 @@ def strftime(d, format_str):
             raise ValueError("Error trying to calculate strftime(%r, %s): unexpected underlying values" % (d, format_str))
         return "".join(rs1)
     return d.strftime(format_str)
+
+strptimelock = threading.Lock()
+def safestrptime(*args, **kwargs):
+    try:
+        strptimelock.acquire()
+        return time.strptime(*args, **kwargs)
+    finally:
+        strptimelock.release()
 
