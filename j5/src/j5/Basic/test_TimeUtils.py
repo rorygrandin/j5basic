@@ -1,6 +1,9 @@
 from j5.Basic import TimeUtils
 from j5.Test import Utils
 import datetime
+import time
+import thread
+import threading
 
 def test_timedelta_roundtrip():
     timedelta = datetime.timedelta(days=5,hours=23,minutes=12,seconds=59)
@@ -53,4 +56,42 @@ def test_sequence():
             raise AssertionError(str(testdate))
         prevday = day
         testdate = testdate + one_day
+
+threadsrun = 0
+def test_threading_fail():
+    def f(event):
+        try:
+            for m in xrange(1,13):
+                for d in xrange(1,29):
+                    time.strptime("2010%02d%02d"%(m,d),"%Y%m%d")
+            global threadsrun
+            threadsrun += 1
+        finally:
+            event.set()
+    threads = []
+    for _ in xrange(10):
+        threads.append(threading.Event())
+        thread.start_new_thread(f, (threads[-1],))
+    for t in threads:
+        t.wait()
+    assert threadsrun != 10
+
+threadsrun_ = 0
+def test_threading_fix():
+    def f(event):
+        try:
+            for m in xrange(1,13):
+                for d in xrange(1,29):
+                    TimeUtils.safestrptime("2010%02d%02d"%(m,d),"%Y%m%d")
+            global threadsrun_
+            threadsrun_ += 1
+        finally:
+            event.set()
+    threads = []
+    for _ in xrange(10):
+        threads.append(threading.Event())
+        thread.start_new_thread(f, (threads[-1],))
+    for t in threads:
+        t.wait()
+    assert threadsrun_ == 10
 
