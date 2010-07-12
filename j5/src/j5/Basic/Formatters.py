@@ -153,7 +153,7 @@ class DatetimeFormatter(FormatterStrBase):
 
     def _parseString(self,value):
         try:
-            return FormattedDatetime(self.format_str,*time.strptime(value, self.format_str)[:6])
+            return FormattedDatetime(self.format_str,*TimeUtils.safestrptime(value, self.format_str)[:6])
         except (TypeError, ValueError):
             logging.debug("DatetimeFormatter failed to parse out date %r with format %s" % (value, self.format_str))
             return None
@@ -170,7 +170,7 @@ class TimeFormatter(FormatterStrBase):
 
     def _parseString(self,value):
         try:
-            return FormattedTime(self.format_str,*time.strptime(value, self.format_str)[3:6])
+            return FormattedTime(self.format_str,*TimeUtils.safestrptime(value, self.format_str)[3:6])
         except (TypeError, ValueError):
             logging.debug("TimeFormatter failed to parse out time %r with format %s" % (value, self.format_str))
             return None
@@ -187,7 +187,7 @@ class DateFormatter(FormatterStrBase):
 
     def _parseString(self,value):
         try:
-            return FormattedDate(self.format_str,*time.strptime(value, self.format_str)[0:3])
+            return FormattedDate(self.format_str,*TimeUtils.safestrptime(value, self.format_str)[0:3])
         except (TypeError, ValueError):
             logging.debug("DateFormatter failed to parse out date %r with format %s" % (value, self.format_str))
             return None
@@ -214,7 +214,7 @@ class LooseDatetimeFormatter(DatetimeFormatter):
         for frags in self.subparts(formatparts):
             subformat = " ".join(frags)
             try:
-                ret = FormattedDatetime(self.format_str, *time.strptime(value, subformat)[:6])
+                ret = FormattedDatetime(self.format_str, *TimeUtils.safestrptime(value, subformat)[:6])
                 ret.format_str = subformat
                 return ret
             except (TypeError, ValueError):
