@@ -58,8 +58,8 @@ def test_sequence():
         testdate = testdate + one_day
 
 threadsrun = 0
-# This test does not reliably pass, as sometimes we do not hit the race condition, and everything is fine with strptime
-def xtest_threading_fail():
+@Utils.skip_test_for("This test does not reliably pass, as sometimes we do not hit the race condition, and everything is fine with strptime", always_skip)
+def test_threading_fail():
     def f(event):
         try:
             for m in xrange(1,13):
