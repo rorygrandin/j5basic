@@ -52,6 +52,21 @@ class TestSemiSortedSet(object):
         assert self.date.max() == SPACE
         assert self.space_year.min() == datetime.datetime(2001, 1, 1)
         assert self.space_year.max() == datetime.datetime(2001, 12, 31)
+        # test altering operations
+        hundred = self.hundred.copy()
+        assert hundred.min() == 1
+        assert hundred.max() == 100
+        hundred.add(1000)
+        assert hundred.max() == 1000
+        hundred.discard(1)
+        assert hundred.min() == 2
+        hundred.remove(2)
+        assert hundred.min() == 3
+        hundred |= self.single_item
+        assert hundred.min() == 1
+        hundred &= self.hundred
+        assert hundred.max() == 100
+        # TODO: test ^= -= and method versions - difference_update, intersection_update, symettric_difference_update, update
 
     def test_slice(self):
         empty = self.empty.copy()
