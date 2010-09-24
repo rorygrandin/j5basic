@@ -70,20 +70,20 @@ class TestSemiSortedSet(object):
 
     def test_slice(self):
         empty = self.empty.copy()
-        empty.remove_below(None)
+        empty.remove_lt(None)
         assert not empty
         single_item = self.single_item.copy()
-        single_item.remove_below(1)
+        single_item.remove_lt(1)
         assert len(single_item) == 1
-        single_item.remove_below(2)
+        single_item.remove_lt(2)
         assert len(single_item) == 0
         fifty = self.hundred.copy()
-        fifty.remove_above(50)
+        fifty.remove_gt(50)
         assert len(fifty) == 50
         assert fifty.min() == 1
         assert fifty.max() == 50
         space_year = self.space_year.copy()
-        space_year.remove_above(datetime.datetime(2001, 1, 5, 12, 30, 32))
+        space_year.remove_gt(datetime.datetime(2001, 1, 5, 12, 30, 32))
         assert len(space_year) == 5
         assert space_year.max() == datetime.datetime(2001, 1, 5)
 

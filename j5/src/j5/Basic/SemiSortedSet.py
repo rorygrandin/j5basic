@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import operator
 import threading
 from j5.Basic import Decorators
 
@@ -44,16 +45,30 @@ class SemiSortedSet(set):
         return self.__max__
 
     @Decorators.SelfLocking.runwithlock
-    def remove_below(self, minimum):
-        """Removes all items in the set that are less than the new minimum"""
-        items_below = set(item for item in self if item < minimum)
-        self.difference_update(items_below)
+    def remove_cmp_op(self, cmp_op, comparator):
+        """Removes all items in the set that satisfy cmp_op(item, comparator)"""
+        items_satisfy = set(item for item in self if cmp_op(item, comparator))
+        self.difference_update(items_satisfy)
 
     @Decorators.SelfLocking.runwithlock
-    def remove_above(self, maximum):
-        """Removes all items in the set that are greater than the new maximum"""
-        items_above = set(item for item in self if item > maximum)
-        self.difference_update(items_above)
+    def remove_lt(self, minimum):
+        """Removes all items in the set that are less than the given minimum"""
+        self.remove_cmp_op(operator.lt, minimum)
+
+    @Decorators.SelfLocking.runwithlock
+    def remove_le(self, minimum):
+        """Removes all items in the set that are less than or equal to the given minimum"""
+        self.remove_cmp_op(operator.le, minimum)
+
+    @Decorators.SelfLocking.runwithlock
+    def remove_gt(self, maximum):
+        """Removes all items in the set that are greater than the given maximum"""
+        self.remove_cmp_op(operator.gt, maximum)
+
+    @Decorators.SelfLocking.runwithlock
+    def remove_ge(self, maximum):
+        """Removes all items in the set that are greater than or equal to the given maximum"""
+        self.remove_cmp_op(operator.ge, maximum)
 
     def _recalculate(self):
         """internal method for recalculating the cached minimum and maximum. not to be called without holding self.lock"""
