@@ -245,7 +245,7 @@ class SelfLocking(object):
             return ret
 
         wrapper.__doc__ = f.__doc__
-        wrapper.func_name = f.func_name
+        wrapper.func_name = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
 
         return wrapper
 
