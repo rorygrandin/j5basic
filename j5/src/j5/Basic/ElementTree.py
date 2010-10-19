@@ -41,6 +41,8 @@ except ImportError:
     try:
         from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
                                           _encode, _escape_attrib
+        def _encode_entity(data, pattern):
+            return _encode(data)
     except ImportError:
         # Try import extras from standalone ElementTree install
         from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
