@@ -33,11 +33,16 @@ if not SomeElementTreeImported:
 # Import Extra Things from ElementTree that are private elements we need from outside
 
 try:
-    # Try import extras from default location of ElementTree in Python >= 2.5
+    # Try import extras from default location of ElementTree in Python 2.5-2.6
     from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
                                       _encode, _escape_attrib, _encode_entity
 except ImportError:
-    # Try import extras from standalone ElementTree install
-    from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
+    # Try import extras from default location of ElementTree in Python >=2.7
+    try:
+        from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
+                                          _encode, _escape_attrib
+    except ImportError:
+        # Try import extras from standalone ElementTree install
+        from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
                                         _encode, _escape_attrib, _encode_entity
 
