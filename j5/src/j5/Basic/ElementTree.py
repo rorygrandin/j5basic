@@ -39,10 +39,29 @@ try:
 except ImportError:
     # Try import extras from default location of ElementTree in Python >=2.7
     try:
+        import string
         from xml.etree.ElementTree import _escape_cdata, _raise_serialization_error, \
                                           _encode, _escape_attrib
-        def _encode_entity(data, pattern):
-            return _encode(data)
+        _escape_map = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+        }
+        def _encode_entity(text, pattern):
+            def escape_entities(m, map=_escape_map):
+                out = []
+                append = out.append
+                for char in m.group():
+                    text = map.get(char)
+                    if text is None:
+                        text = "&#%d;" % ord(char)
+                    append(text)
+                return string.join(out, "")
+            try:
+                return _encode(pattern.sub(escape_entities, text), "utf-8")
+            except TypeError:
+                _raise_serialization_error(text)
     except ImportError:
         # Try import extras from standalone ElementTree install
         from elementtree.ElementTree import _escape_cdata, _raise_serialization_error, \
