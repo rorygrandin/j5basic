@@ -11,6 +11,7 @@ _NO_DEFAULT = object()
 
 class enum(object):
     __metaclass__ = enum_meta
+    __constant_class__ = int
     @classmethod
     def _build_lookups(cls):
         if not hasattr(cls, "_constant_lookup"):
@@ -19,10 +20,10 @@ class enum(object):
                 for attr in dir(cls)
                 if attr not in builtin_attrs]
             cls._constant_lookup = dict(
-                [(value, attr) for (attr, value) in constant_attrs if isinstance(value, int)]
+                [(value, attr) for (attr, value) in constant_attrs if isinstance(value, cls.__constant_class__)]
                 )
             cls._stringid_lookup = dict(
-                [(attr, value) for (attr, value) in constant_attrs if isinstance(value, int)]
+                [(attr, value) for (attr, value) in constant_attrs if isinstance(value, cls.__constant_class__)]
                 )
 
     @classmethod
