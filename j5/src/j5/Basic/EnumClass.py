@@ -4,6 +4,7 @@ class enum_meta(type):
     def __iter__(cls):
         """iterates over the constants defined in the class"""
         cls._build_lookups()
+        # TODO: iterate in definition order rather than constant order
         for constant in sorted(cls._constant_lookup):
             yield constant
 
