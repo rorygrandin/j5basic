@@ -1,23 +1,23 @@
 from j5.Basic import TzInfo
+from j5.OS import datetime_tz
 import datetime
 import threading
 import time
+import pytz
 
 """Utilities for dealing with time."""
 
 def utcnow():
     """Return now in UTC with the tzinfo properly set."""
-    dt = datetime.datetime.utcnow()
-    dt = dt.replace(tzinfo=TzInfo.utc)
-    return dt
+    return datetime_tz.datetime_tz.now().astimezone(pytz.utc)
 
 def localsecondnow():
     """Provides the current local time with microseconds set to 0."""
-    return datetime.datetime.now().replace(microsecond=0)
+    return datetime_tz.datetime_tz.now().replace(microsecond=0)
 
 def localminutenow():
     """Provides the current local time with seconds and microseconds set to 0."""
-    return datetime.datetime.now().replace(second=0,microsecond=0)
+    return datetime_tz.datetime_tz.now().replace(second=0,microsecond=0)
 
 def totalmilliseconds(timedelta):
     """Return the total number of milliseconds represented by a datetime.timedelta object."""
@@ -87,7 +87,7 @@ def str_to_timedelta(td_str):
 def timetuple_to_datetime(t):
     """Convert a timetuple to a datetime object.
        """
-    return datetime.datetime(*(t[:6]))
+    return datetime_tz.datetime_tz(*(t[:6]))
 
 # deprecated alias
 timetuple2datetime = timetuple_to_datetime
