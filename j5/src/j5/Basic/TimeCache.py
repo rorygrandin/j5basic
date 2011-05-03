@@ -95,21 +95,8 @@ class timecache(dict):
     """[] setting of items"""
     if self.is_disabled():
       return
-    self.purge()
-    return repr(dict(self.items()))
-
-  def __setitem__(self, key, value):
-    """[] setting of items"""
-    if self.is_disabled():
-      return
     timestamp = self.gettimestamp()
     dict.__setitem__(self, key, (timestamp, value))
-
-  def has_key(self, key):
-    """check if key is present"""
-    if self.is_disabled():
-      return False
-    return self.__contains__(key)
 
   def has_key(self, key):
     """check if key is present"""
