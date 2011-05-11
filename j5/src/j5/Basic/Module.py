@@ -79,4 +79,20 @@ def getpart(module, partname):
         module = getattr(module, component)
     return module
 
+def get_all_distinct_hierarchical_targets(obj, functionname):
+    """Gets a list of all distinct instances of functionname in the mro"""
+    for t in reversed(obj.__mro__):
+        base_hook_fn = getattr(t, functionname, None)
+        if base_hook_fn:
+            t_f = base_hook_fn.im_func
+            if t_f not in sources:
+                sources[t_f] = t
+                sources[t] = (t_f, base_hook_fn)
+                targets.append(base_hook_fn)
+                for base in t.__mro__[1:]:
+                    if base in sources:
+                        r_f, r_m = sources[base]
+                        if r_m in targets:
+                            targets.remove(r_m)
+    return list(reversed(targets))
 
