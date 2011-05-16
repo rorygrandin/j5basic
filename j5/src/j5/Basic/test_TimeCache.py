@@ -25,14 +25,14 @@ class TestTimeCache(object):
         assert cleanups_called == [(False, 1, "test")]
 
     @classmethod
-    def setup_method(self, method):
-        self.orig_global_disabled = TimeCache.GLOBAL_CACHE_DISABLED
-        self.orig_local_disabled = TimeCache.LOCAL_CACHE_DISABLED
+    def setup_method(cls, method):
+        cls.orig_global_disabled = TimeCache.GLOBAL_CACHE_DISABLED
+        cls.orig_local_disabled = TimeCache.LOCAL_CACHE_DISABLED
 
     @classmethod
-    def teardown_method(self, method):
-        TimeCache.GLOBAL_CACHE_DISABLED = self.orig_global_disabled
-        TimeCache.LOCAL_CACHE_DISABLED = self.orig_local_disabled
+    def teardown_method(cls, method):
+        TimeCache.GLOBAL_CACHE_DISABLED = cls.orig_global_disabled
+        TimeCache.LOCAL_CACHE_DISABLED = cls.orig_local_disabled
 
     def test_global_disable(self):
         d = TimeCache.timecache(10)
