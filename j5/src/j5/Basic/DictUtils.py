@@ -7,6 +7,8 @@
 
 from j5.Config import ConfigTree
 
+_DUMMY_ARG_ = object()
+
 def unique_items(list1):
     """generates unique hashable items in list1, in the same order they were given in"""
     seen = set()
@@ -122,10 +124,18 @@ class cidict(dict):
                 return dict.__setitem__(self, akey, value)
         return dict.__setitem__(self, key, value)
 
-    def update(self, updatedict):
+    def update(self, _updatedict=_DUMMY_ARG_, **kwargs):
         """D.update(E) -> None.  Update D from E: for k in E.keys(): D[k] = E[k]"""
-        for key, value in updatedict.iteritems():
-            self[key] = value
+        if _updatedict == _DUMMY_ARG_:
+            pass
+        elif hasattr(_updatedict, "keys"):
+            for key in _updatedict.keys():
+                self[key] = _updatedict[key]
+        else:
+            for key, value in _updatedict:
+                self[key] = value
+        for key in kwargs:
+            self[key] = kwargs[key]
 
     def __delitem__(self, key):
         if type(key) != str and type(key) != unicode:
@@ -188,10 +198,18 @@ class ordereddict(dict):
             self[key] = default
             return self[key]
 
-    def update(self, updatedict):
+    def update(self, _updatedict=_DUMMY_ARG_, **kwargs):
         """D.update(E) -> None.  Update D from E: for k in E.keys(): D[k] = E[k]"""
-        for key, value in updatedict.iteritems():
-            self[key] = value
+        if _updatedict == _DUMMY_ARG_:
+            pass
+        elif hasattr(_updatedict, "keys"):
+            for key in _updatedict.keys():
+                self[key] = _updatedict[key]
+        else:
+            for key, value in _updatedict:
+                self[key] = value
+        for key in kwargs:
+            self[key] = kwargs[key]
 
     def __delitem__(self, key):
         alreadypresent = key in self
@@ -243,6 +261,18 @@ class ordereddict(dict):
         del self[k]
         return (k,v)
 
+    def pop(self, k, v=_DUMMY_ARG_):
+        if v == _DUMMY_ARG_:
+            v = dict.pop(self, k)
+        else:
+            v = dict.pop(self, k, v)
+        if k in self.order:
+            self.order.remove(k)
+        return v
+
+    def clear(self):
+        dict.clear(self)
+        self.order = []
 
 class attrdict(dict):
     """Dictionary that also allows access to keys using attributes"""
