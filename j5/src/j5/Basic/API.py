@@ -55,6 +55,9 @@ class APIMeta(type):
                 interface_method = getattr(interface, method)
                 if not inspect.ismethod(interface_method):
                     continue
+                # PyPy has API inheriting stuff from the base object; we should ignore these if the interface doesn't declare them explicitly
+                if interface_method == getattr(API, method, None):
+                    continue
                 if not hasattr(new_class, method):
                     raise APIError("Class %s does not implement method %s from API %s" % (new_class, method, interface))
                 interface_spec = inspect.getargspec(interface_method)
