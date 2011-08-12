@@ -2,6 +2,9 @@
 
 SomeElementTreeImported = False
 
+import sys
+import logging
+
 try:
     from lxml import etree
 except ImportError:
@@ -24,6 +27,11 @@ if not SomeElementTreeImported:
 if not SomeElementTreeImported:
     from xml.etree.ElementTree import *
     SomeElementTreeImported = True
+
+if "PyPy" in sys.version:
+    logging.warn("Using PyPy-specific monkey-patching of etree")
+    import lxml
+    sys.modules["lxml.etree"] = lxml.etree = sys.modules["xml.etree.ElementTree"]
 
 # Import Extra Things from ElementTree that are private elements we need from outside
 
@@ -63,7 +71,7 @@ except ImportError:
                                         _encode, _escape_attrib, _encode_entity
 
 
-# Fast parsing from xml
+# Fast parsing from lxml
 # infile is a file object to be processed
 # events is a tuple of a selection of events of interest (start, end, data, close)
 # tag is the tagname of interest (e.g. AttributeType)
