@@ -32,6 +32,13 @@ if "PyPy" in sys.version:
     logging.warn("Using PyPy-specific monkey-patching of etree")
     import lxml
     sys.modules["lxml.etree"] = lxml.etree = sys.modules["xml.etree.ElementTree"]
+    orig_tostring = tostring
+    def lxml_tostring(element, encoding=None, method=None, xml_declaration=True, pretty_print=False):
+        if 'nsmap' in element.attrib:
+            for k, v in sorted(element.attrib.pop('nsmap').items()):
+                element.attrib['xmlns:%s' % k] = v
+        return orig_tostring(element, encoding, method)
+    lxml.etree.tostring = lxml_tostring
 
 # Import Extra Things from ElementTree that are private elements we need from outside
 
