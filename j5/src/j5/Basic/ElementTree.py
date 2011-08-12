@@ -2,7 +2,10 @@
 
 SomeElementTreeImported = False
 
-from lxml import etree
+try:
+    from lxml import etree
+except ImportError:
+    from xml import etree
 # Import Basic ElementTree
 
 try:
@@ -13,7 +16,13 @@ except ImportError:
     pass
 if not SomeElementTreeImported:
     # After cElementTree, lxml.etree is the fastest
-    from lxml.etree import *
+    try:
+        from lxml.etree import *
+        SomeElementTreeImported = True
+    except ImportError:
+        pass
+if not SomeElementTreeImported:
+    from xml.etree.ElementTree import *
     SomeElementTreeImported = True
 
 # Import Extra Things from ElementTree that are private elements we need from outside
@@ -54,7 +63,7 @@ except ImportError:
                                         _encode, _escape_attrib, _encode_entity
 
 
-# Fast parsing from lxml
+# Fast parsing from xml
 # infile is a file object to be processed
 # events is a tuple of a selection of events of interest (start, end, data, close)
 # tag is the tagname of interest (e.g. AttributeType)
