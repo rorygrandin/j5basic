@@ -41,6 +41,11 @@ if "PyPy" in sys.version:
         xml_s = orig_tostring(element, encoding, method)
         tidy_result = tidylib.tidy_document(xml_s, {'indent': 1, 'input-xml': 1, 'output-xml': 1})
         return tidy_result[0]
+    lxml.etree.Element.xpath = lxml.etree.Element.findall
+    # the _Comment class is just used by soaplib to search for comments
+    class _Comment(lxml.etree.Element):
+        pass
+    lxml.etree._Comment = _Comment
     lxml.etree.tostring = lxml_tostring
 
 # Import Extra Things from ElementTree that are private elements we need from outside
