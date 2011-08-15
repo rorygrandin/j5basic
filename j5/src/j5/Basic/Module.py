@@ -24,12 +24,12 @@ def resolvemodule(modulename, loglevel=logging.WARN):
 
     try:
         parentmodule = getimportablemodule(modulename, loglevel)
-    except (ImportError, SyntaxError), e:
+    except (ImportError, SyntaxError) as e:
         logging.log(loglevel, "Could not import module for %s" % (modulename))
         raise
     try:
         module = getpart(parentmodule, modulename)
-    except AttributeError, e:
+    except AttributeError as e:
         logging.log(loglevel, "Could not resolve modulename %s" % (modulename))
         raise
     importedmodules[modulename] = module
@@ -53,23 +53,23 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
         parentmodulename = ".".join(components[:-1])
         try:
             parentmodule = __import__(parentmodulename)
-        except ImportError, error:
+        except ImportError as error:
             # if we get an import error on the parent module, we're unlikely to be able to import the child
             logging.log(loglevel, "Import Error attempting to import %s (parent of %s): %s" % (parentmodulename, modulename, error))
             raise
-        except Exception, error:
+        except Exception as error:
             logging.log(loglevel, "Error attempting to import %s: %s" % (parentmodulename, error))
             raise
     try:
         module = __import__(modulename)
         return module
-    except ImportError, error:
+    except ImportError as error:
         if component_depth > 1:
             logging.debug("Import Error attempting to import %s (but have parent module to return): %s" % (modulename, error))
             return parentmodule
         logging.log(loglevel, "Error attempting to import %s: %s" % (modulename, error))
         raise
-    except Exception, error:
+    except Exception as error:
         logging.log(loglevel, "Error attempting to import %s: %s" % (modulename, error))
         raise
 
