@@ -50,9 +50,11 @@ class Timer(object):
                 logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
                 nexttime += self.resolution
             else:
-                waittime = nexttime - currenttime
-                waitseconds = to_seconds(waittime)
-                self.stop_event.wait(waitseconds)
+                while nexttime > currenttime and not self.stop_event.isSet():
+                    waittime = nexttime - currenttime
+                    waitseconds = to_seconds(waittime)
+                    self.stop_event.wait(waitseconds)
+                    currenttime = datetime.datetime.now()
             if not self.stop_event.isSet():
                 apply(self.target, self.args, self.kwargs)
 
