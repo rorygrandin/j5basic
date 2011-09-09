@@ -11,6 +11,7 @@ class TimerDriver:
         self.expecteddiff = expecteddiff
         self.expectarg = expectarg
         self.ticks = 0
+        self.errors = []
 
     def timefunc(self, testarg=None):
         tm = time.time()
@@ -18,7 +19,9 @@ class TimerDriver:
         assert not self.expectarg or testarg is not None
         if self.lasttime != None:
             actual_diff = tm - self.lasttime
-            assert abs(actual_diff - self.expecteddiff) <= (float(self.expecteddiff) / 10)
+            if abs(actual_diff - self.expecteddiff) > (float(self.expecteddiff) / 10):
+                self.errors.append("timefunc started at %r was %r later than last time %r" % (tm, actual_diff, self.last_time))
+                print self.errors[-1]
         self.lasttime = tm
 
     def sleepfunc(self, testarg=None):
@@ -43,6 +46,8 @@ class TestTimer:
         timer.stop = True
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
+        thread.join()
+        assert not tm.errors
 
     @Utils.if_long_test_run()
     def test_twosec(self):
@@ -55,6 +60,8 @@ class TestTimer:
         timer.stop = True
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
+        thread.join()
+        assert not tm.errors
 
     @Utils.if_long_test_run()
     def test_args(self):
@@ -66,6 +73,8 @@ class TestTimer:
         time.sleep(3)
         timer.stop = True
         assert tm.lasttime is not None
+        thread.join()
+        assert not tm.errors
 
     @Utils.if_long_test_run()
     def test_missed(self):
@@ -82,6 +91,8 @@ class TestTimer:
         timer.stop = True
         assert tm.lasttime is not None
         assert 4 <= tm.ticks <= 5
+        thread.join()
+        assert not tm.errors
 
     @Utils.if_long_test_run()
     def test_kwargs(self):
@@ -93,6 +104,8 @@ class TestTimer:
         time.sleep(3)
         timer.stop = True
         assert tm.lasttime is not None
+        thread.join()
+        assert not tm.errors
 
     def test_short_run(self):
         """Test stopping immediately"""
@@ -102,4 +115,6 @@ class TestTimer:
         thread.start()
         timer.stop = True
         assert tm.lasttime is None
+        thread.join()
+        assert not tm.errors
 
