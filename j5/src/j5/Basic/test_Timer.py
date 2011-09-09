@@ -3,6 +3,7 @@
 from j5.Basic import Timer
 from j5.Test import Utils
 from j5.Test import VirtualTime
+from j5.Test import test_VirtualTime
 import threading
 import time
 
@@ -121,7 +122,7 @@ class TestTimer(object):
         assert tm.lasttime is None
         self.finish_wait(thread, tm.errors)
 
-class TestVirtualTimer(TestTimer):
+class TestVirtualTimer(TestTimer, test_VirtualTime.RunPatched):
     """Tests that Timers react appropriately to virtual time setting"""
     def sleep(self, seconds):
         VirtualTime.fast_forward_time(seconds)
