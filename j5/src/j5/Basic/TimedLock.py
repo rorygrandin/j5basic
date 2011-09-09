@@ -5,9 +5,10 @@ import time
 
 class TimedLock(threading._RLock):
     """A lock that allows waiting"""
-    def __init__(self):
+    def __init__(self, time_function=None):
         self._wait_event = threading.Event()
         self._wait_event.set()
+        self._time_function = time_function or time.time
         super(TimedLock, self).__init__()
 
     def acquire(self, wait=True):
@@ -26,14 +27,14 @@ class TimedLock(threading._RLock):
                 return True
             return False
         else:
-            start_time = time.time()
+            start_time = self._time_function()
             elapsed_time = 0
             while elapsed_time < wait:
                 self._wait_event.wait(wait - elapsed_time)
                 if super(TimedLock, self).acquire(False):
                     self._wait_event.clear()
                     return True
-                elapsed_time = time.time() - start_time
+                elapsed_time = self._time_function() - start_time
             return False
 
     def release(self):
