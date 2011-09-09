@@ -4,6 +4,7 @@ import datetime
 import logging
 import time
 import threading
+from j5.Test import VirtualTime
 
 def to_seconds(timedelta):
     """Converts timedelta to a float number of seconds"""
@@ -13,6 +14,7 @@ class Timer(object):
     """Accurate timer of resolution minimum 1 second - the idea is to guarantee accuracy"""
     def __init__(self, target, args=None, kwargs=None, resolution=1):
         self.interrupt_event = threading.Event()
+        VirtualTime.notify_on_change(self.interrupt_event)
         self._running = True
         self.target = target
         self.args = args
