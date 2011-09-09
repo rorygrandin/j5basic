@@ -19,12 +19,16 @@ def localminutenow():
     """Provides the current local time with seconds and microseconds set to 0."""
     return datetime_tz.datetime_tz.now().replace(second=0,microsecond=0)
 
+def totalseconds_float(timedelta):
+    """Return the total number of seconds represented by a datetime.timedelta object, including fractions of seconds"""
+    return timedelta.seconds + (timedelta.days * 24 * 60 * 60) + timedelta.microseconds/1000000.0
+
 def totalmilliseconds(timedelta):
     """Return the total number of milliseconds represented by a datetime.timedelta object."""
     return timedelta.microseconds/1000.0 + (totalseconds(timedelta) * 1000)
 
 def totalseconds(timedelta):
-    """Return the total number of seconds represented by a datetime.timedelta object."""
+    """Return the total number of seconds represented by a datetime.timedelta object, excluding fractions of seconds"""
     return timedelta.seconds + (timedelta.days * 24 * 60 * 60)
 
 def totalhours(timedelta):
