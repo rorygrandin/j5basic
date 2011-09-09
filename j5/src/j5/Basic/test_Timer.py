@@ -2,6 +2,7 @@
 
 from j5.Basic import Timer
 from j5.Test import Utils
+from j5.Test import VirtualTime
 import threading
 import time
 
@@ -34,7 +35,16 @@ class TimerDriver:
         if next_sleep:
             time.sleep(next_sleep)
 
-class TestTimer:
+class TestTimer(object):
+    def sleep(self, seconds):
+        """An overridable method to call time.sleep"""
+        time.sleep(seconds)
+
+    def finish_wait(self, thread, error_list, expected_sleep=0):
+        """Waits for the thread to finish, checks for any errors in the given list. expected_sleep says how long we should have to wait for this..."""
+        thread.join()
+        assert not error_list
+
     @Utils.if_long_test_run()
     def test_onesec(self):
         """Test the one second resolution"""
@@ -42,12 +52,11 @@ class TestTimer:
         timer = Timer.Timer(tm.timefunc)
         thread = threading.Thread(target=timer.start)
         thread.start()
-        time.sleep(3)
+        self.sleep(3)
         timer.stop = True
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors)
 
     @Utils.if_long_test_run()
     def test_twosec(self):
@@ -56,12 +65,11 @@ class TestTimer:
         timer = Timer.Timer(tm.timefunc, resolution=2)
         thread = threading.Thread(target=timer.start)
         thread.start()
-        time.sleep(5)
+        self.sleep(5)
         timer.stop = True
         assert tm.lasttime is not None
         assert 2 <= tm.ticks <= 3
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors)
 
     @Utils.if_long_test_run()
     def test_args(self):
@@ -70,29 +78,26 @@ class TestTimer:
         timer = Timer.Timer(tm.timefunc, args=(True,))
         thread = threading.Thread(target=timer.start)
         thread.start()
-        time.sleep(3)
+        self.sleep(3)
         timer.stop = True
         assert tm.lasttime is not None
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors)
 
     @Utils.if_long_test_run()
     def test_missed(self):
         """Test missing time events by sleeping in the target function"""
         tm = TimerDriver(1)
         timer = Timer.Timer(tm.sleepfunc, args=(iter([0,2,3,0,6]),))
-        import logging
-        logging.getLogger().setLevel(logging.INFO)
         thread = threading.Thread(target=timer.start)
         thread.start()
+        start_time = VirtualTime._original_time()
         # make sure our sleep happens within the last 6-second pause
-        time.sleep(12)
+        self.sleep(12)
         print time.time(), tm.lasttime
         timer.stop = True
         assert tm.lasttime is not None
         assert 4 <= tm.ticks <= 5
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors, 6)
 
     @Utils.if_long_test_run()
     def test_kwargs(self):
@@ -101,11 +106,10 @@ class TestTimer:
         timer = Timer.Timer(tm.timefunc, kwargs={"testarg":True})
         thread = threading.Thread(target=timer.start)
         thread.start()
-        time.sleep(3)
+        self.sleep(3)
         timer.stop = True
         assert tm.lasttime is not None
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors)
 
     def test_short_run(self):
         """Test stopping immediately"""
@@ -115,6 +119,20 @@ class TestTimer:
         thread.start()
         timer.stop = True
         assert tm.lasttime is None
-        thread.join()
-        assert not tm.errors
+        self.finish_wait(thread, tm.errors)
+
+class TestVirtualTimer(TestTimer):
+    """Tests that Timers react appropriately to virtual time setting"""
+    def sleep(self, seconds):
+        VirtualTime.fast_forward_time(seconds)
+
+    def teardown_method(self, method):
+        """Restores normal time after the method has finished"""
+        VirtualTime.restore_time()
+
+    def finish_wait(self, thread, error_list, expected_sleep=0):
+        """Waits for the thread to finish, checks for any errors in the given list. expected_sleep says how long we should have to wait for this..."""
+        if expected_sleep:
+            VirtualTime.fast_forward_time(expected_sleep)
+        super(TestVirtualTimer, self).finish_wait(thread, error_list, expected_sleep)
 
