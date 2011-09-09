@@ -17,18 +17,21 @@ def test_timedelta_totals():
     assert TimeUtils.totalmilliseconds(td(microseconds=1)) == 0.001
     assert TimeUtils.totalmilliseconds(td(milliseconds=1)) == 1
     assert TimeUtils.totalmilliseconds(td(seconds=1)) == 1000
+    assert TimeUtils.totalmilliseconds(td(seconds=-1)) == -1000
     assert TimeUtils.totalmilliseconds(td(seconds=1.25)) == 1250
     assert TimeUtils.totalmilliseconds(td(hours=1)) == 3600 * 1000
     assert TimeUtils.totalmilliseconds(td(days=1)) == 24 * 3600 * 1000
     assert TimeUtils.totalseconds(td(microseconds=1)) == 0
     assert TimeUtils.totalseconds(td(milliseconds=1)) == 0
     assert TimeUtils.totalseconds(td(seconds=1)) == 1
+    assert TimeUtils.totalseconds(td(seconds=-1)) == -1
     assert TimeUtils.totalseconds(td(seconds=1.25)) == 1
     assert TimeUtils.totalseconds(td(hours=1)) == 3600
     assert TimeUtils.totalseconds(td(days=1)) == 24 * 3600
     assert TimeUtils.totalseconds_float(td(microseconds=1)) == 0.000001
     assert TimeUtils.totalseconds_float(td(milliseconds=1)) == 0.001
     assert TimeUtils.totalseconds_float(td(seconds=1)) == 1
+    assert TimeUtils.totalseconds_float(td(seconds=-1)) == -1
     assert TimeUtils.totalseconds_float(td(seconds=1.25)) == 1.25
     assert TimeUtils.totalseconds_float(td(hours=1)) == 3600
     assert TimeUtils.totalseconds_float(td(days=1)) == 24 * 3600
