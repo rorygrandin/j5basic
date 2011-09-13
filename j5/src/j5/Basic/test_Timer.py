@@ -127,10 +127,6 @@ class TestVirtualTimer(TestTimer, test_VirtualTime.RunPatched):
     def sleep(self, seconds):
         VirtualTime.fast_forward_time(seconds)
 
-    def teardown_method(self, method):
-        """Restores normal time after the method has finished"""
-        VirtualTime.restore_time()
-
     def finish_wait(self, thread, error_list, expected_sleep=0):
         """Waits for the thread to finish, checks for any errors in the given list. expected_sleep says how long we should have to wait for this..."""
         if expected_sleep:
