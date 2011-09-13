@@ -40,7 +40,6 @@ class Timer(object):
     def start(self):
         nexttime = datetime.datetime.now()
         while self._running:
-            nexttime = nexttime + self.resolution
             currenttime = datetime.datetime.now()
             if nexttime < currenttime:
                 first_missed_time = nexttime
@@ -51,14 +50,23 @@ class Timer(object):
                 logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
                 nexttime += self.resolution
             else:
-                while nexttime > currenttime and self._running:
-                    waittime = nexttime - currenttime
-                    waitseconds = to_seconds(waittime)
-                    self.interrupt_event.wait(waitseconds)
-                    self.interrupt_event.clear()
-                    currenttime = datetime.datetime.now()
+                waittime = nexttime - currenttime
+                waitseconds = to_seconds(waittime)
+                self.interrupt_event.wait(waitseconds)
+                self.interrupt_event.clear()
+                currenttime = datetime.datetime.now()
             if self._running:
-                apply(self.target, self.args, self.kwargs)
+                if nexttime <= currenttime:
+                    self.setup_run(nexttime)
+                    self.execute_run(nexttime)
+                    nexttime = nexttime + self.resolution
+
+    def setup_run(self, target_time):
+        """Prepares for a run of the timer target"""
+
+    def execute_run(self, target_time):
+        """Executes a run of the timer target"""
+        apply(self.target, self.args, self.kwargs)
 
 
 if __name__ == "__main__":
