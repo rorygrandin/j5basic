@@ -22,7 +22,7 @@ class TimerDriver:
         if self.lasttime != None:
             actual_diff = tm - self.lasttime
             if abs(actual_diff - self.expecteddiff) > (float(self.expecteddiff) / 10):
-                self.errors.append("timefunc started at %r was %r later than last time %r" % (tm, actual_diff, self.last_time))
+                self.errors.append("timefunc started at %r was %r later than last time %r" % (tm, actual_diff, self.lasttime))
                 print self.errors[-1]
         self.lasttime = tm
 
