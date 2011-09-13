@@ -14,7 +14,9 @@ class Timer(object):
     """Accurate timer of resolution minimum 1 second - the idea is to guarantee accuracy"""
     def __init__(self, target, args=None, kwargs=None, resolution=1):
         self.interrupt_event = threading.Event()
+        self.virtual_time_callback_event = threading.Event()
         VirtualTime.notify_on_change(self.interrupt_event)
+        VirtualTime.wait_for_callback_on_change(self.interrupt_event)
         self._running = True
         self.target = target
         self.args = args
@@ -55,11 +57,13 @@ class Timer(object):
                 self.interrupt_event.wait(waitseconds)
                 self.interrupt_event.clear()
                 currenttime = datetime.datetime.now()
-            if self._running:
-                if nexttime <= currenttime:
-                    self.setup_run(nexttime)
-                    self.execute_run(nexttime)
-                    nexttime = nexttime + self.resolution
+            if self._running and nexttime <= currenttime:
+                self.setup_run(nexttime)
+                self.virtual_time_callback_event.set()
+                self.execute_run(nexttime)
+                nexttime = nexttime + self.resolution
+            else:
+                self.virtual_time_callback_event.set()
 
     def setup_run(self, target_time):
         """Prepares for a run of the timer target"""
