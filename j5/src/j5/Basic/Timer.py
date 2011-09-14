@@ -49,7 +49,7 @@ class Timer(object):
                 missed_count = int(to_seconds(missed_time_delta)/to_seconds(self.resolution))
                 if missed_count > 0:
                     nexttime += missed_count * self.resolution
-                logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
+                    logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
                 nexttime += self.resolution
             else:
                 waittime = nexttime - currenttime
