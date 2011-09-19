@@ -52,8 +52,8 @@ def resolve_aliases(modulename):
             registered_module = sys.modules[module_subset]
             if module_subset in registered_module._aliased_by:
                 fullname_parts = registered_module._fullmodulename.split('.')
-                module_parts[:len(fullname_parts)] = fullname_parts
-    return ".".join(module_parts)
+                actual_parts = fullname_parts
+    return ".".join(actual_parts)
 
 thisfilename = canonicalize(__file__)
 if thisfilename.endswith(".pyc") or thisfilename.endswith(".pyo"):
