@@ -20,7 +20,6 @@ def find_module(modulename):
 
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
-    modulename = resolve_aliases(modulename)
     if importedmodules.has_key(modulename):
         return importedmodules[modulename]
 
