@@ -3,6 +3,7 @@
 import imp
 import logging
 import os
+import sys
 
 importedmodules = {}
 
@@ -19,6 +20,7 @@ def find_module(modulename):
 
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
+    modulename = resolve_aliases(modulename)
     if importedmodules.has_key(modulename):
         return importedmodules[modulename]
 
@@ -38,6 +40,20 @@ def resolvemodule(modulename, loglevel=logging.WARN):
 def canonicalize(path):
     """returns the canonical reference to the path that can be used for comparison to other paths"""
     return os.path.normpath(os.path.realpath(os.path.abspath(path)))
+
+def resolve_aliases(modulename):
+    """Resolve module name by replacing any aliases with the relevant module name."""
+    module_parts = modulename.split(".")
+    actual_parts = []
+    for module_part in module_parts:
+        actual_parts.append(module_part)
+        module_subset = ".".join(actual_parts)
+        if module_subset in sys.modules and hasattr(sys.modules[module_subset], '_aliased_by'):
+            registered_module = sys.modules[module_subset]
+            if module_subset in registered_module._aliased_by:
+                fullname_parts = registered_module._fullmodulename.split('.')
+                module_parts[:len(fullname_parts)] = fullname_parts
+    return ".".join(module_parts)
 
 thisfilename = canonicalize(__file__)
 if thisfilename.endswith(".pyc") or thisfilename.endswith(".pyo"):
