@@ -2,6 +2,7 @@
 
 from j5.Basic import TimedLock
 from j5.OS import ThreadControl
+from j5.Test import Utils
 import threading
 import time
 
@@ -111,6 +112,7 @@ class TestTimedLock(object):
         print "delay time", bt2_ea.ts - bt1_er.ts
         assert bt2_ea.ts - bt1_er.ts < 0.04
 
+    @Utils.if_long_test_run()
     def test_wait_multi(self):
         """tests that the acquire with a wait parameter actually works with multiple threads"""
         lock = TimedLock.TimedLock()
@@ -142,6 +144,7 @@ class TestTimedLock(object):
         print "elapsed time", final_er - first_ea
         assert final_er - first_ea < 0.03*thread_count*3
 
+    @Utils.if_long_test_run()
     def test_wait_blocking_success(self):
         """tests that the acquire with a wait parameter of True actually acquires the lock and doesn't wait the expected period of time"""
         lock = TimedLock.TimedLock()
