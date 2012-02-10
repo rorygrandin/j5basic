@@ -11,23 +11,34 @@ import datetime
 GLOBAL_CACHE_DISABLED = False
 # a global variable which makes all time caches that declare themselves as LOCAL_CACHE to behave as though they are empty, and remember no new data
 LOCAL_CACHE_DISABLED = False
+# a global variable which makes all time caches that declare themselves as LOCAL_CACHE have a maximum time period - this needs to be a datetime.timedelta
+LOCAL_CACHE_TIMELIMIT = None
 
 class timecache(dict):
   """caches objects, remembers time, and dumps when neccessary..."""
-  # by default time caches are not LOCAL_CACHE. If this is set to True on a class or object, it will obey (LOCAL_CACHE_DISABLED or GLOBAL_CACHE_DISABLED)
-  LOCAL_CACHE = False
-  def __init__(self, expiryperiod):
+  # by default time caches are not LOCAL_CACHE. If this is set to True on a class or object, it will obey (LOCAL_CACHE_DISABLED or GLOBAL_CACHE_DISABLED) - otherwise, just GLOBAL_CACHE_DISABLED
+  _LOCAL_CACHE = False
+  def __init__(self, expiryperiod, local=False):
     """constructs a timecache dictionary with an expiryperiod given in seconds..."""
     dict.__init__(self)
     self.expiryperiod = datetime.timedelta(seconds=expiryperiod)
+    self.LOCAL_CACHE = local
+
+  def _get_local_cache(self):
+    return self._LOCAL_CACHE
+
+  def _set_local_cache(self, local_cache):
+    self._LOCAL_CACHE = local_cache
+
+  LOCAL_CACHE = property(_get_local_cache, _set_local_cache)
 
   def is_disabled(self):
     """Returns whether this cache is currently disabled"""
-    return GLOBAL_CACHE_DISABLED or (self.LOCAL_CACHE and LOCAL_CACHE_DISABLED)
+    return GLOBAL_CACHE_DISABLED or (self._LOCAL_CACHE and LOCAL_CACHE_DISABLED)
 
   def expired(self, timestamp):
     """checks if self.timestamp is older than self.expiryperiod"""
-    return timestamp < self.gettimestamp() - self.expiryperiod
+    return timestamp < self.gettimestamp() - ((self._LOCAL_CACHE and LOCAL_CACHE_TIMELIMIT) or self.expiryperiod)
 
   def cleanup_key(self, key, value):
     """Performs any cleanup needed when a key is expired (for derived classes)"""

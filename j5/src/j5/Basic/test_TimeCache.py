@@ -1,5 +1,6 @@
 from j5.Basic import TimeCache
 from j5.Test.Utils import raises
+import datetime
 import time
 
 class TestTimeCache(object):
@@ -64,5 +65,27 @@ class TestTimeCache(object):
         TimeCache.LOCAL_CACHE_DISABLED = False
         assert d[1] == "test"
         assert 2 not in d
+        assert sorted(e.items()) == [(1, "test"), (2, "missing")]
+
+    def test_local_timelimit(self):
+        d = TimeCache.timecache(10, True)
+        e = TimeCache.timecache(10)
+        assert d.LOCAL_CACHE == True
+        d[1] = "test"
+        e[1] = "test"
+        assert 1 in d
+        assert 1 in e
+        TimeCache.LOCAL_CACHE_TIMELIMIT = datetime.timedelta(seconds=0.1)
+        time.sleep(0.2)
+        assert 1 not in d
+        assert 1 in e
+        d[2] = "missing"
+        e[2] = "missing"
+        assert d.items() == [(2, "missing")]
+        assert sorted(e.items()) == [(1, "test"), (2, "missing")]
+        TimeCache.LOCAL_CACHE_TIMELIMIT = None
+        time.sleep(0.2)
+        assert 1 not in d
+        assert d[2] == "missing"
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
 
