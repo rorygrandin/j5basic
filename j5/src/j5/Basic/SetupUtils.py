@@ -167,3 +167,10 @@ def allow_distutils_remove_source():
     add_remove_source_option(libinst)
     libinst.get_outputs = extend_function(libinst.get_outputs, get_outputs_removesource)
 
+def makefileset(dest, srcparts, destparts=None, **kwargs):
+    if destparts is None:
+        destparts = srcparts
+    src = os.path.join(*srcparts)
+    destsubdir = os.path.join(*destparts)
+    return fileset(src, dest, destsubdir, **kwargs)
+
