@@ -23,6 +23,8 @@ class fileset(list):
         # arg is ignored
         filenames = []
         for exclude in self.exclude:
+            if fnmatch.fnmatch(dirname, exclude):
+                return
             for name in fnmatch.filter(names, exclude):
                 names.remove(name)
         if self.include is not None:
