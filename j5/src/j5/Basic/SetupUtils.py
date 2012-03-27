@@ -60,8 +60,6 @@ def is_removable (py_file):
             if cutpoint in parts:
                 parts = parts[parts.index(cutpoint)+1:]
     py_file = os.sep.join(parts)
-    if building_standalone:
-        return False
     return "sjsoft" in parts
 
 def remove_source (py_files, verbose=1, dry_run=0):
