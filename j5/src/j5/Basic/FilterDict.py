@@ -13,7 +13,7 @@ import base64
 import logging
 import json
 
-class filterdict(DictUtils.attrdict):
+class filterdict(DictUtils.setattrdict):
     """A dictionary that holds filter options, and makes them available as attributes"""
 
 def filtervalue_to_safe_str(value):
