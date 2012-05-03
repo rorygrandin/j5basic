@@ -294,11 +294,11 @@ class setattrdict(attrdict):
         """Sets the attribute by setting the value in the dictionary"""
         self[attr] = value
 
-def attribify(context):
+def attribify(context, modifiable=False):
     """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
     # We shouldn't convert Config nodes
     if isinstance(context, dict) and not isinstance(context, attrdict) and not isinstance(context, ConfigTree.Node):
-        newcontext = attrdict(context)
+        newcontext = (attrdict if not modifiable else setattrdict)(context)
         for key, value in newcontext.items():
             if isinstance(value, (dict, list)):
                 newcontext[key] = attribify(value)
