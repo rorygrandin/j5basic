@@ -16,7 +16,7 @@ class Timer(object):
         self.interrupt_event = threading.Event()
         self.virtual_time_callback_event = threading.Event()
         VirtualTime.notify_on_change(self.interrupt_event)
-        VirtualTime.wait_for_callback_on_change(self.interrupt_event)
+        VirtualTime.wait_for_callback_on_change(self.virtual_time_callback_event)
         self._running = True
         self.target = target
         self.args = args
@@ -57,6 +57,8 @@ class Timer(object):
                 self.interrupt_event.wait(waitseconds)
                 self.interrupt_event.clear()
                 currenttime = datetime.datetime.now()
+                if VirtualTime.is_skip_time_change():
+                    nexttime = currenttime.replace(microsecond=0)
             if self._running and nexttime <= currenttime:
                 self.setup_run(nexttime)
                 self.virtual_time_callback_event.set()
