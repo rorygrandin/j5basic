@@ -57,7 +57,7 @@ class Timer(object):
                 self.interrupt_event.wait(waitseconds)
                 self.interrupt_event.clear()
                 currenttime = datetime.datetime.now()
-                if VirtualTime.is_skip_time_change():
+                if VirtualTime.in_skip_time_change():
                     nexttime = currenttime.replace(microsecond=0)
             if self._running and nexttime <= currenttime:
                 self.setup_run(nexttime)
