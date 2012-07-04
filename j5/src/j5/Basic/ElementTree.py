@@ -95,7 +95,7 @@ except ImportError:
 def fast_iter(func, infile, events=('end',), tag=None):
     context = etree.iterparse(infile, events=events, tag=tag)
     for event, elem in context:
-        func(event, elem)
+        yield func(event, elem)
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]
