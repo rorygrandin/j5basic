@@ -15,31 +15,24 @@ class fileset(list):
         self.destsubdir = destsubdir
         self.exclude = exclude
         self.include = include
-        # this calls self.adddirfiles(None, dirname, names) for each subdirectory dirname of self.src
-        os.path.walk(self.src, self.adddirfiles, None)
-
-    def adddirfiles(self, arg, dirname, names):
-        """adds the files names from dirname to self (which is a list)"""
-        # arg is ignored
-        filenames = []
-        for exclude in self.exclude:
-            if fnmatch.fnmatch(dirname, exclude):
-                return
-            for name in fnmatch.filter(names, exclude):
-                names.remove(name)
-        if self.include is not None:
-            filtered_names = []
-            for include in self.include:
-                filtered_names.extend(fnmatch.filter(names, include))
-            names = filtered_names
-        for name in names:
-            filename = os.path.join(dirname,name)
-            if not os.path.isdir(filename):
-                filenames.append(filename)
-        if len(filenames) > 0:
-            destsubdirname = dirname.replace(self.src,self.destsubdir,1)
-            destpath = os.path.join(self.dest,destsubdirname)
-            self.append((destpath,filenames))
+        for root, dirs, files in os.walk(self.src):
+            filenames = []
+            for exclude in self.exclude:
+                for exdir in fnmatch.filter(dirs, exclude):
+                    dirs.remove(exdir)
+                for f in fnmatch.filter(files, exclude):
+                    files.remove(f)
+            if self.include is not None:
+                filtered_names = set()
+                for include in self.include:
+                    filtered_names.update(fnmatch.filter(files, include))
+                files = sorted(filtered_names)
+            for name in files:
+                filenames.append(os.path.join(root, name))
+            if len(filenames) > 0:
+                destsubdirname = root.replace(self.src, self.destsubdir, 1)
+                destpath = os.path.join(self.dest, destsubdirname)
+                self.append((destpath, filenames))
 
 ############# remove_source alterations to distutils ############
 
