@@ -4,6 +4,8 @@ import datetime
 import threading
 import time
 import pytz
+import imp
+import random
 
 """Utilities for dealing with time."""
 
@@ -141,8 +143,15 @@ def strftime(d, format_str):
 strptimelock = threading.Lock()
 def safestrptime(*args, **kwargs):
     try:
+        #if import lock is held wait a random number of milliseconds
         strptimelock.acquire()
+        total_time=0
+        while imp.lock_held():
+            if total_time>0.5:
+                raise ImportError('safestrptime has been waiting 0.5s to aqcuire a lock')
+            wait = random.random()*0.1
+            time.sleep(wait)
+            total_time += wait
         return time.strptime(*args, **kwargs)
     finally:
         strptimelock.release()
-
