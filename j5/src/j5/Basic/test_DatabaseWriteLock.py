@@ -187,6 +187,7 @@ class TestJoiningQueueNothingBusy(object):
         with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
             with (DatabaseWriteLock.database_write_lock):
                 DatabaseWriteLock.database_lock_queue.remove("TEST")
+            DatabaseWriteLock.database_write_lock.notifyAll()
 
     def test_joining_queue_when_nothing_busy(self):
         DatabaseWriteLock.logging.clear()
