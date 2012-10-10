@@ -160,5 +160,7 @@ def release_db_lock():
                 if busy_op.count <= 0:
                     database_lock_queue.popleft()
                     database_write_lock.notifyAll()
+                    return
+    logging.error("Thread %s came out of the database write lock but wasn't the busy operation any more - it either had the lock stolen due to being stuck or the lock is being released twice by coding error", current_thread)
 
 

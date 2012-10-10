@@ -226,6 +226,8 @@ class TestMaxWaitTimeout(object):
             error_log = DatabaseWriteLock.logging._error[0]
             assert " timed out waiting for Thread " in error_log
             assert " to release database lock ... Stealing lock ..." in error_log
+            error_log = DatabaseWriteLock.logging._error[-1]
+            assert " came out of the database write lock but wasn't the busy operation any more " in error_log
 
 class TestCompetingTimeouts(object):
     def do_something_for_awhile(self, name):
