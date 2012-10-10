@@ -51,7 +51,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                     last_trace_back = ThreadDebug.format_traceback(frame)
                     logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
                         current_id, busy_op[0])
-                    logging.info("Traceback of thread to be killed:\n%s",last_trace_back)
+                    logging.info("Traceback of thread to be killed:\n%s","\n".join(last_trace_back))
                     try:
                         ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
                         traceback_lines.append("== RuntimeError raised in Thread %s ==" % busy_op[0])
@@ -66,7 +66,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                         traceback_lines.append("}}}")
                     traceback_lines.append("== Traceback of killed thread %s ==" % busy_op[0])
                     traceback_lines.append("{{{")
-                    traceback_lines.extend(last_trace_back.split("\n"))
+                    traceback_lines.extend(last_trace_back)
                     traceback_lines.append("}}}")
                     dump_file_contents = wiki2html.creole2xhtml("\n".join(traceback_lines))
                     email_msg = "\n".join([
@@ -82,7 +82,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                     frame = ThreadDebug.find_thread_frame(busy_op[0])
                     last_trace_back = ThreadDebug.format_traceback(frame)
                     logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
-                    logging.info(last_trace_back)
+                    logging.info("\n".join(last_trace_back))
                     timeout_warned = busy_op[:2]
             else:
                 busy_op = now_busy_op
