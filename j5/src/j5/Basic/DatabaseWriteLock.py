@@ -35,7 +35,7 @@ class ServerMode(InterfaceRegistry.Component):
     mode = property(get_mode)
 
 def no_database_writes(f):
-    f.does_database_writes = False
+    f.requires_database_lock = False
     return f
 
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
