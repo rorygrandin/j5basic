@@ -123,15 +123,30 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
         thread_busy[None] = [current_id, time.time(), 1, False]
     # Outside the lock, as this can take a while
     if email_msg and dump_file_contents:
-        Ratings.ratings.select(Notification.EmailAdmin).email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
+        email_admin = Ratings.ratings.select(Notification.EmailAdmin)
+        if email_admin:
+            email_admin.email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
+        else:
+            logging.error("No admin emailer while trying to send details of killed thread")
 
 def release_db_lock():
-    with (database_write_lock):
-        current_id = ThreadRaise.get_thread_id(threading.currentThread())
-        busy_op = thread_busy.get(None, None)
-        if busy_op and busy_op[0] == current_id:
-            busy_op[2] -= 1
-            if busy_op[2] <= 0:
-                thread_busy.pop(None, None)
-                database_write_lock.notify()
+    # Make sure we don't interrupt giving up the lock
+    try:
+        with (database_write_lock):
+            current_id = ThreadRaise.get_thread_id(threading.currentThread())
+            busy_op = thread_busy.get(None, None)
+            busy_op_backup = busy_op[:]
+            # If we're interrupted here, we must back out our changes
+            try:
+                if busy_op and busy_op[0] == current_id:
+                    busy_op[2] -= 1
+                    if busy_op[2] <= 0:
+                        thread_busy.pop(None, None)
+                        database_write_lock.notify()
+            except RuntimeError as e:
+                thread_busy[None] = busy_op_backup
+                release_db_lock()
+    except RuntimeError as e:
+        logging.error("Attempt to kill thread while trying to release db lock")
+        release_db_lock()
 
