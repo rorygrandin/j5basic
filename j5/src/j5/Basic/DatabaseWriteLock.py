@@ -54,6 +54,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
     current_thread = threading.currentThread()
     if getattr(current_thread, '__DatabaseWriteLock__DatabaseLockTooLong__', False):
         #We were killed at some point, but are trying to get the lock again! (perhaps the exception was handled)
+        #TODO: should we actually raise an exception here and force long running threads to explicitly catch the exception and do something with it?
         delattr(current_thread, '__DatabaseWriteLock__DatabaseLockTooLong__')
     current_id = ThreadRaise.get_thread_id(current_thread)
     if ServerMode().mode == Admin.ServerModeEnum.SLAVE:

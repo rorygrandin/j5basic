@@ -70,9 +70,17 @@ class ExceptionHandlingThread(threading.Thread):
     @classmethod
     def join_threads(cls, *threads, **kwargs):
         timeout = kwargs.get('timeout', 20)
+        use_join = kwargs.get('use_join', True)
         deadlock=False
         for thread in threads:
-            thread.join(timeout)
+            if use_join:
+                #Join has some problems with the DatabaseTooLongError
+                thread.join(timeout)
+            else:
+                for t in range(timeout):
+                    if thread.isAlive():
+                        time.sleep(1)
+
             if thread.isAlive():
                 deadlock = True
                 break
@@ -186,7 +194,7 @@ class TestMaxWaitTimeout(object):
             DatabaseWriteLock.release_db_lock()
 
     def test_max_wait_timeout(self):
-        for i in range(6):
+        for i in range(10):
             DatabaseWriteLock.logging.clear()
             class server:
                 mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
@@ -197,7 +205,7 @@ class TestMaxWaitTimeout(object):
             second_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
             first_thread.start()
             second_thread.start()
-            ExceptionHandlingThread.join_threads(first_thread, second_thread)
+            ExceptionHandlingThread.join_threads(first_thread, second_thread, use_join=False)
             assert "second_thread" in self.run
             assert "Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ..." % (second_thread.ident, first_thread.ident) in DatabaseWriteLock.logging._error
 
@@ -237,7 +245,7 @@ class TestCompetingTimeouts(object):
         first_thread.start()
         second_thread.start()
         third_thread.start()
-        ExceptionHandlingThread.join_threads(first_thread, second_thread, third_thread)
+        ExceptionHandlingThread.join_threads(first_thread, second_thread, third_thread, use_join=False)
         assert "second_thread" in self.run
         assert "third_thread" in self.run
 
