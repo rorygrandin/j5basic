@@ -135,17 +135,18 @@ def release_db_lock():
         with (database_write_lock):
             current_id = ThreadRaise.get_thread_id(threading.currentThread())
             busy_op = thread_busy.get(None, None)
-            busy_op_backup = busy_op[:]
-            # If we're interrupted here, we must back out our changes
-            try:
-                if busy_op and busy_op[0] == current_id:
-                    busy_op[2] -= 1
-                    if busy_op[2] <= 0:
-                        thread_busy.pop(None, None)
-                        database_write_lock.notify()
-            except RuntimeError as e:
-                thread_busy[None] = busy_op_backup
-                release_db_lock()
+            if busy_op:
+                busy_op_backup = busy_op[:]
+                # If we're interrupted here, we must back out our changes
+                try:
+                    if busy_op[0] == current_id:
+                        busy_op[2] -= 1
+                        if busy_op[2] <= 0:
+                            thread_busy.pop(None, None)
+                            database_write_lock.notify()
+                except RuntimeError as e:
+                    thread_busy[None] = busy_op_backup
+                    release_db_lock()
     except RuntimeError as e:
         logging.error("Attempt to kill thread while trying to release db lock")
         release_db_lock()
