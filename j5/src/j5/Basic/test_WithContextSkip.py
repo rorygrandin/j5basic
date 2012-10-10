@@ -30,7 +30,7 @@ def ignorant_peasant():
     if True is False:
         yield value
 
-# actual tests
+# basic tests illustrating the principles
 
 def test_no_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with no value being assigned by the with statement"""
@@ -88,4 +88,5 @@ def test_never_yields():
         raised = True
         assert "SkipStatement" in e.message
     assert raised and not code_run
+
 
