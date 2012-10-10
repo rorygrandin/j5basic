@@ -28,7 +28,7 @@ class ServerMode(InterfaceRegistry.Component):
 
     def cleanup(self, cleanup_resource):
         """Called at server shutdown"""
-        cleanup_resource("DatabaseLock", "server")
+        pass
 
     def get_mode(self):
         return self.server.mode
