@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test module for DatabaseWriteLock"""
 
+
 """
 Scenarios to test:
     * Parallel threads do not threadlock
@@ -16,6 +17,9 @@ import logging
 from j5.Test import ThreadWeave
 from j5.Basic.WithContextSkip import StatementSkipped
 from j5.Basic import DatabaseWriteLock
+from j5.Basic.DatabaseWriteLock import DatabaseLockTooLong
+from j5.Logging import Errors
+from j5.OS import ThreadRaise, ThreadDebug
 
 class instrumented_logging(object):
     def __init__(self):
@@ -46,43 +50,90 @@ class instrumented_logging(object):
 # Override logging module
 DatabaseWriteLock.logging = instrumented_logging()
 
+class ExceptionHandlingThread(threading.Thread):
+    def __init__(self, target=None, **kwargs):
+        super(ExceptionHandlingThread, self).__init__(target=self.safe_run, **kwargs)
+        self.actual_target = target
+        self.exception = None
+        self.timeout_exception = None
+
+    def safe_run(self, *args, **kwargs):
+        try:
+            self.actual_target(*args, **kwargs)
+        except DatabaseLockTooLong, dbex:
+            logging.info("%r:\n%s", self, Errors.traceback_str())
+            self.timeout_exception = dbex
+        except Exception, ex:
+            logging.info("%r:\n%s", self, Errors.traceback_str())
+            self.exception = ex
+
+    @classmethod
+    def join_threads(cls, *threads, **kwargs):
+        timeout = kwargs.get('timeout', 20)
+        deadlock=False
+        for thread in threads:
+            thread.join(timeout)
+            if thread.isAlive():
+                deadlock = True
+                break
+
+        if deadlock:
+            for thread in threads:
+                if thread.isAlive():
+                    thread_id = ThreadRaise.get_thread_id(thread)
+                    frame = ThreadDebug.find_thread_frame(thread_id)
+                    last_trace_back = "\n".join(ThreadDebug.format_traceback(frame))
+                    logging.error("Stuck thread: %r\n:%s", thread, last_trace_back)
+            raise AssertionError("Threads are still alive")
+
+        for thread in threads:
+            assert thread.exception is None, "'%r' in launched thread" % thread.exception
+
+
+#I don't understand what this is testing ...
 class TestParallelWriteLockAccess(object):
-    def do_something(self, name):
+    def do_something(self, name, total):
         DatabaseWriteLock.get_db_lock()
         try:
-            with self.run_lock:
-                self.run.add(name)
-            time.sleep(0.05)
+            read = total[0]
+            total[0] = read + 1
         finally:
             DatabaseWriteLock.release_db_lock()
 
     def test_parallel_access(self):
-        class server:
-            mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
-        DatabaseWriteLock.ServerMode().server = server
-        self.run_lock = threading.Lock()
-        self.run = set()
-        threads = []
-        expected_names = set()
-        for i in range(10):
-            name = "Lock-%d" % i
-            expected_names.add(name)
-            threads.append(threading.Thread(target=self.do_something, args=(name,), name=name))
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        assert expected_names == self.run
+        for j in range(10):
+            class server:
+                mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
+            DatabaseWriteLock.ServerMode().server = server
+            assert not DatabaseWriteLock.database_lock_queue
+            num_threads = 30
+            total = [0]
+            threads = []
+            expected_names = set()
+            for i in range(num_threads):
+                name = "Lock-%d" % i
+                expected_names.add(name)
+                threads.append(ExceptionHandlingThread(target=self.do_something, args=(name,total), name=name))
+            for thread in threads:
+                thread.start()
+
+            ExceptionHandlingThread.join_threads(*threads)
+
+            assert total[0] == num_threads, 'Expected %d, got %d' % (num_threads, total[0])
+            assert not DatabaseWriteLock.database_lock_queue
 
 class TestWarningTimeout(object):
-    def do_something_for_awhile(self):
-        with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
-            # Make sure the first thread gets the lock first
-            time.sleep(0.5)
+    def do_something_for_a_little_too_long(self):
         DatabaseWriteLock.get_db_lock(warning_timeout=2)
         try:
-            with ThreadWeave.only_thread('first_thread') as StatementSkipped.detector:
-                time.sleep(3)
+            time.sleep(3)
+        finally:
+            DatabaseWriteLock.release_db_lock()
+
+    def do_something_else(self):
+        DatabaseWriteLock.get_db_lock(warning_timeout=2)
+        try:
+            time.sleep(0.1)
         finally:
             DatabaseWriteLock.release_db_lock()
 
@@ -91,13 +142,30 @@ class TestWarningTimeout(object):
         class server:
             mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
         DatabaseWriteLock.ServerMode().server = server
-        first_thread = threading.Thread(target=self.do_something_for_awhile, name="first_thread")
-        second_thread = threading.Thread(target=self.do_something_for_awhile, name="second_thread")
+        first_thread = ExceptionHandlingThread(target=self.do_something_for_a_little_too_long, name="first_thread")
+        second_thread = ExceptionHandlingThread(target=self.do_something_else, name="second_thread")
         first_thread.start()
         second_thread.start()
-        first_thread.join()
-        second_thread.join()
+        ExceptionHandlingThread.join_threads(first_thread, second_thread)
+
         assert ("Thread %s still waiting for database lock after 2s - this may timeout" % second_thread.ident) in DatabaseWriteLock.logging._warning
+
+    def test_only_one_warning(self):
+        DatabaseWriteLock.logging.clear()
+        class server:
+            mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
+        DatabaseWriteLock.ServerMode().server = server
+        first_thread = ExceptionHandlingThread(target=self.do_something_for_a_little_too_long, name="first_thread")
+        second_threads = [ExceptionHandlingThread(target=self.do_something_else, name="other_thread-%d" % i) for i in range(3)]
+        first_thread.start()
+        # Make sure the first thread gets the lock first
+        time.sleep(0.5)
+        for second_thread in second_threads:
+            second_thread.start()
+        ExceptionHandlingThread.join_threads(first_thread, *second_threads)
+        assert len(DatabaseWriteLock.logging._warning) == 1
+        assert "still waiting for database lock after 2s - this may timeout" in DatabaseWriteLock.logging._warning[0]
+
 
 class TestMaxWaitTimeout(object):
     def do_something_for_awhile(self, name):
@@ -118,20 +186,20 @@ class TestMaxWaitTimeout(object):
             DatabaseWriteLock.release_db_lock()
 
     def test_max_wait_timeout(self):
-        DatabaseWriteLock.logging.clear()
-        class server:
-            mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
-        DatabaseWriteLock.ServerMode().server = server
-        self.run_lock = threading.Lock()
-        self.run = set()
-        first_thread = threading.Thread(target=self.do_something_for_awhile, args=("first_thread",), name="first_thread")
-        second_thread = threading.Thread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
-        first_thread.start()
-        second_thread.start()
-        first_thread.join()
-        second_thread.join()
-        assert "second_thread" in self.run
-        assert "Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ..." % (second_thread.ident, first_thread.ident) in DatabaseWriteLock.logging._error
+        for i in range(100):
+            DatabaseWriteLock.logging.clear()
+            class server:
+                mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
+            DatabaseWriteLock.ServerMode().server = server
+            self.run_lock = threading.Lock()
+            self.run = set()
+            first_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("first_thread",), name="first_thread")
+            second_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
+            first_thread.start()
+            second_thread.start()
+            ExceptionHandlingThread.join_threads(first_thread, second_thread)
+            assert "second_thread" in self.run
+            assert "Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ..." % (second_thread.ident, first_thread.ident) in DatabaseWriteLock.logging._error
 
 class TestCompetingTimeouts(object):
     def do_something_for_awhile(self, name):
@@ -163,15 +231,13 @@ class TestCompetingTimeouts(object):
         DatabaseWriteLock.ServerMode().server = server
         self.run_lock = threading.Lock()
         self.run = set()
-        first_thread = threading.Thread(target=self.do_something_for_awhile, args=("first_thread",), name="first_thread")
-        second_thread = threading.Thread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
-        third_thread = threading.Thread(target=self.do_something_for_awhile, args=("third_thread",), name="third_thread")
+        first_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("first_thread",), name="first_thread")
+        second_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
+        third_thread = ExceptionHandlingThread(target=self.do_something_for_awhile, args=("third_thread",), name="third_thread")
         first_thread.start()
         second_thread.start()
         third_thread.start()
-        first_thread.join()
-        second_thread.join()
-        third_thread.join()
+        ExceptionHandlingThread.join_threads(first_thread, second_thread, third_thread)
         assert "second_thread" in self.run
         assert "third_thread" in self.run
 
@@ -189,7 +255,7 @@ class TestJoiningQueueNothingBusy(object):
                 DatabaseWriteLock.database_lock_queue.remove("TEST")
                 DatabaseWriteLock.database_write_lock.notifyAll()
 
-    def test_joining_queue_when_nothing_busy(self):
+    def ctest_joining_queue_when_nothing_busy(self):
         DatabaseWriteLock.logging.clear()
         class server:
             mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
@@ -198,12 +264,11 @@ class TestJoiningQueueNothingBusy(object):
             DatabaseWriteLock.database_lock_queue.append("TEST")
         self.run_lock = threading.Lock()
         self.run = set()
-        first_thread = threading.Thread(target=self.run_lock_clear_test, name="first_thread")
-        second_thread = threading.Thread(target=self.run_lock_clear_test, name="second_thread")
+        first_thread = ExceptionHandlingThread(target=self.run_lock_clear_test, name="first_thread")
+        second_thread = ExceptionHandlingThread(target=self.run_lock_clear_test, name="second_thread")
         first_thread.start()
         second_thread.start()
-        first_thread.join()
-        second_thread.join()
+        ExceptionHandlingThread.join_threads(first_thread, second_thread)
         assert "first_thread" in self.run
 
 class TestSlaveError(object):
