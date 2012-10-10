@@ -186,7 +186,7 @@ class TestMaxWaitTimeout(object):
             DatabaseWriteLock.release_db_lock()
 
     def test_max_wait_timeout(self):
-        for i in range(100):
+        for i in range(6):
             DatabaseWriteLock.logging.clear()
             class server:
                 mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
