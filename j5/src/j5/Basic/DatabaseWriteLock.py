@@ -5,7 +5,7 @@
 import threading
 import logging
 import time
-from collections import deque
+from collections import deque, namedtuple
 from j5.OS import ThreadRaise
 from j5.OS import ThreadDebug
 from j5.Logging import Errors
@@ -19,6 +19,7 @@ MAX_LOCK_WAIT_TIMEOUT = 120
 LOCK_WARNING_TIMEOUT = 30
 
 class ServerMode(InterfaceRegistry.Component):
+    """Component that allows following what mode the server is in"""
     InterfaceRegistry.implements(Server.ResourceInterface)
     def startup(self, get_resource):
         """Called at server startup"""
@@ -36,21 +37,25 @@ class DatabaseLockTooLong(RuntimeError):
     pass
 
 def no_database_writes(f):
+    """Decorator that annotates a function to indicate it doesn't perform any database write operations and doesn't require the database write lock"""
     f.requires_database_lock = False
     return f
 
 def requires_database_lock(f):
+    """Decorator that annotates a function to indicate it performs database write operations and requires the database write lock"""
     f.requires_database_lock = True
     return f
 
-#Busy Op Indexes
-_THREAD_ID = 0
-_LOCK_ACQUIRED_TIME = 1
-_LOCK_COUNT = 2
-_WARNING_DONE = 3
-_THREAD_INSTANCE = 4
+class LockRequest(object):
+    def __init__(self, thread_id, request_time, thread_instance):
+        self.thread_id = thread_id
+        self.request_time = request_time
+        self.count = 1
+        self.warning_issued = False
+        self.thread_instance = thread_instance
 
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
+    """Acquire the database for use in operations that may result in writing and require exclusive access under our current conservative model"""
     current_thread = threading.currentThread()
     if getattr(current_thread, '__DatabaseWriteLock__DatabaseLockTooLong__', False):
         #We were killed at some point, but are trying to get the lock again! (perhaps the exception was handled)
@@ -70,9 +75,9 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
     with (database_write_lock):
         if database_lock_queue:
             busy_op = database_lock_queue[0]
-            if busy_op[_THREAD_ID] == current_id:
+            if busy_op.thread_id == current_id:
                 # Multi-entrant
-                busy_op[_LOCK_COUNT] += 1
+                busy_op.count += 1
                 return
 
         # This is used to measure the max time for timeout purposes
@@ -80,20 +85,20 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
         # This is used to make sure we don't wait too long on the notify
         check_start_time = start_time
 
-        database_lock_queue.append([current_id, start_time, 1, False, current_thread])
+        database_lock_queue.append(LockRequest(current_id, start_time, current_thread))
 
-        while database_lock_queue[0][_THREAD_ID] != current_id:
+        while database_lock_queue[0].thread_id != current_id:
             busy_op = database_lock_queue[0]
             logging.info('Thread %s waiting for Thread %s to release database lock (maximum wait %ds)',
-                current_id, busy_op[_THREAD_ID], max_wait_for_exclusive_lock)
+                current_id, busy_op.thread_id, max_wait_for_exclusive_lock)
 
             database_write_lock.wait(warning_timeout)
 
             # Check if I'm still blocked:
-            if database_lock_queue[0][_THREAD_ID] != current_id:
+            if database_lock_queue[0].thread_id != current_id:
 
                 # Check if I'm next in the queue;
-                if database_lock_queue[1][_THREAD_ID] == current_id:
+                if database_lock_queue[1].thread_id == current_id:
                     new_busy_op = database_lock_queue[0]
                     if new_busy_op is not busy_op:
                         busy_op = new_busy_op
@@ -106,17 +111,17 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                             database_lock_queue.popleft()
 
                             #We're going to kill this (once we've got the lock, and released the database_write_lock condition
-                            kill_thread_id = busy_op[_THREAD_ID]
-                            kill_thread = busy_op[_THREAD_INSTANCE]
+                            kill_thread_id = busy_op.thread_id
+                            kill_thread = busy_op.thread_instance
                         elif (time.time() - check_start_time > warning_timeout):
-                            if not busy_op[_WARNING_DONE]:
+                            if not busy_op.warning_issued:
                                 try:
                                     # Warn of impending timeout
-                                    frame = ThreadDebug.find_thread_frame(busy_op[_THREAD_ID])
+                                    frame = ThreadDebug.find_thread_frame(busy_op.thread_id)
                                     last_trace_back = ThreadDebug.format_traceback(frame)
                                     logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
                                     logging.info("\n".join(last_trace_back))
-                                    busy_op[_WARNING_DONE] = True
+                                    busy_op.warning_issued = True
                                 except Exception as e:
                                     logging.error("Exception occurred while trying to warn Database Lock timeout on thread %s - %s",current_id, e)
 
@@ -171,9 +176,9 @@ def release_db_lock():
     with (database_write_lock):
         if database_lock_queue:
             busy_op = database_lock_queue[0]
-            if busy_op[_THREAD_ID] == current_id:
-                busy_op[_LOCK_COUNT] -= 1
-                if busy_op[_LOCK_COUNT] <= 0:
+            if busy_op.thread_id == current_id:
+                busy_op.count -= 1
+                if busy_op.count <= 0:
                     database_lock_queue.popleft()
                     database_write_lock.notifyAll()
 
