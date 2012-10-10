@@ -154,9 +154,10 @@ class TestWarningTimeout(object):
         second_thread = ExceptionHandlingThread(target=self.do_something_else, name="second_thread")
         first_thread.start()
         second_thread.start()
+        second_thread_str = str(second_thread)
         ExceptionHandlingThread.join_threads(first_thread, second_thread)
 
-        assert ("Thread %s still waiting for database lock after 2s - this may timeout" % second_thread.ident) in DatabaseWriteLock.logging._warning
+        assert ("Thread %s still waiting for database lock after 2s - this may timeout" % second_thread_str) in DatabaseWriteLock.logging._warning
 
     def test_only_one_warning(self):
         DatabaseWriteLock.logging.clear()
@@ -207,7 +208,10 @@ class TestMaxWaitTimeout(object):
             second_thread.start()
             ExceptionHandlingThread.join_threads(first_thread, second_thread, use_join=False)
             assert "second_thread" in self.run
-            assert "Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ..." % (second_thread.ident, first_thread.ident) in DatabaseWriteLock.logging._error
+            assert len(DatabaseWriteLock.logging._error) >= 1
+            error_log = DatabaseWriteLock.logging._error[0]
+            assert " timed out waiting for Thread " in error_log
+            assert " to release database lock ... Killing blocking thread ..." in error_log
 
 class TestCompetingTimeouts(object):
     def do_something_for_awhile(self, name):
