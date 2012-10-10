@@ -6,13 +6,15 @@ from . import WithContextSkip
 
 SkipDetector = WithContextSkip.StatementSkippedDetector
 
+# helper methods
+
 @WithContextSkip.conditionalcontextmanager
 def wanneer(condition):
     """Runs the controlled block if the condition is True - otherwise skips it"""
     if condition:
         yield
     else:
-        raise WithContextSkip.SkipStatement
+        raise WithContextSkip.SkipStatement()
 
 @WithContextSkip.conditionalcontextmanager
 def if_positive(value):
@@ -20,7 +22,15 @@ def if_positive(value):
     if value > 0:
         yield value
     else:
-        raise WithContextSkip.SkipStatement
+        raise WithContextSkip.SkipStatement()
+
+@WithContextSkip.conditionalcontextmanager
+def ignorant_peasant():
+    """Never yields - doesn't even raise a valid exception"""
+    if True is False:
+        yield value
+
+# actual tests
 
 def test_no_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with no value being assigned by the with statement"""
@@ -67,4 +77,15 @@ def test_received_value_condition_avoided():
     assert not code_run
     assert value is WithContextSkip.StatementSkipped
 
+def test_never_yields():
+    """Tests that if the generator completes without yielding, a RuntimeError is raised"""
+    raised = False
+    code_run = False
+    try:
+        with ignorant_peasant() as SkipDetector.detect:
+            code_run = True
+    except RuntimeError, e:
+        raised = True
+        assert "SkipStatement" in e.message
+    assert raised and not code_run
 

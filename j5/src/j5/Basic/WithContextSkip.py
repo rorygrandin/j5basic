@@ -108,6 +108,8 @@ def conditionalcontextmanager(func):
             try:
                 if <condition>:
                     yield <value>
+                else:
+                    raise SkipStatement()
             finally:
                 <cleanup>
 
