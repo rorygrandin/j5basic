@@ -178,7 +178,7 @@ class TestCompetingTimeouts(object):
 class TestJoiningQueueNothingBusy(object):
     def run_lock_clear_test(self):
         with ThreadWeave.only_thread('first_thread') as StatementSkipped.detector:
-            DatabaseWriteLock.get_db_lock()
+            DatabaseWriteLock.get_db_lock(2,1)
             try:
                 with self.run_lock:
                     self.run.add("first_thread")
@@ -187,7 +187,7 @@ class TestJoiningQueueNothingBusy(object):
         with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
             with (DatabaseWriteLock.database_write_lock):
                 DatabaseWriteLock.database_lock_queue.remove("TEST")
-            DatabaseWriteLock.database_write_lock.notifyAll()
+                DatabaseWriteLock.database_write_lock.notifyAll()
 
     def test_joining_queue_when_nothing_busy(self):
         DatabaseWriteLock.logging.clear()
