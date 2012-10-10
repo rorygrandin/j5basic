@@ -23,12 +23,14 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
             # Multi-entrant
             thread_busy[None][2] += 1
             return
+        start_time = time.time()
         while busy_op:
             logging.info('Thread %s waiting for Thread %s to release database lock (maximum wait %ds)',
                 current_id, busy_op[0], max_wait_for_exclusive_lock)
-            database_write_lock.wait(max_wait_for_exclusive_lock)
+            database_write_lock.wait(max_wait_for_exclusive_lock - (time.time() - start_time))
             now_busy_op = thread_busy.get(None, None)
-            if now_busy_op and busy_op[0] == now_busy_op[0]: #same op is still busy
+            # Make sure we've waited the timeout time, as the same thread can release and catch the lock multiple times
+            if now_busy_op and busy_op[0] == now_busy_op[0] and (time.time() - start_time > max_wait_for_exclusive_lock): #same op is still busy
                 logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
                     current_id, busy_op[0])
                 ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
@@ -36,7 +38,6 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
             else:
                 busy_op = now_busy_op
 
-        #logging.info("Thread %s getting database lock", current_id)
         thread_busy[None] = [current_id, time.time(), 1]
 
 def release_db_lock():
@@ -47,6 +48,5 @@ def release_db_lock():
             busy_op[2] -= 1
             if busy_op[2] <= 0:
                 thread_busy.pop(None, None)
-                #logging.info("Thread %s releasing database lock", current_id)
                 database_write_lock.notify()
 
