@@ -47,6 +47,12 @@ def requires_database_lock(f):
     f.requires_database_lock = True
     return f
 
+#Busy Op Indexes
+_THREAD_ID = 0
+_LOCK_ACQUIRED_TIME = 1
+_LOCK_COUNT = 2
+_WARNING_DONE = 3
+
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
     current_id = ThreadRaise.get_thread_id(threading.currentThread())
     if ServerMode().mode == Admin.ServerModeEnum.SLAVE:
@@ -58,21 +64,23 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
     dump_file_contents = None
     with (database_write_lock):
         busy_op = thread_busy.get(None, None)
-        if busy_op and busy_op[0] == current_id:
+        if busy_op and busy_op[_THREAD_ID] == current_id:
             # Multi-entrant
-            thread_busy[None][2] += 1
+            busy_op[_LOCK_COUNT] += 1
             return
         database_lock_queue.append(current_id)
         # This is used to measure the max time for timeout purposes
-        start_time = time.time()
+        start_time = time.time() #TODO: We should probably be using virtual time's underlying time for this (see davidf's recent commits for deadlock detection)
         # This is used to make sure we don't wait too long on the notify
         check_start_time = start_time
         while busy_op or database_lock_queue[0] != current_id:
             if busy_op:
                 logging.info('Thread %s waiting for Thread %s to release database lock (maximum wait %ds)',
-                    current_id, busy_op[0], max_wait_for_exclusive_lock)
+                    current_id, busy_op[_THREAD_ID], max_wait_for_exclusive_lock)
             else:
+                #TODO: Something tells me we should be able to get rid of this condition ...
                 logging.info('Thread %s waiting in queue for database lock (maximum wait %ds)',current_id, max_wait_for_exclusive_lock)
+
             database_write_lock.wait(warning_timeout - (time.time() - check_start_time))
             # Check if I'm the head of the queue
             if database_lock_queue[0] != current_id:
@@ -86,16 +94,16 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                     try:
                         # Time to kill this
                         traceback_lines = ["=== Tracebacks from attempt to kill blocking thread==="]
-                        frame = ThreadDebug.find_thread_frame(busy_op[0])
+                        frame = ThreadDebug.find_thread_frame(busy_op[_THREAD_ID])
                         last_trace_back = ThreadDebug.format_traceback(frame)
                         logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
-                            current_id, busy_op[0])
+                            current_id, busy_op[_THREAD_ID])
                         logging.info("Traceback of thread to be killed:\n%s","\n".join(last_trace_back))
                         try:
-                            ThreadRaise.thread_async_raise(busy_op[0], DatabaseLockTooLong)
-                            traceback_lines.append("== DatabaseLockTooLong exception raised in Thread %s ==" % busy_op[0])
+                            ThreadRaise.thread_async_raise(busy_op[_THREAD_ID], DatabaseLockTooLong)
+                            traceback_lines.append("== DatabaseLockTooLong exception raised in Thread %s ==" % busy_op[_THREAD_ID])
                         except Exception as e:
-                            msg = "Could not raise exception in thread %s - %e" % (busy_op[0], e)
+                            msg = "Could not raise exception in thread %s - %e" % (busy_op[_THREAD_ID], e)
                             logging.error(msg)
                             traceback_lines.append("== %s ==" % msg)
                             tb = Errors.traceback_str()
@@ -103,29 +111,29 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                             traceback_lines.append("{{{")
                             traceback_lines.extend(tb.split("\n"))
                             traceback_lines.append("}}}")
-                        traceback_lines.append("== Traceback of killed thread %s ==" % busy_op[0])
+                        traceback_lines.append("== Traceback of killed thread %s ==" % busy_op[_THREAD_ID])
                         traceback_lines.append("{{{")
                         traceback_lines.extend(last_trace_back)
                         traceback_lines.append("}}}")
                         dump_file_contents = wiki2html.creole2xhtml("\n".join(traceback_lines))
                         email_msg = "\n".join([
                             "== Blocking Thread in Database Lock ==",
-                            "The thread %s has blocked the Database Lock for over %ds" % (busy_op[0], max_wait_for_exclusive_lock),
+                            "The thread %s has blocked the Database Lock for over %ds" % (busy_op[_THREAD_ID], max_wait_for_exclusive_lock),
                             "Attached is the traceback and the attempt to kill it.",
                             "Thread %s is the thread attempting to kill it, which will now take the Database Lock." % current_id
                             ])
                     except Exception as e:
-                        logging.error("Error creating tracebacks for thread %s we're trying to kill - %s",busy_op[0],e)
+                        logging.error("Error creating tracebacks for thread %s we're trying to kill - %s",busy_op[_THREAD_ID],e)
                     busy_op = None
                 elif (time.time() - check_start_time > warning_timeout):
-                    if not busy_op[3]:
+                    if not busy_op[_WARNING_DONE]:
                         try:
                             # Warn of impending timeout
-                            frame = ThreadDebug.find_thread_frame(busy_op[0])
+                            frame = ThreadDebug.find_thread_frame(busy_op[_THREAD_ID])
                             last_trace_back = ThreadDebug.format_traceback(frame)
                             logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
                             logging.info("\n".join(last_trace_back))
-                            busy_op[3] = True
+                            busy_op[_WARNING_DONE] = True
                         except Exception as e:
                             logging.error("Exception occurred while trying to warn Database Lock timeout on thread %s - %s",current_id, e)
                     check_start_time = time.time()
@@ -157,13 +165,13 @@ def release_db_lock():
                 busy_op_backup = busy_op[:]
                 # If we're interrupted here, we must back out our changes
                 try:
-                    if busy_op[0] == current_id:
-                        busy_op[2] -= 1
-                        if busy_op[2] <= 0:
+                    if busy_op[_THREAD_ID] == current_id:
+                        busy_op[_LOCK_COUNT] -= 1
+                        if busy_op[_LOCK_COUNT] <= 0:
                             thread_busy.pop(None, None)
                             database_write_lock.notifyAll()
                 except DatabaseLockTooLong as e:
-                    if busy_op_backup[2] > 1:
+                    if busy_op_backup[_LOCK_COUNT] > 1:
                         raise   # We weren't letting go the lock
                     thread_busy[None] = busy_op_backup
                     failed = True
