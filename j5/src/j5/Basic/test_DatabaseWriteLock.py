@@ -21,6 +21,8 @@ from j5.Basic.DatabaseWriteLock import DatabaseLockTooLong
 from j5.Logging import Errors
 from j5.OS import ThreadRaise, ThreadDebug
 
+# TODO: Test multi-entrant locking explicitly
+
 class instrumented_logging(object):
     def __init__(self):
         self._loglock = threading.Lock()
@@ -72,6 +74,9 @@ class ExceptionHandlingThread(threading.Thread):
         timeout = kwargs.get('timeout', 20)
         use_join = kwargs.get('use_join', True)
         deadlock=False
+        for thread in threads:
+            if thread.exception is not None:
+                logging.error("Thread %s died with %r", thread.exception, thread)
         for thread in threads:
             if use_join:
                 #Join has some problems with the DatabaseTooLongError
