@@ -5,6 +5,7 @@
 import threading
 import logging
 import time
+from collections import deque
 from j5.OS import ThreadRaise
 from j5.OS import ThreadDebug
 from j5.Logging import Errors
@@ -13,6 +14,7 @@ from j5.Control import Ratings, InterfaceRegistry
 from j5.Text.Conversion import wiki2html
 
 database_write_lock = threading.Condition()
+database_lock_queue = deque()
 # This is a dictionary in case it is worth it to implement more fine-grained locks
 # So the lock at None is the whole database lock, whereas if we implemented table locks
 # they would use the table name as a key
@@ -60,6 +62,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
             # Multi-entrant
             thread_busy[None][2] += 1
             return
+        database_lock_queue.append(current_id)
         # This is used to measure the max time for timeout purposes
         start_time = time.time()
         # This is used to make sure we don't wait too long on the notify
@@ -68,6 +71,11 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
             logging.info('Thread %s waiting for Thread %s to release database lock (maximum wait %ds)',
                 current_id, busy_op[0], max_wait_for_exclusive_lock)
             database_write_lock.wait(warning_timeout - (time.time() - check_start_time))
+            # Check if I'm the head of the queue
+            if database_lock_queue[0] != current_id:
+                # Reset check_start_time and wait again
+                check_start_time = time.time()
+                continue
             now_busy_op = thread_busy.get(None, None)
             # Make sure we've waited the timeout time, as the same thread can release and catch the lock multiple times
             if now_busy_op and busy_op[:2] == now_busy_op[:2]:
@@ -123,6 +131,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                 check_start_time = time.time()
 
         # Element 4 here is whether this op has been warned for a potential timeout
+        assert database_lock_queue.popleft() == current_id
         thread_busy[None] = [current_id, time.time(), 1, False]
     # Outside the lock, as this can take a while
     if email_msg and dump_file_contents:
@@ -146,7 +155,7 @@ def release_db_lock():
                         busy_op[2] -= 1
                         if busy_op[2] <= 0:
                             thread_busy.pop(None, None)
-                            database_write_lock.notify()
+                            database_write_lock.notifyAll()
                 except DatabaseLockTooLong as e:
                     thread_busy[None] = busy_op_backup
                     release_db_lock()
