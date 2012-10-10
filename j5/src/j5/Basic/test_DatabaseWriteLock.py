@@ -133,6 +133,48 @@ class TestMaxWaitTimeout(object):
         assert "second_thread" in self.run
         assert "Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ..." % (second_thread.ident, first_thread.ident) in DatabaseWriteLock.logging._error
 
+class TestCompetingTimeouts(object):
+    def do_something_for_awhile(self, name):
+        with ThreadWeave.only_thread_blocking('first_thread') as StatementSkipped.detector:
+            # Make sure the first thread gets the lock first
+            DatabaseWriteLock.get_db_lock(2)
+        # Then they all try to get the lock - this will be reentrant on first_thread
+        DatabaseWriteLock.get_db_lock(2, 1)
+        try:
+            with ThreadWeave.only_thread('first_thread') as StatementSkipped.detector:
+                # First thread holds on for too long
+                for i in range(4):
+                    time.sleep(1)
+            with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
+                # Wait long enough for third thread to try to kill us unless it correctly resets its timeout
+                time.sleep(0.8)
+            with self.run_lock:
+                self.run.add(name)
+        finally:
+            DatabaseWriteLock.release_db_lock()
+            with ThreadWeave.only_thread('first_thread') as StatementSkipped.detector:
+                # We took the lock twice - release it again
+                DatabaseWriteLock.release_db_lock()
+
+    def test_competing_timeout(self):
+        DatabaseWriteLock.logging.clear()
+        class server:
+            mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
+        DatabaseWriteLock.ServerMode().server = server
+        self.run_lock = threading.Lock()
+        self.run = set()
+        first_thread = threading.Thread(target=self.do_something_for_awhile, args=("first_thread",), name="first_thread")
+        second_thread = threading.Thread(target=self.do_something_for_awhile, args=("second_thread",), name="second_thread")
+        third_thread = threading.Thread(target=self.do_something_for_awhile, args=("third_thread",), name="third_thread")
+        first_thread.start()
+        second_thread.start()
+        third_thread.start()
+        first_thread.join()
+        second_thread.join()
+        third_thread.join()
+        assert "second_thread" in self.run
+        assert "third_thread" in self.run
+
 class TestSlaveError(object):
     def test_slave_error(self):
         DatabaseWriteLock.logging.clear()
