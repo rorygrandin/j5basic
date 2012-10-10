@@ -99,3 +99,13 @@ class TestWarningTimeout(object):
         second_thread.join()
         assert ("Thread %s still waiting for database lock after 2s - this may timeout" % second_thread.ident) in DatabaseWriteLock.logging._warning
 
+class TestSlaveError(object):
+    def test_slave_error(self):
+        DatabaseWriteLock.logging.clear()
+        class server:
+            mode = DatabaseWriteLock.Admin.ServerModeEnum.SLAVE
+        DatabaseWriteLock.ServerMode().server = server
+        DatabaseWriteLock.get_db_lock()
+        DatabaseWriteLock.release_db_lock()
+        assert "Requesting DatabaseWriteLock on SLAVE process.  Traceback in info logs" in DatabaseWriteLock.logging._error
+
