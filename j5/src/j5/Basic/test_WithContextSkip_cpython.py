@@ -20,7 +20,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
             state.append(1)
             yield 42
             state.append(999)
-        with woohoo() as (x, StatementSkipped.detect):
+        with woohoo() as (x, StatementSkipped.detector):
             self.assertEqual(state, [1])
             self.assertEqual(x, 42)
             state.append(x)
@@ -36,7 +36,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
             finally:
                 state.append(999)
         with self.assertRaises(ZeroDivisionError):
-            with woohoo() as (x, StatementSkipped.detect):
+            with woohoo() as (x, StatementSkipped.detector):
                 self.assertEqual(state, [1])
                 self.assertEqual(x, 42)
                 state.append(x)
@@ -75,7 +75,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
             except ZeroDivisionError, e:
                 state.append(e.args[0])
                 self.assertEqual(state, [1, 42, 999])
-        with woohoo() as (x, StatementSkipped.detect):
+        with woohoo() as (x, StatementSkipped.detector):
             self.assertEqual(state, [1])
             self.assertEqual(x, 42)
             state.append(x)

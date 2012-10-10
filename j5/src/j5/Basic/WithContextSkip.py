@@ -23,19 +23,19 @@ class StatementNotSkippedType:
     name = "StatementNotSkipped"
 
 class StatementSkippedType:
-    """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detect attribute"""
+    """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detector attribute"""
     __metaclass__ = Singleton.Singleton
     name = "StatementSkipped"
     def __setattr__(self, attr, value):
-        """Setting an attribute of detect will raise a SkipStatement if the value is StatementSkipped, or warn if the value is not StatementNotSkipped. Other atttributes will raise AttrError"""
-        if attr != "detect":
+        """Setting an attribute of detector will raise a SkipStatement if the value is StatementSkipped, or warn if the value is not StatementNotSkipped. Other atttributes will raise AttrError"""
+        if attr != "detector":
             raise AttributeError("%r object has no attribute %r", type(self), attr)
         if isinstance(value, tuple) and len(value) == 2 and value[1] in (StatementSkipped, StatementNotSkipped):
             value = value[1]
         if value is StatementSkipped:
             raise SkipStatement()
         elif value is not StatementNotSkipped:
-            warnings.warn("%s.detect received an unexpected skip indicator" % self.name, SkipWarning, stacklevel=2)
+            warnings.warn("%s.detector received an unexpected skip indicator" % self.name, SkipWarning, stacklevel=2)
 
 StatementSkipped = StatementSkippedType()
 StatementNotSkipped = StatementNotSkippedType()
@@ -113,7 +113,7 @@ def conditionalcontextmanager(func):
 
     This makes this:
 
-        with some_generator(<arguments>) as (<variable>, StatementSkipped.detect):
+        with some_generator(<arguments>) as (<variable>, StatementSkipped.detector):
             <body>
 
     equivalent to this:
