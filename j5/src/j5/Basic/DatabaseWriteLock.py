@@ -8,6 +8,9 @@ import time
 from j5.OS import ThreadRaise
 from j5.OS import ThreadDebug
 from j5.Logging import Errors
+from j5.Control.Interface import Notification
+from j5.Control import Ratings
+from j5.Text.Conversion import wiki2html
 
 database_write_lock = threading.Condition()
 # This is a dictionary in case it is worth it to implement more fine-grained locks
@@ -43,6 +46,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
             if now_busy_op and busy_op[:2] == now_busy_op[:2]:
                 if (time.time() - start_time > max_wait_for_exclusive_lock): #same op is still busy
                     # Time to kill this
+                    traceback_lines = ["=== Tracebacks from attempt to kill blocking thread==="]
                     frame = ThreadDebug.find_thread_frame(busy_op[0])
                     last_trace_back = ThreadDebug.format_traceback(frame)
                     logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
@@ -50,9 +54,28 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                     logging.info("Traceback of thread to be killed:\n%s",last_trace_back)
                     try:
                         ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
+                        traceback_lines.append("== RuntimeError raised in Thread %s ==" % busy_op[0])
                     except Exception as e:
-                        logging.error("Could not raise exception in thread %s - %e", busy_op[0], e)
-                        logging.info(Errors.traceback_str())
+                        msg = "Could not raise exception in thread %s - %e" % (busy_op[0], e)
+                        logging.error(msg)
+                        traceback_lines.append("== %s ==" % msg)
+                        tb = Errors.traceback_str()
+                        logging.info(tb)
+                        traceback_lines.append("{{{")
+                        traceback_lines.extend(tb.split("\n"))
+                        traceback_lines.append("}}}")
+                    traceback_lines.append("== Traceback of killed thread %s ==" % busy_op[0])
+                    traceback_lines.append("{{{")
+                    traceback_lines.extend(last_trace_back.split("\n"))
+                    traceback_lines.append("}}}")
+                    dump_file_contents = wiki2html.creole2xhtml("\n".join(traceback_lines))
+                    email_msg = "\n".join([
+                        "== Blocking Thread in Database Lock ==",
+                        "The thread %s has blocked the Database Lock for over %ds" % (busy_op[0], max_wait_for_exclusive_lock),
+                        "Attached is the traceback and the attempt to kill it.",
+                        "Thread %s is the thread attempting to kill it, which will now take the Database Lock." % current_id
+                        ])
+                    Ratings.ratings.select(Notification.EmailAdmin).email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
                     busy_op = None
                 elif (time.time() - check_start_time > warning_timeout) and timeout_warned != busy_op[:2]:
                     # Warn of implending timeout
