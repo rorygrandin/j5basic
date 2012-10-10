@@ -27,15 +27,25 @@ class StatementSkippedType:
     __metaclass__ = Singleton.Singleton
     name = "StatementSkipped"
     def __setattr__(self, attr, value):
-        """Setting an attribute of detector will raise a SkipStatement if the value is StatementSkipped, or warn if the value is not StatementNotSkipped. Other atttributes will raise AttrError"""
+        """Only the detector attribute may be set on StatementSkipped"""
         if attr != "detector":
-            raise AttributeError("%r object has no attribute %r", type(self), attr)
+            raise AttributeError("%r object has no attribute %r" % (type(self), attr))
+        object.__setattr__(self, attr, value)
+
+    @property
+    def detector(self):
+        """Attribute which when set triggers the skipping of controlled statements by conditional context managers"""
+        raise AttributeError("%r.detector is a write-only attribute" % type(self))
+
+    @detector.setter
+    def detector(self, value):
+        """Sets the detector attribute, triggering a SkipStatement exception if the value is StatementSkipped"""
         if isinstance(value, tuple) and len(value) == 2 and value[1] in (StatementSkipped, StatementNotSkipped):
             value = value[1]
         if value is StatementSkipped:
             raise SkipStatement()
         elif value is not StatementNotSkipped:
-            warnings.warn("%s.detector received an unexpected skip indicator" % self.name, SkipWarning, stacklevel=2)
+            warnings.warn("%s.detector received an unexpected skip indicator" % self.name, SkipWarning, stacklevel=3)
 
 StatementSkipped = StatementSkippedType()
 StatementNotSkipped = StatementNotSkippedType()
