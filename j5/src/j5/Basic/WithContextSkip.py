@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""Implementation of with block context managers that allow clearly defined skipping of the controlled block ala PEP 377
+
+PEP 377 (rejected) proposed making this a standard language feature, and was rejected primarily because it alters the logical control flow of the with block.
+This implementation uses the fact that variable assignments in the with ... as ...: syntax are considered part of the with block
+Exceptions raised in these assignments are passed to the __exit__ function of the context manager, and can be used to skip the block.
+"""
+
 import threading
 import contextlib
 from functools import wraps
@@ -49,9 +56,11 @@ class ConditionalContextManager(object):
     def __enter__(self):
         try:
             return self.gen.next(), StatementNotSkipped
-        except StopIteration, e:
+        except SkipStatement, e:
             # set flag
             return StatementSkipped, StatementSkipped
+        except StopIteration, e:
+            raise RuntimeError("generator didn't yield or raise SkipStatement")
 
     def __exit__(self, type, value, traceback):
         if type is None:
@@ -97,21 +106,21 @@ def conditionalcontextmanager(func):
         def some_generator(<arguments>):
             <setup>
             try:
-                if condition:
+                if <condition>:
                     yield <value>
             finally:
                 <cleanup>
 
     This makes this:
 
-        with some_generator(<arguments>) as stopper.<variable>:
+        with some_generator(<arguments>) as (<variable>, StatementSkippedDetector.<any_attr_name>):
             <body>
 
     equivalent to this:
 
         <setup>
         try:
-            if condition:
+            if <condition>:
                 <variable> = <value>
                 <body>
         finally:

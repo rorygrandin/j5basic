@@ -8,13 +8,19 @@ SkipDetector = WithContextSkip.StatementSkippedDetector
 
 @WithContextSkip.conditionalcontextmanager
 def wanneer(condition):
+    """Runs the controlled block if the condition is True - otherwise skips it"""
     if condition:
         yield
+    else:
+        raise WithContextSkip.SkipStatement
 
 @WithContextSkip.conditionalcontextmanager
 def if_positive(value):
+    """Runs the controlled block if the value is greater than 0 - otherwise skips it. The value is returned for assignment to a variable"""
     if value > 0:
         yield value
+    else:
+        raise WithContextSkip.SkipStatement
 
 def test_no_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with no value being assigned by the with statement"""
