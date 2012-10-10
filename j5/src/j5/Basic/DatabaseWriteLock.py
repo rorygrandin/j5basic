@@ -38,6 +38,10 @@ def no_database_writes(f):
     f.requires_database_lock = False
     return f
 
+def requires_database_lock(f):
+    f.requires_database_lock = True
+    return f
+
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
     current_id = ThreadRaise.get_thread_id(threading.currentThread())
     if ServerMode().mode == Admin.ServerModeEnum.SLAVE:
