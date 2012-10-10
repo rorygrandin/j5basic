@@ -175,6 +175,36 @@ class TestCompetingTimeouts(object):
         assert "second_thread" in self.run
         assert "third_thread" in self.run
 
+class TestJoiningQueueNothingBusy(object):
+    def run_lock_clear_test(self):
+        with ThreadWeave.only_thread('first_thread') as StatementSkipped.detector:
+            DatabaseWriteLock.get_db_lock()
+            try:
+                with self.run_lock:
+                    self.run.add("first_thread")
+            finally:
+                DatabaseWriteLock.release_db_lock()
+        with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
+            with (DatabaseWriteLock.database_write_lock):
+                DatabaseWriteLock.database_lock_queue.remove("TEST")
+
+    def test_joining_queue_when_nothing_busy(self):
+        DatabaseWriteLock.logging.clear()
+        class server:
+            mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
+        DatabaseWriteLock.ServerMode().server = server
+        with (DatabaseWriteLock.database_write_lock):
+            DatabaseWriteLock.database_lock_queue.append("TEST")
+        self.run_lock = threading.Lock()
+        self.run = set()
+        first_thread = threading.Thread(target=self.run_lock_clear_test, name="first_thread")
+        second_thread = threading.Thread(target=self.run_lock_clear_test, name="second_thread")
+        first_thread.start()
+        second_thread.start()
+        first_thread.join()
+        second_thread.join()
+        assert "first_thread" in self.run
+
 class TestSlaveError(object):
     def test_slave_error(self):
         DatabaseWriteLock.logging.clear()
