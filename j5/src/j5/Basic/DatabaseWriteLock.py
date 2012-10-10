@@ -4,7 +4,6 @@
 
 import threading
 import logging
-import time
 from collections import deque, namedtuple
 from j5.OS import ThreadRaise
 from j5.OS import ThreadDebug
@@ -12,6 +11,9 @@ from j5.Logging import Errors
 from j5.Control.Interface import Notification, Server, Admin
 from j5.Control import Ratings, InterfaceRegistry
 from j5.Text.Conversion import wiki2html
+# instead of using time.time, use the always-unpatched version (so that VirtualTime will not affect this module)
+from j5.Test import VirtualTime
+nonvirtual_time = VirtualTime._original_time # time.time, without virtual time patching
 
 database_write_lock = threading.Condition()
 database_lock_queue = deque()
@@ -58,9 +60,12 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
     current_thread = threading.currentThread()
     if ServerMode().mode == Admin.ServerModeEnum.SLAVE:
         logging.error("Requesting DatabaseWriteLock on SLAVE process.  Traceback in info logs")
-        frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(current_thread))
-        last_trace_back = ThreadDebug.format_traceback(frame)
-        logging.info("\n".join(last_trace_back))
+        try:
+            frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(current_thread))
+            last_trace_back = ThreadDebug.format_traceback(frame)
+            logging.info("\n".join(last_trace_back))
+        except Exception, e:
+            logging.warning("Error logging traceback for DatabaseWriteLock SLAVE operation: %r", e)
     kill_thread_id = None
     kill_thread = None
     email_msg = None
@@ -75,7 +80,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                 return
 
         # This is used to measure the max time for timeout purposes
-        start_time = time.time() #TODO: We should probably be using virtual time's underlying time for this (see davidf's recent commits for deadlock detection)
+        start_time = nonvirtual_time()
         # This is used to make sure we don't wait too long on the notify
         check_start_time = start_time
 
@@ -96,10 +101,10 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                     new_busy_op = database_lock_queue[0]
                     if new_busy_op is not busy_op:
                         busy_op = new_busy_op
-                        check_start_time = time.time()
+                        check_start_time = nonvirtual_time()
                     else:
                         # Make sure we've waited the timeout time, as the same thread can release and catch the lock multiple times
-                        if (time.time() - start_time > max_wait_for_exclusive_lock):
+                        if (nonvirtual_time() - start_time > max_wait_for_exclusive_lock):
                             #Release the lock:
                             #On the next round in to the loop, we'll exit and continue
                             database_lock_queue.popleft()
@@ -107,7 +112,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                             #We're going to kill this (once we've got the lock, and released the database_write_lock condition
                             kill_thread = busy_op.thread
                             kill_thread_id = ThreadRaise.get_thread_id(busy_op.thread)
-                        elif (time.time() - check_start_time > warning_timeout):
+                        elif (nonvirtual_time() - check_start_time > warning_timeout):
                             if not busy_op.warning_issued:
                                 try:
                                     # Warn of impending timeout
