@@ -100,26 +100,29 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                 if database_lock_queue[1].thread is current_thread:
                     # It's the responsibility of the next-in-line thread to monitor for excess lock times; we assume that this thread will keep on waiting and performing this function until it acquires the lock
                     busy_op = database_lock_queue[0]
-                    # Make sure we've waited the timeout time, as the same thread can release and catch the lock multiple times
-                    if (nonvirtual_time() - start_time > max_wait_for_exclusive_lock):
-                        #Release the lock:
-                        #On the next round in to the loop, we'll exit and continue
-                        database_lock_queue.popleft()
+                    if busy_op.start_time:
+                        busy_op_time = nonvirtual_time() - busy_op.start_time
+                        if busy_op_time > max_wait_for_exclusive_lock:
+                            # Forcibly release the lock:
+                            # On the next round in to the loop, we'll exit and continue
+                            logging.critical("Thread %s has had the database write lock for %ds - forcing it to drop it (%s)", busy_op.thread, busy_op_time, current_thread)
+                            database_lock_queue.popleft()
+                            # TODO: log tracebacks in this case...
+                            #We're going to kill this (once we've got the lock, and released the database_write_lock condition
+                            kill_thread = busy_op.thread
+                            kill_thread_id = ThreadRaise.get_thread_id(busy_op.thread)
+                        if busy_op_time > warning_timeout:
+                            if not busy_op.warning_issued:
+                                try:
+                                    # Warn of impending timeout
+                                    frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(busy_op.thread))
+                                    last_trace_back = ThreadDebug.format_traceback(frame)
+                                    logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_thread, warning_timeout)
+                                    logging.info("\n".join(last_trace_back))
+                                    busy_op.warning_issued = True
+                                except Exception as e:
+                                    logging.error("Exception occurred while trying to warn Database Lock timeout on thread %s - %s",current_thread, e)
 
-                        #We're going to kill this (once we've got the lock, and released the database_write_lock condition
-                        kill_thread = busy_op.thread
-                        kill_thread_id = ThreadRaise.get_thread_id(busy_op.thread)
-                    elif busy_op.start_time and (nonvirtual_time() - busy_op.start_time > warning_timeout):
-                        if not busy_op.warning_issued:
-                            try:
-                                # Warn of impending timeout
-                                frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(busy_op.thread))
-                                last_trace_back = ThreadDebug.format_traceback(frame)
-                                logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_thread, warning_timeout)
-                                logging.info("\n".join(last_trace_back))
-                                busy_op.warning_issued = True
-                            except Exception as e:
-                                logging.error("Exception occurred while trying to warn Database Lock timeout on thread %s - %s",current_thread, e)
         # record the time we got the lock
         database_lock_queue[0].start_time = nonvirtual_time()
 
