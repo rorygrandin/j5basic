@@ -8,8 +8,8 @@ import time
 from j5.OS import ThreadRaise
 from j5.OS import ThreadDebug
 from j5.Logging import Errors
-from j5.Control.Interface import Notification
-from j5.Control import Ratings
+from j5.Control.Interface import Notification, Server, Admin
+from j5.Control import Ratings, InterfaceRegistry
 from j5.Text.Conversion import wiki2html
 
 database_write_lock = threading.Condition()
@@ -20,15 +20,34 @@ thread_busy = {}
 MAX_LOCK_WAIT_TIMEOUT = 120
 LOCK_WARNING_TIMEOUT = 30
 
+class ServerMode(InterfaceRegistry.Component):
+    InterfaceRegistry.implements(Server.ResourceInterface)
+    def startup(self, get_resource):
+        """Called at server startup"""
+        self.server = get_resource("DatabaseLock", "server")
+
+    def cleanup(self, cleanup_resource):
+        """Called at server shutdown"""
+        cleanup_resource("DatabaseLock", "server")
+
+    def get_mode(self):
+        return self.server.mode
+    mode = property(get_mode)
+
 def no_database_writes(f):
     f.does_database_writes = False
     return f
 
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
+    current_id = ThreadRaise.get_thread_id(threading.currentThread())
+    if ServerMode().mode == Admin.ServerModeEnum.SLAVE:
+        logging.error("Requesting DatabaseWriteLock on SLAVE process.  Traceback in info logs")
+        frame = ThreadDebug.find_thread_frame(current_id)
+        last_trace_back = ThreadDebug.format_traceback(frame)
+        logging.info("\n".join(last_trace_back))
     email_msg = None
     dump_file_contents = None
     with (database_write_lock):
-        current_id = ThreadRaise.get_thread_id(threading.currentThread())
         busy_op = thread_busy.get(None, None)
         if busy_op and busy_op[0] == current_id:
             # Multi-entrant
