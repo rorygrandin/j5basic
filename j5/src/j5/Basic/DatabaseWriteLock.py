@@ -5,6 +5,7 @@
 import threading
 import logging
 import time
+from j5.OS import ThreadRaise
 
 database_write_lock = threading.Condition()
 thread_busy = {}
@@ -16,7 +17,7 @@ def no_database_writes(f):
 
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
     with (database_write_lock):
-        current_id = threading.currentThread().ident
+        current_id = ThreadRaise.get_thread_id(threading.currentThread())
         busy_op = thread_busy.get(None, None)
         if busy_op and busy_op[0] == current_id:
             # Multi-entrant
@@ -28,8 +29,9 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
             database_write_lock.wait(max_wait_for_exclusive_lock)
             now_busy_op = thread_busy.get(None, None)
             if now_busy_op and busy_op[0] == now_busy_op[0]: #same op is still busy
-                logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Continuing ...',
+                logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
                     current_id, busy_op[0])
+                ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
                 busy_op = None
             else:
                 busy_op = now_busy_op
@@ -39,7 +41,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
 
 def release_db_lock():
     with (database_write_lock):
-        current_id = threading.currentThread().ident
+        current_id = ThreadRaise.get_thread_id(threading.currentThread())
         busy_op = thread_busy.get(None, None)
         if busy_op and busy_op[0] == current_id:
             busy_op[2] -= 1
