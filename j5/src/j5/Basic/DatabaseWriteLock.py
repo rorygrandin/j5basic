@@ -67,10 +67,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
             logging.info("\n".join(last_trace_back))
         except Exception, e:
             logging.warning("Error logging traceback for DatabaseWriteLock SLAVE operation: %r", e)
-    kill_thread_id = None
-    kill_thread = None
-    email_msg = None
-    dump_file_contents = None
+    left_for_dead_thread = None
 
     with (database_write_lock):
         if database_lock_queue:
@@ -107,10 +104,8 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                             # On the next round in to the loop, we'll exit and continue
                             logging.critical("Thread %s has had the database write lock for %ds - forcing it to drop it (%s)", busy_op.thread, busy_op_time, current_thread)
                             database_lock_queue.popleft()
-                            # TODO: log tracebacks in this case...
-                            #We're going to kill this (once we've got the lock, and released the database_write_lock condition
-                            kill_thread = busy_op.thread
-                            kill_thread_id = ThreadRaise.get_thread_id(busy_op.thread)
+                            # We're going to ignore this thread and take the lock anyway
+                            left_for_dead_thread = busy_op.thread
                         if busy_op_time > warning_timeout:
                             if not busy_op.warning_issued:
                                 try:
@@ -127,52 +122,36 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
         database_lock_queue[0].start_time = nonvirtual_time()
 
     # Outside the database_write_lock, as this can take a while
-    if kill_thread_id:
+    if left_for_dead_thread:
         try:
-            # Time to kill this
-            traceback_lines = ["=== Tracebacks from attempt to kill blocking thread==="]
-            frame = ThreadDebug.find_thread_frame(kill_thread_id)
+            # Time to steal the lock from this
+            traceback_lines = ["=== Tracebacks from blocking thread that lock was taken from==="]
+            logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Stealing lock ...',
+                current_thread, left_for_dead_thread)
+            frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(left_for_dead_thread))
             last_trace_back = ThreadDebug.format_traceback(frame)
-            logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
-                current_thread, kill_thread_id)
-            logging.info("Traceback of thread to be killed:\n%s","\n".join(last_trace_back))
-            setattr(kill_thread, '__DatabaseWriteLock__DatabaseLockTooLong__', True)
-            try:
-                ThreadRaise.thread_async_raise(kill_thread_id, DatabaseLockTooLong)
-                traceback_lines.append("== DatabaseLockTooLong exception raised in Thread %s ==" % kill_thread_id)
-            except Exception as e:
-                msg = "Could not raise exception in thread %s - %e" % (kill_thread_id, e)
-                logging.error(msg)
-                traceback_lines.append("== %s ==" % msg)
-                tb = Errors.traceback_str()
-                logging.info(tb)
-                traceback_lines.append("{{{")
-                traceback_lines.extend(tb.split("\n"))
-                traceback_lines.append("}}}")
-            traceback_lines.append("== Traceback of killed thread %s ==" % kill_thread_id)
+            logging.info("Traceback of stuck thread:\n%s","\n".join(last_trace_back))
+            traceback_lines.append("== Traceback of stuck thread %s ==" % left_for_dead_thread)
             traceback_lines.append("{{{")
             traceback_lines.extend(last_trace_back)
             traceback_lines.append("}}}")
             dump_file_contents = wiki2html.creole2xhtml("\n".join(traceback_lines))
             email_msg = "\n".join([
                 "== Blocking Thread in Database Lock ==",
-                "The thread %s has blocked the Database Lock for over %ds" % (kill_thread_id, max_wait_for_exclusive_lock),
-                "Attached is the traceback and the attempt to kill it.",
-                "Thread %s is the thread attempting to kill it, which will now take the Database Lock." % current_thread
+                "The thread %s has blocked the Database Lock for over %ds" % (left_for_dead_thread, max_wait_for_exclusive_lock),
+                "Attached is the traceback - the database lock has been stolen as we assume this thread is dead",
+                "Thread %s is the thread which will now take the Database Lock." % current_thread
             ])
             email_admin = Ratings.ratings.select(Notification.EmailAdmin)
             if email_admin:
                 email_admin.email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
             else:
-                logging.error("No admin emailer while trying to send details of killed thread")
+                logging.error("No admin emailer while trying to send details of stuck thread")
         except Exception as e:
-            logging.error("Error creating / sending error email for thread %s we're trying to kill - %s",kill_thread_id,e)
+            logging.error("Error creating / sending error email for thread %s we're trying to steal the database lock from - %s",left_for_dead_thread, e)
 
 def release_db_lock():
     current_thread = threading.currentThread()
-    if getattr(current_thread, '__DatabaseWriteLock__DatabaseLockTooLong__', False):
-        #The database lock has already been released (by the thread that killed us)
-        return
     with (database_write_lock):
         if database_lock_queue:
             busy_op = database_lock_queue[0]
@@ -181,4 +160,5 @@ def release_db_lock():
                 if busy_op.count <= 0:
                     database_lock_queue.popleft()
                     database_write_lock.notifyAll()
+
 

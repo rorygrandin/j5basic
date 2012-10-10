@@ -6,8 +6,8 @@
 Scenarios to test:
     * Parallel threads do not threadlock
     * Locking a thread for warning_timeout when someone else wants it causes a warning to be logged
-    * Locking a thread for max_wait_for_exclusive_lock causes an attempt at killing the offending thread
-    * When a thread has the lock and two others go for it, and it stalls long enough to timeout, only one thread triggers the killing, and the second thread does not kill the one which has just done the killing
+    * Locking a thread for max_wait_for_exclusive_lock causes a robbery of the lock from the offending thread
+    * When a thread has the lock and two others go for it, and it stalls long enough to timeout, only one thread triggers the lock stealing, and the second thread does not steal the lock from the one which has just done the stealing
     * Trying to get the lock while a SLAVE causes an error to be logged (but proceeds)
 """
 
@@ -28,6 +28,11 @@ class instrumented_logging(object):
         self._loglock = threading.Lock()
         self.clear()
 
+    def critical(self, msg, *args):
+        with self._loglock:
+            self._critical.append(msg % args)
+        logging.critical(msg, *args)
+
     def error(self, msg, *args):
         with self._loglock:
             self._error.append(msg % args)
@@ -43,8 +48,12 @@ class instrumented_logging(object):
             self._info.append(msg % args)
         logging.info(msg, *args)
 
+    def debug(self, msg, *args):
+        logging.debug(msg, *args)
+
     def clear(self):
         with self._loglock:
+            self._critical = []
             self._error = []
             self._info = []
             self._warning = []
@@ -216,7 +225,7 @@ class TestMaxWaitTimeout(object):
             assert len(DatabaseWriteLock.logging._error) >= 1
             error_log = DatabaseWriteLock.logging._error[0]
             assert " timed out waiting for Thread " in error_log
-            assert " to release database lock ... Killing blocking thread ..." in error_log
+            assert " to release database lock ... Stealing lock ..." in error_log
 
 class TestCompetingTimeouts(object):
     def do_something_for_awhile(self, name):
@@ -231,7 +240,7 @@ class TestCompetingTimeouts(object):
                 for i in range(4):
                     time.sleep(1)
             with ThreadWeave.only_thread('second_thread') as StatementSkipped.detector:
-                # Wait long enough for third thread to try to kill us unless it correctly resets its timeout
+                # Wait long enough for third thread to steal the lock from us unless it correctly resets its timeout
                 time.sleep(0.8)
             with self.run_lock:
                 self.run.add(name)
