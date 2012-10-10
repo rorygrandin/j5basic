@@ -76,13 +76,15 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                         ])
                     Ratings.ratings.select(Notification.EmailAdmin).email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
                     busy_op = None
-                elif (time.time() - check_start_time > warning_timeout) and not busy_op[3]:
-                    # Warn of implending timeout
-                    frame = ThreadDebug.find_thread_frame(busy_op[0])
-                    last_trace_back = ThreadDebug.format_traceback(frame)
-                    logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
-                    logging.info("\n".join(last_trace_back))
-                    busy_op[3] = True
+                elif (time.time() - check_start_time > warning_timeout):
+                    if not busy_op[3]:
+                        # Warn of implending timeout
+                        frame = ThreadDebug.find_thread_frame(busy_op[0])
+                        last_trace_back = ThreadDebug.format_traceback(frame)
+                        logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
+                        logging.info("\n".join(last_trace_back))
+                        busy_op[3] = True
+                    check_start_time = time.time()
             else:
                 busy_op = now_busy_op
                 check_start_time = time.time()
