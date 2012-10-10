@@ -25,7 +25,6 @@ def no_database_writes(f):
     return f
 
 def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeout=LOCK_WARNING_TIMEOUT):
-    timeout_warned = None
     with (database_write_lock):
         current_id = ThreadRaise.get_thread_id(threading.currentThread())
         busy_op = thread_busy.get(None, None)
@@ -77,18 +76,19 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                         ])
                     Ratings.ratings.select(Notification.EmailAdmin).email_admin(email_msg, attach_contentlist=[(dump_file_contents, 'debug.htm', 'text/html')])
                     busy_op = None
-                elif (time.time() - check_start_time > warning_timeout) and timeout_warned != busy_op[:2]:
+                elif (time.time() - check_start_time > warning_timeout) and not busy_op[3]:
                     # Warn of implending timeout
                     frame = ThreadDebug.find_thread_frame(busy_op[0])
                     last_trace_back = ThreadDebug.format_traceback(frame)
                     logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_id, warning_timeout)
                     logging.info("\n".join(last_trace_back))
-                    timeout_warned = busy_op[:2]
+                    busy_op[3] = True
             else:
                 busy_op = now_busy_op
                 check_start_time = time.time()
 
-        thread_busy[None] = [current_id, time.time(), 1]
+        # Element 4 here is whether this op has been warned for a potential timeout
+        thread_busy[None] = [current_id, time.time(), 1, False]
 
 def release_db_lock():
     with (database_write_lock):
