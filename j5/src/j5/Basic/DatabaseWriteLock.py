@@ -8,6 +8,9 @@ import time
 from j5.OS import ThreadRaise
 
 database_write_lock = threading.Condition()
+# This is a dictionary in case it is worth it to implement more fine-grained locks
+# So the lock at None is the whole database lock, whereas if we implemented table locks
+# they would use the table name as a key
 thread_busy = {}
 MAX_LOCK_WAIT_TIMEOUT = 30
 
@@ -30,7 +33,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
             database_write_lock.wait(max_wait_for_exclusive_lock - (time.time() - start_time))
             now_busy_op = thread_busy.get(None, None)
             # Make sure we've waited the timeout time, as the same thread can release and catch the lock multiple times
-            if now_busy_op and busy_op[0] == now_busy_op[0] and (time.time() - start_time > max_wait_for_exclusive_lock): #same op is still busy
+            if now_busy_op and busy_op[0] == now_busy_op[0] and busy_op[1] == now_busy_op[1] and (time.time() - start_time > max_wait_for_exclusive_lock): #same op is still busy
                 logging.error('Thread %s timed out waiting for Thread %s to release database lock ... Killing blocking thread ...',
                     current_id, busy_op[0])
                 ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
