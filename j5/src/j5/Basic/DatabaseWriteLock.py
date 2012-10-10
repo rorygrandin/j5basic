@@ -34,6 +34,9 @@ class ServerMode(InterfaceRegistry.Component):
         return self.server.mode
     mode = property(get_mode)
 
+class DatabaseLockTooLong(RuntimeError):
+    pass
+
 def no_database_writes(f):
     f.requires_database_lock = False
     return f
@@ -78,8 +81,8 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                             current_id, busy_op[0])
                         logging.info("Traceback of thread to be killed:\n%s","\n".join(last_trace_back))
                         try:
-                            ThreadRaise.thread_async_raise(busy_op[0], RuntimeError)
-                            traceback_lines.append("== RuntimeError raised in Thread %s ==" % busy_op[0])
+                            ThreadRaise.thread_async_raise(busy_op[0], DatabaseLockTooLong)
+                            traceback_lines.append("== DatabaseLockTooLong exception raised in Thread %s ==" % busy_op[0])
                         except Exception as e:
                             msg = "Could not raise exception in thread %s - %e" % (busy_op[0], e)
                             logging.error(msg)
@@ -144,10 +147,10 @@ def release_db_lock():
                         if busy_op[2] <= 0:
                             thread_busy.pop(None, None)
                             database_write_lock.notify()
-                except RuntimeError as e:
+                except DatabaseLockTooLong as e:
                     thread_busy[None] = busy_op_backup
                     release_db_lock()
-    except RuntimeError as e:
+    except DatabaseLockTooLong as e:
         logging.error("Attempt to kill thread while trying to release db lock")
         release_db_lock()
 
