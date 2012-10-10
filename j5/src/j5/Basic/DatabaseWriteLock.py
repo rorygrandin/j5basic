@@ -30,6 +30,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT):
             else:
                 busy_op = now_busy_op
 
+        logging.info("Thread %s getting database lock", current_id)
         thread_busy[None] = [current_id, time.time(), 1]
 
 def release_db_lock():
@@ -37,8 +38,9 @@ def release_db_lock():
         current_id = threading.currentThread().ident
         busy_op = thread_busy.get(None, None)
         if busy_op and busy_op[0] == current_id:
-            busy_op[2] -= - 1
+            busy_op[2] -= 1
             if busy_op[2] <= 0:
                 thread_busy.pop(None, None)
+                logging.info("Thread %s releasing database lock", current_id)
                 database_write_lock.notify()
 
