@@ -4,7 +4,7 @@
 
 from . import WithContextSkip
 
-SkipDetector = WithContextSkip.StatementSkippedDetector
+StatementSkipped = WithContextSkip.StatementSkipped
 
 # helper methods
 
@@ -35,35 +35,35 @@ def ignorant_peasant():
 def test_no_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with no value being assigned by the with statement"""
     code_run = False
-    with wanneer(False) as SkipDetector.detect:
+    with wanneer(False) as StatementSkipped.detect:
         code_run = True
     assert not code_run
 
 def test_no_value_condition_passed():
     """Tests that the generator yielding means the code block governed by with is run, with no value being assigned by the with statement"""
     code_run = False
-    with wanneer(True) as SkipDetector.detect:
+    with wanneer(True) as StatementSkipped.detect:
         code_run = True
     assert code_run
 
 def test_ignored_value_condition_passed():
     """Tests that the generator yielding means the code block governed by with is run, with a value being yielded by the generator but ignored"""
     code_run = False
-    with if_positive(37) as SkipDetector.detect:
+    with if_positive(37) as StatementSkipped.detect:
         code_run = True
     assert code_run
 
 def test_ignored_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with a value being yielded by the generator but ignored"""
     code_run = False
-    with if_positive(-37) as SkipDetector.detect:
+    with if_positive(-37) as StatementSkipped.detect:
         code_run = True
     assert not code_run
 
 def test_received_value_condition_passed():
     """Tests that the generator yielding means the code block governed by with is run, with a value being yielded by the generator and received"""
     code_run = False
-    with if_positive(37) as (value, SkipDetector.detect):
+    with if_positive(37) as (value, StatementSkipped.detect):
         code_run = True
         assert value == 37
     assert value == 37
@@ -72,17 +72,17 @@ def test_received_value_condition_passed():
 def test_received_value_condition_avoided():
     """Tests that the generator not yielding means the code block governed by with is not run, with StatementSkipped being received by the target value variable"""
     code_run = False
-    with if_positive(-37) as (value, SkipDetector.detect):
+    with if_positive(-37) as (value, StatementSkipped.detect):
         code_run = True
     assert not code_run
-    assert value is WithContextSkip.StatementSkipped
+    assert value is StatementSkipped
 
 def test_never_yields():
     """Tests that if the generator completes without yielding, a RuntimeError is raised"""
     raised = False
     code_run = False
     try:
-        with ignorant_peasant() as SkipDetector.detect:
+        with ignorant_peasant() as StatementSkipped.detect:
             code_run = True
     except RuntimeError, e:
         raised = True

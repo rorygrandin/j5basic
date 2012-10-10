@@ -15,15 +15,27 @@ import warnings
 from . import Singleton
 
 class SkipStatement(Exception):
-    pass
+    """Exception which when raised by a conditional context manager function will cause the controlled statement to be skipped"""
 
 class StatementNotSkippedType:
-    """A singleton object indicating that a context manager for a with clause has directed the receiving variable to cause the statement to be skipped"""
+    """A singleton object indicating that a context manager for a with clause has not directed the controlled statement to be skipped"""
     __metaclass__ = Singleton.Singleton
+    name = "StatementNotSkipped"
 
 class StatementSkippedType:
-    """A singleton object indicating that a context manager for a with clause has directed the receiving variable to cause the statement to be skipped"""
+    """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detect attribute"""
     __metaclass__ = Singleton.Singleton
+    name = "StatementSkipped"
+    def __setattr__(self, attr, value):
+        """Setting an attribute of detect will raise a SkipStatement if the value is StatementSkipped, or warn if the value is not StatementNotSkipped. Other atttributes will raise AttrError"""
+        if attr != "detect":
+            raise AttributeError("%r object has no attribute %r", type(self), attr)
+        if isinstance(value, tuple) and len(value) == 2 and value[1] in (StatementSkipped, StatementNotSkipped):
+            value = value[1]
+        if value is StatementSkipped:
+            raise SkipStatement()
+        elif value is not StatementNotSkipped:
+            warnings.warn("%s.detect received an unexpected skip indicator" % self.name, SkipWarning, stacklevel=2)
 
 StatementSkipped = StatementSkippedType()
 StatementNotSkipped = StatementNotSkippedType()
@@ -33,20 +45,6 @@ del StatementNotSkippedType
 
 class SkipWarning(Warning):
     """Warning related to with context managers with conditional block skipping"""
-
-class StatementSkippedDetectorType(object):
-    """A singleton object used to detect whether a statement has been skipped or not"""
-    __metaclass__ = Singleton.Singleton
-
-    def __setattr__(self, attr, value):
-        if isinstance(value, tuple) and len(value) == 2 and value[1] in (StatementSkipped, StatementNotSkipped):
-            value = value[1]
-        if value is StatementSkipped:
-            raise SkipStatement()
-        elif value is not StatementNotSkipped:
-            warnings.warn("StatementSkippedDetector received an unexpected skip indicator", SkipWarning, stacklevel=2)
-
-StatementSkippedDetector = StatementSkippedDetectorType()
 
 class ConditionalContextManager(object):
     """Helper for @conditionalcontextmanager decorator."""
@@ -115,7 +113,7 @@ def conditionalcontextmanager(func):
 
     This makes this:
 
-        with some_generator(<arguments>) as (<variable>, StatementSkippedDetector.<any_attr_name>):
+        with some_generator(<arguments>) as (<variable>, StatementSkipped.detect):
             <body>
 
     equivalent to this:
