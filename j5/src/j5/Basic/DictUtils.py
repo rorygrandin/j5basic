@@ -6,6 +6,8 @@
 # Copyright 2002, 2003 St James Software
 
 from j5.Config import ConfigTree
+from j5.OS import datetime_tz
+import datetime
 
 _DUMMY_ARG_ = object()
 
@@ -17,7 +19,7 @@ def unique_items(list1):
             seen.add(item)
             yield item
 
-def assert_dicts_equal(dict1,dict2):
+def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
     """tests equality of two dicts"""
     k1, k2 = dict1.keys(), dict2.keys()
     k1.sort()
@@ -25,8 +27,11 @@ def assert_dicts_equal(dict1,dict2):
 
     assert k1 == k2
     for key in k1:
-        # this assert means we get the key if the assert fails
-        assert (dict1[key], key) == (dict2[key], key)
+        if datetimes_to_naive and isinstance(dict1[key], datetime.datetime) and isinstance(dict2[key], datetime.datetime):
+            assert (datetime_tz.localize(dict1[key]), key) == (datetime_tz.localize(dict2[key]), key)
+        else:
+            # this assert means we get the key if the assert fails
+            assert (dict1[key], key) == (dict2[key], key)
 
 def assert_dicts_not_equal(dict1,dict2):
     """tests two dicts are not equal"""
