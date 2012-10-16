@@ -32,6 +32,9 @@ class ServerMode(InterfaceRegistry.Component):
         pass
 
     def get_mode(self):
+        if not hasattr(self, 'server'):
+            # Assume we're not in a full j5 session - probably a test environment
+            return Admin.ServerModeEnum.SINGLE
         return self.server.mode
     mode = property(get_mode)
 
