@@ -26,14 +26,22 @@ class TestTimeCache(object):
         assert cleanups_called == [(False, 1, "test")]
 
     @classmethod
-    def setup_method(cls, method):
+    def setUp(cls):
         cls.orig_global_disabled = TimeCache.GLOBAL_CACHE_DISABLED
         cls.orig_local_disabled = TimeCache.LOCAL_CACHE_DISABLED
 
     @classmethod
-    def teardown_method(cls, method):
+    def tearDown(cls):
         TimeCache.GLOBAL_CACHE_DISABLED = cls.orig_global_disabled
         TimeCache.LOCAL_CACHE_DISABLED = cls.orig_local_disabled
+
+    @classmethod
+    def setup_method(cls, method):  # This is a wrapper of setUp for py.test (py.test and nose take different method setup methods)
+        cls.setUp()
+
+    @classmethod
+    def teardown_method(cls, method):  # This is a wrapper of tearDown for py.test (py.test and nose take different method setup methods)
+        cls.tearDown()
 
     def test_global_disable(self):
         d = TimeCache.timecache(10)
