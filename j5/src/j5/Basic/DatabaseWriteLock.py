@@ -46,6 +46,9 @@ def no_database_writes(f):
     f.requires_database_lock = False
     return f
 
+#This is an alias to make our code clearer:
+self_managed_database_lock = no_database_writes
+
 def requires_database_lock(f):
     """Decorator that annotates a function to indicate it performs database write operations and requires the database write lock"""
     f.requires_database_lock = True
