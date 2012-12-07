@@ -83,8 +83,8 @@ class TestTimedLock(object):
         bt2 = threading.Thread(target=schedule_acquire_release, name="bt2", args=(lock, 0.1, 0.1, 0.1), kwargs=dict(ea=bt2_ea, er=bt2_er))
         bt2.start()
         bt1.start()
-        bt1_er.wait(0.4)
-        bt2_er.wait(0.4)
+        bt1_er.wait(1)
+        bt2_er.wait(1)
         self.ensure_stopped(bt1)
         self.ensure_stopped(bt2)
         assert bt1_ea.isSet()
@@ -110,7 +110,7 @@ class TestTimedLock(object):
         assert bt2_er.isSet()
         # check that we didn't wait very long to catch the event
         print "delay time", bt2_ea.ts - bt1_er.ts
-        assert bt2_ea.ts - bt1_er.ts < 0.04
+        assert bt2_ea.ts - bt1_er.ts < 0.1
 
     @Utils.if_long_test_run()
     def test_wait_multi(self):
