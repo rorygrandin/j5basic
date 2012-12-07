@@ -19,8 +19,8 @@ from j5.Basic.WithContextSkip import StatementSkipped
 from j5.Basic import DatabaseWriteLock
 from j5.Basic.DatabaseWriteLock import DatabaseLockTooLong
 from j5.Logging import Errors
-from j5.Logging import MemoryHandler
 from j5.OS import ThreadRaise, ThreadDebug
+from j5.Test.LoggingTest import LoggingTest
 
 # TODO: Test multi-entrant locking explicitly
 
@@ -75,17 +75,6 @@ class ExceptionHandlingThread(threading.Thread):
             assert thread.exception is None, "'%r' in launched thread" % thread.exception
 
 
-class ContextLogging(object):
-    def __init__(self):
-        self.log = MemoryHandler.MemoryHandler(level=logging.DEBUG)
-
-    def __enter__(self):
-        logging.getLogger().addHandler(self.log)
-        return self.log
-
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        logging.getLogger().removeHandler(self.log)
-
 #I don't understand what this is testing ...
 class TestParallelWriteLockAccess(object):
     def do_something(self, name, total):
@@ -134,7 +123,7 @@ class TestWarningTimeout(object):
             DatabaseWriteLock.release_db_lock()
 
     def test_warning_timeout(self):
-        with ContextLogging() as log:
+        with LoggingTest() as log:
             class server:
                 mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
             DatabaseWriteLock.ServerMode().server = server
@@ -149,7 +138,7 @@ class TestWarningTimeout(object):
             assert ("Thread %s still waiting for database lock after 2s - this may timeout" % second_thread_str) in warning_logs
 
     def test_only_one_warning(self):
-        with ContextLogging() as log:
+        with LoggingTest() as log:
             class server:
                 mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
             DatabaseWriteLock.ServerMode().server = server
@@ -185,7 +174,7 @@ class TestMaxWaitTimeout(object):
 
     def test_max_wait_timeout(self):
         for i in range(10):
-            with ContextLogging() as log:
+            with LoggingTest() as log:
                 class server:
                     mode = DatabaseWriteLock.Admin.ServerModeEnum.SINGLE
                 DatabaseWriteLock.ServerMode().server = server
@@ -272,7 +261,7 @@ class TestJoiningQueueNothingBusy(object):
 
 class TestSlaveError(object):
     def test_slave_error(self):
-        with ContextLogging() as log:
+        with LoggingTest() as log:
             class server:
                 mode = DatabaseWriteLock.Admin.ServerModeEnum.SLAVE
             DatabaseWriteLock.ServerMode().server = server
