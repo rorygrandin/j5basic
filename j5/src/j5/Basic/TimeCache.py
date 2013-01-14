@@ -6,6 +6,8 @@
 # Copyright 2002, 2003 St James Software
 
 import datetime
+import time
+import threading
 
 # a global variable which makes all time caches behave as though they are empty, and remember no new data
 GLOBAL_CACHE_DISABLED = False
@@ -23,6 +25,9 @@ class timecache(dict):
     dict.__init__(self)
     self.expiryperiod = datetime.timedelta(seconds=expiryperiod)
     self.LOCAL_CACHE = local
+    self.last_purged = time.time()
+    self.purge_period = min(expiryperiod / 2.0,120)
+    self.purge_lock = threading.RLock()
 
   def _get_local_cache(self):
     return self._LOCAL_CACHE
@@ -47,7 +52,8 @@ class timecache(dict):
   def expire(self, key):
     """expires the key, removing the associated item. Calls self.cleanup_key(key, value) after removal"""
     timestamp, value = self.pop(key, (None, None))
-    self.cleanup_key(key, value)
+    if timestamp:
+        self.cleanup_key(key, value)
 
   def gettimestamp(self):
     """returns a new timestamp for the current time..."""
@@ -55,6 +61,11 @@ class timecache(dict):
 
   def purge(self):
     """removes all items that are older then self.expiryperiod"""
+    with self.purge_lock:
+        n = time.time()
+        if not self.last_purged + self.purge_period < n:
+            return
+        self.last_purged = n
     keystodelete = []
     for key, (timestamp, value) in dict.iteritems(self):
       if self.expired(timestamp):
@@ -106,6 +117,7 @@ class timecache(dict):
     """[] setting of items"""
     if self.is_disabled():
       return
+    self.purge()
     timestamp = self.gettimestamp()
     dict.__setitem__(self, key, (timestamp, value))
 
@@ -183,6 +195,7 @@ class timecache(dict):
     """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
     if self.is_disabled():
       return failobj
+    self.purge()
     newtimestamp = self.gettimestamp()
     oldtimestamp, value = dict.setdefault(self, key, (newtimestamp, failobj))
     if self.expired(oldtimestamp):
@@ -194,6 +207,7 @@ class timecache(dict):
     """D.update(E) -> None.  Update D from E: for k in E.keys(): D[k] = E[k]"""
     if self.is_disabled():
       return
+    self.purge()
     for key in updatedict.keys():
       self[key] = updatedict[key]
 

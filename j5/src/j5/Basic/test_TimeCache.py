@@ -97,3 +97,18 @@ class TestTimeCache(object):
         assert d[2] == "missing"
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
 
+    def test_purge_on_set (self):
+        d = TimeCache.timecache(1)
+        d[0] = datetime.datetime.now()
+        d[1] = datetime.datetime.now()
+        assert len(d) == 2
+        time.sleep(2)
+        assert len(d) == 2
+        d[2] = datetime.datetime.now()
+        assert len(d) == 1
+        time.sleep(1)
+        d[3] = datetime.datetime.now()
+        time.sleep(1)
+        d[4] = datetime.datetime.now()
+        assert len(d) == 1
+
