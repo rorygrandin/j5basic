@@ -1,12 +1,12 @@
 import copy
 from lxml.html import clean
-from lxml.html import tostring, fromstring, bytes
+from lxml.html import tostring, fromstring
 
 
 def _transform_result(typ, result):
     """Convert the result back into the input type.
     """
-    if issubclass(typ, bytes):
+    if issubclass(typ, str):
         return tostring(result, encoding = 'utf-8', method = 'xml')
     elif issubclass(typ, unicode):
         return tostring(result, encoding = unicode, method = 'xml')
