@@ -66,8 +66,11 @@ def getimportablemodule(modulename, loglevel=logging.WARN):
         return module
     except ImportError as error:
         if component_depth > 1:
-            logging.debug("Import Error attempting to import %s (but have parent module to return): %s" % (modulename, error))
-            return parentmodule
+            actualparentmodule = sys.modules[parentmodulename]
+            moduleattr = components[-1]
+            if hasattr(actualparentmodule, moduleattr):
+                logging.debug("Import Error attempting to import %s (but have parent module to return which has %s as attribute): %s" % (modulename, moduleattr, error))
+                return parentmodule
         logging.log(loglevel, "Error attempting to import %s: %s" % (modulename, error))
         raise
     except Exception as error:
