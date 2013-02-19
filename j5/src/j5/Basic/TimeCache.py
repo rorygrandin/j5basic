@@ -76,7 +76,7 @@ class timecache(dict):
           self.expire(key)
     except RuntimeError:
         # our size changed during iteration, but we don't mind - we'll just purge next time
-        logging.info("TimeCache purge failed (this is usually harmless)")
+        logging.info("TimeCache purge interrupted")
 
   def __contains__(self, key):
     """in operator"""
