@@ -8,6 +8,7 @@
 import datetime
 import time
 import threading
+import logging
 
 # a global variable which makes all time caches behave as though they are empty, and remember no new data
 GLOBAL_CACHE_DISABLED = False
@@ -66,12 +67,16 @@ class timecache(dict):
         if not self.last_purged + self.purge_period < n:
             return
         self.last_purged = n
-    keystodelete = []
-    for key, (timestamp, value) in dict.iteritems(self):
-      if self.expired(timestamp):
-        keystodelete.append(key)
-    for key in keystodelete:
-      self.expire(key)
+    try:
+        keystodelete = []
+        for key, (timestamp, value) in dict.iteritems(self):
+          if self.expired(timestamp):
+            keystodelete.append(key)
+        for key in keystodelete:
+          self.expire(key)
+    except RuntimeError:
+        # our size changed during iteration, but we don't mind - we'll just purge next time
+        logging.info("TimeCache purge failed (this is usually harmless)")
 
   def __contains__(self, key):
     """in operator"""
