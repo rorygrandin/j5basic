@@ -126,6 +126,7 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
 
         # record the time we got the lock
         database_lock_queue[0].start_time = nonvirtual_time()
+        logging.debug("Database lock acquired by Thread %s at %s", current_thread, database_lock_queue[0].start_time)
 
     # Outside the database_write_lock, as this can take a while
     if left_for_dead_thread:
@@ -166,6 +167,7 @@ def release_db_lock():
                 if busy_op.count <= 0:
                     database_lock_queue.popleft()
                     database_write_lock.notifyAll()
+                    logging.debug("Database lock released by Thread %s", current_thread)
                     return
     logging.error("Thread %s came out of the database write lock but wasn't the busy operation any more - it either had the lock stolen due to being stuck or the lock is being released twice by coding error", current_thread)
 
