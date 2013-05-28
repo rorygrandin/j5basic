@@ -19,17 +19,16 @@ class Cleaner(clean.Cleaner):
 
         # Drop all xml:lang and lang attributes, and handle the
         # stripping of any bad css styles
-        for attrib in divnode.xpath("//@*"):
-            parent = attrib.getparent()
-            for key, value in parent.attrib.iteritems():
-                if 'xml:lang' == key or 'lang' == key:
-                    parent.attrib.pop(key, None)
-                elif 'style' == key:
+        for node in divnode.xpath("//*"):
+            for key, value in node.attrib.iteritems():
+                if key.lower() in ('xml:lang', 'lang'):
+                    node.attrib.pop(key, None)
+                elif 'style' == key.lower():
                     try:
                         cssStyle = cssutils.parseStyle(value)
                     except Exception, e:
                         logging.info("Style %s failed to parse with error %s." % (value, e))
-                        parent.attrib.pop('style', None)
+                        node.attrib.pop(key, None)
                         continue
 
                     # Set the line separator so that the style gets serialized
@@ -39,14 +38,12 @@ class Cleaner(clean.Cleaner):
 
                     new_style = cssStyle.cssText
                     if not new_style.strip():
-                        parent.attrib.pop('style', None)
+                        node.attrib.pop(key, None)
                     else:
-                        parent.attrib['style'] = new_style
-            
-        # Drop all empty span tags
-        for span_tag in divnode.xpath("//span"):
-            if not span_tag.keys():
-                span_tag.drop_tag()
+                        node.attrib[key] = new_style
+            # Drop all empty span tags
+            if node.tag == 'span' and not node.keys():
+                node.drop_tag()
 
         #Now unwrap the divnode (i.e. just serialize the children of our extra div node)
         cleaned = saxutils.escape(divnode.text) if divnode.text else ''
