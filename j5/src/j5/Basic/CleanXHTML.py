@@ -17,26 +17,32 @@ class Cleaner(clean.Cleaner):
         # Strip all class attributes
         etree.strip_attributes(divnode, 'class')
 
-        for style in divnode.xpath("//@style"):
-            parent = style.getparent()
-            try:
-                cssStyle = cssutils.parseStyle(style)
-            except Exception, e:
-                logging.info("Style %s failed to parse with error %s." % (style, e))
-                parent.attrib.pop('style', None)
-                continue
+        # Drop all xml:lang and lang attributes, and handle the
+        # stripping of any bad css styles
+        for attrib in divnode.xpath("//@*"):
+            parent = attrib.getparent()
+            for key, value in parent.attrib.iteritems():
+                if 'xml:lang' == key or 'lang' == key:
+                    parent.attrib.pop(key, None)
+                elif 'style' == key:
+                    try:
+                        cssStyle = cssutils.parseStyle(value)
+                    except Exception, e:
+                        logging.info("Style %s failed to parse with error %s." % (value, e))
+                        parent.attrib.pop('style', None)
+                        continue
 
-            # Set the line separator so that the style gets serialized
-            cssutils.ser.prefs.lineSeparator = ''
-            # Only allow valid style properties
-            cssutils.ser.prefs.validOnly = True
+                    # Set the line separator so that the style gets serialized
+                    cssutils.ser.prefs.lineSeparator = ''
+                    # Only allow valid style properties
+                    cssutils.ser.prefs.validOnly = True
 
-            new_style = cssStyle.cssText
-            if not new_style.strip():
-                parent.attrib.pop('style', None)
-            else:
-                parent.attrib['style'] = new_style
-
+                    new_style = cssStyle.cssText
+                    if not new_style.strip():
+                        parent.attrib.pop('style', None)
+                    else:
+                        parent.attrib['style'] = new_style
+            
         # Drop all empty span tags
         for span_tag in divnode.xpath("//span"):
             if not span_tag.keys():
