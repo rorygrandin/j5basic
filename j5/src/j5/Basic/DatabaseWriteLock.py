@@ -117,10 +117,15 @@ def get_db_lock(max_wait_for_exclusive_lock=MAX_LOCK_WAIT_TIMEOUT, warning_timeo
                                 try:
                                     # Warn of impending timeout
                                     frame = ThreadDebug.find_thread_frame(ThreadRaise.get_thread_id(busy_op.thread))
-                                    last_trace_back = ThreadDebug.format_traceback(frame)
-                                    logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_thread, warning_timeout)
-                                    logging.info("\n".join(last_trace_back))
-                                    busy_op.warning_issued = True
+                                    from j5.Control.Admin import StatusMonitor
+                                    if StatusMonitor.PdbFrame().matches(busy_op.thread, frame):
+                                        logging.info("pdb thread blocking DatabaseWriteLock - dropping the lock for pdb")
+                                        database_lock_queue.popleft()
+                                    else:
+                                        last_trace_back = ThreadDebug.format_traceback(frame)
+                                        logging.warning("Thread %s still waiting for database lock after %ds - this may timeout", current_thread, warning_timeout)
+                                        logging.info("\n".join(last_trace_back))
+                                        busy_op.warning_issued = True
                                 except Exception as e:
                                     logging.error("Exception occurred while trying to warn Database Lock timeout on thread %s - %s",current_thread, e)
 
