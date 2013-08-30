@@ -24,6 +24,8 @@ def filtervalue_to_safe_str(value):
         value = value.encode("UTF-8")
     elif isinstance(value, str):
         value_type = "s!"
+    elif value is None:
+        return "n!"
     else:
         value = str(value)
     return value_type + base64.b32encode(value).replace("=",".")
@@ -36,6 +38,8 @@ def safe_str_to_filtervalue(value):
     elif value.startswith("u!"):
         value_type = unicode
         value = value[2:]
+    elif value.startswith('n!'):
+        return None
     try:
         value = base64.b32decode(value.replace(".","="))
     except TypeError as e:
