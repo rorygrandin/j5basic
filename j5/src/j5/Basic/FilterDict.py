@@ -50,7 +50,7 @@ def safe_str_to_filtervalue(value):
 
 def filterdict_to_str(fdict):
     """Convert a filter dictionary to a string which can be passed around URLs."""
-    # Note: b32encode produces only [A-Za-z0-9_=]
+    # Note: b32encode produces only [A-Z2-7] with padding of =
     if fdict is None:
         return ""
     if not fdict:
