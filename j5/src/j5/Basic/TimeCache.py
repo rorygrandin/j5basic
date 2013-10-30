@@ -145,6 +145,9 @@ class timecache(dict):
       return dict.get(self, key, (None, default))[1]
     return value
 
+  def set(self, key, value):
+      self[key] = value
+
   def items(self):
     """D.items() -> list of D's (key, value) pairs, as 2-tuples"""
     if self.is_disabled():
