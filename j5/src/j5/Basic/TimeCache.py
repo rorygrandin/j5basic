@@ -224,3 +224,6 @@ class timecache(dict):
     for key in updatedict.keys():
       self[key] = updatedict[key]
 
+  def size(self):
+    return len(self)
+
