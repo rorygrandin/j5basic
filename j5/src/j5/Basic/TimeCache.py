@@ -148,6 +148,11 @@ class timecache(dict):
   def set(self, key, value):
       self[key] = value
 
+  def clear(self):
+      """ D.clear() -> None.  Remove all items from D. """
+      with self.purge_lock:
+          dict.clear(self)
+
   def items(self):
     """D.items() -> list of D's (key, value) pairs, as 2-tuples"""
     if self.is_disabled():
