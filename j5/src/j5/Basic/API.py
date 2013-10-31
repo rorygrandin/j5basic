@@ -49,6 +49,10 @@ class APIMeta(type):
         for base in [base for base in bases if hasattr(base, '_implements')]:
             for interface in base._implements:
                 check_interfaces.append(interface)
+                if '_implements' not in d:
+                    d['_implements'] = []
+                if interface not in d['_implements']:
+                    d['_implements'].append(interface)
 
         for interface in check_interfaces:
             for method in dir(interface):
