@@ -37,11 +37,9 @@ class APIMeta(type):
     def __new__(cls, name, bases, d):
         """Create the class."""
 
-        new_class = type.__new__(cls, name, bases, d)
-
         if d.get('abstract'):
             # Don't put abstract component classes in the registry
-            return new_class
+            return type.__new__(cls, name, bases, d)
 
         check_interfaces = []
         for interface in d.get('_implements', []):
@@ -53,6 +51,8 @@ class APIMeta(type):
                     d['_implements'] = []
                 if interface not in d['_implements']:
                     d['_implements'].append(interface)
+
+        new_class = type.__new__(cls, name, bases, d)
 
         for interface in check_interfaces:
             for method in dir(interface):
