@@ -19,9 +19,10 @@ class Cleaner(clean.Cleaner):
 
         # Drop all xml:lang and lang attributes, and handle the
         # stripping of any bad css styles
+        # Also drop id and class attributes - these are not useful in RichTextEditor
         for node in divnode.xpath("//*"):
             for key, value in node.attrib.iteritems():
-                if key.lower() in ('xml:lang', 'lang'):
+                if key.lower() in ('xml:lang', 'lang','id','class'):
                     node.attrib.pop(key, None)
                 elif 'style' == key.lower():
                     try:
