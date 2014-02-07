@@ -15,6 +15,7 @@ import json
 
 class filterdict(DictUtils.setattrdict):
     """A dictionary that holds filter options, and makes them available as attributes"""
+    pass
 
 def filtervalue_to_safe_str(value):
     """converts a filter value to a string that's safe to pass through URLs"""
