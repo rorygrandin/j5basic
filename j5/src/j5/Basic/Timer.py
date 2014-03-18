@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime
+from j5.OS import datetime_tz
 import logging
 import time
 import threading
@@ -25,10 +25,10 @@ class Timer(object):
         self.kwargs = kwargs
         if self.kwargs is None:
             self.kwargs = {}
-        if isinstance(resolution, datetime.timedelta):
+        if isinstance(resolution, datetime_tz.timedelta):
             self.resolution = resolution
         else:
-            self.resolution = datetime.timedelta(seconds=resolution)
+            self.resolution = datetime_tz.timedelta(seconds=resolution)
 
     def get_stop(self):
         return self._running
@@ -40,9 +40,9 @@ class Timer(object):
     stop = property(get_stop, set_stop)
 
     def start(self):
-        nexttime = datetime.datetime.now()
+        nexttime = datetime_tz.datetime_tz.now()
         while self._running:
-            currenttime = datetime.datetime.now()
+            currenttime = datetime_tz.datetime_tz.now()
             if nexttime < currenttime:
                 first_missed_time = nexttime
                 missed_time_delta = currenttime - first_missed_time
@@ -56,7 +56,7 @@ class Timer(object):
                 waitseconds = to_seconds(waittime)
                 self.interrupt_event.wait(waitseconds)
                 self.interrupt_event.clear()
-                currenttime = datetime.datetime.now()
+                currenttime = datetime_tz.datetime_tz.now()
                 if VirtualTime.in_skip_time_change():
                     nexttime = currenttime.replace(microsecond=0)
             if self._running and nexttime <= currenttime:
