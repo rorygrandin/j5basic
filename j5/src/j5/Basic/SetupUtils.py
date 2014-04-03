@@ -5,6 +5,50 @@
 import os
 import fnmatch
 from distutils import log
+from distutils.util import convert_path
+
+DEFAULT_EXCLUDE_PACKAGE_DATA_FILES = [
+    '*.py',
+    '*.py3',
+    '*.pyc',
+    '*.pyo',
+    '*.pyw',
+    '*.pyx',
+    '*.pyd',
+    ]
+
+def find_packages_and_data(where='.', exclude_packages=(), exclude_package_data=()):
+    packages = []
+    package_data = {}
+    stack=[(convert_path(where), '', '', True)]
+    while stack:
+        where,parent,parent_where,parent_is_package = stack.pop(0)
+        for name in os.listdir(where):
+            fn = os.path.join(where,name)
+            looks_like_package = (
+                '.' not in name
+                and os.path.isdir(fn)
+                and os.path.isfile(os.path.join(fn, '__init__.py'))
+                and parent_is_package
+            )
+            if looks_like_package:
+                package_name = ((parent+'.') if parent else '')+name
+                packages.append(package_name)
+                stack.append((fn, package_name, fn, True))
+            elif os.path.isdir(fn):
+                stack.append((fn, parent, parent_where, False))
+            elif parent:
+                keep_it = True
+                for pat in list(exclude_package_data)+DEFAULT_EXCLUDE_PACKAGE_DATA_FILES:
+                    if fnmatch.fnmatch(fn, pat):
+                        keep_it = False
+                        break
+                if keep_it:
+                    package_data.setdefault(parent, []).append(fn[len(parent_where)+1:])
+
+    for pat in list(exclude_packages)+['ez_setup']:
+        packages = [item for item in packages if not fnmatch.fnmatchcase(item,pat)]
+    return packages, dict((k,v) for k, v in package_data.iteritems() if k in packages)
 
 class fileset(list):
     """this is a installation list of a set of files from a directory"""
