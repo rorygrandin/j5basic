@@ -2,6 +2,7 @@
 
 import os
 from j5.Basic import Module
+from j5.Test import Utils
 
 class TestModule:
     def test_find_module(self):
@@ -13,6 +14,7 @@ class TestModule:
         assert Module.find_module("j5") == os.path.dirname(os.path.dirname(target_file))
         assert Module.find_module("j5.Basic") == os.path.dirname(target_file)
         assert Module.find_module("j5.Basic.Module") == target_file
+        assert Utils.raises(ValueError, Module.find_module, "j5.Basic.NonExistent")
 
     def test_resolve(self):
         assert Module.resolvemodule("j5.Basic.Module") == Module

@@ -3,6 +3,7 @@
 import imp
 import logging
 import os
+import pkgutil
 import sys
 
 importedmodules = {}
@@ -11,12 +12,18 @@ def find_module(modulename):
     """finds the filename of the module with the given name (supports submodules)"""
     module_parts = modulename.split(".")
     search_path = None
-    for part in module_parts:
-        next_path = imp.find_module(part, search_path)[1]
-        if next_path is None:
+    for i, part in enumerate(module_parts):
+        search_module = ".".join(module_parts[:i+1])
+        try:
+            loader = pkgutil.find_loader(search_module)
+            if loader is None:
+                raise ImportError(search_module)
+            search_path = loader.get_filename(search_module)
+        except ImportError:
             raise ValueError("Could not find %s (reached %s at %s)" % (modulename, part, search_path))
-        search_path = [next_path]
-    return search_path[0]
+    if search_path.endswith(os.sep + "__init__.py"):
+        return search_path[:-len(os.sep + "__init__.py")]
+    return search_path
 
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
