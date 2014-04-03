@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import imp
 import logging
 import os
 import pkgutil
