@@ -5,6 +5,7 @@ import logging
 import time
 import threading
 from j5.Test import VirtualTime
+from j5.Logging import Errors
 
 def to_seconds(timedelta):
     """Converts timedelta to a float number of seconds"""
@@ -42,30 +43,34 @@ class Timer(object):
     def start(self):
         nexttime = datetime_tz.datetime_tz.now()
         while self._running:
-            currenttime = datetime_tz.datetime_tz.now()
-            if nexttime < currenttime:
-                first_missed_time = nexttime
-                missed_time_delta = currenttime - first_missed_time
-                missed_count = int(to_seconds(missed_time_delta)/to_seconds(self.resolution))
-                if missed_count > 0:
-                    nexttime += missed_count * self.resolution
-                    logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
-                nexttime += self.resolution
-            else:
-                waittime = nexttime - currenttime
-                waitseconds = to_seconds(waittime)
-                self.interrupt_event.wait(waitseconds)
-                self.interrupt_event.clear()
+            try:
                 currenttime = datetime_tz.datetime_tz.now()
-                if VirtualTime.in_skip_time_change():
-                    nexttime = currenttime.replace(microsecond=0)
-            if self._running and nexttime <= currenttime:
-                self.setup_run(nexttime)
-                self.virtual_time_callback_event.set()
-                self.execute_run(nexttime)
-                nexttime = nexttime + self.resolution
-            else:
-                self.virtual_time_callback_event.set()
+                if nexttime < currenttime:
+                    first_missed_time = nexttime
+                    missed_time_delta = currenttime - first_missed_time
+                    missed_count = int(to_seconds(missed_time_delta)/to_seconds(self.resolution))
+                    if missed_count > 0:
+                        nexttime += missed_count * self.resolution
+                        logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))
+                    nexttime += self.resolution
+                else:
+                    waittime = nexttime - currenttime
+                    waitseconds = to_seconds(waittime)
+                    self.interrupt_event.wait(waitseconds)
+                    self.interrupt_event.clear()
+                    currenttime = datetime_tz.datetime_tz.now()
+                    if VirtualTime.in_skip_time_change():
+                        nexttime = currenttime.replace(microsecond=0)
+                if self._running and nexttime <= currenttime:
+                    self.setup_run(nexttime)
+                    self.virtual_time_callback_event.set()
+                    self.execute_run(nexttime)
+                    nexttime = nexttime + self.resolution
+                else:
+                    self.virtual_time_callback_event.set()
+            except Exception as e:
+                logging.error("Error in Timer thread: %s", Errors.error_to_str(e))
+                logging.error(Errors.traceback_str())
 
     def setup_run(self, target_time):
         """Prepares for a run of the timer target"""
