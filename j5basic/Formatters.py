@@ -6,7 +6,7 @@
 import datetime
 import logging
 import time
-from j5.Basic import TimeUtils
+from j5basic import TimeUtils
 
 # Formatted Types
 

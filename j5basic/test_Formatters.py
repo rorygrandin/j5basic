@@ -1,6 +1,6 @@
 from j5.Test import IterativeTester
 from j5.Test import DictDim
-from j5.Basic import Formatters
+from j5basic import Formatters
 import datetime
 
 class FormatTestResource(object):

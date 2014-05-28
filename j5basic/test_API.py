@@ -4,7 +4,7 @@
    Also serves as a helper to understand how the API declarations etc work
 """
 
-from j5.Basic import API
+from j5basic import API
 from j5.Test import Utils
 
 class ArbAPI(API.API):

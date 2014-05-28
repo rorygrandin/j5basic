@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from j5.Basic import Module
+from j5basic import Module
 from j5.Test import Utils
 
 class TestModule:
@@ -12,12 +12,12 @@ class TestModule:
             if os.path.exists(source_file):
                 target_file = source_file
         assert Module.find_module("j5") == os.path.dirname(os.path.dirname(target_file))
-        assert Module.find_module("j5.Basic") == os.path.dirname(target_file)
-        assert Module.find_module("j5.Basic.Module") == target_file
-        assert Utils.raises(ValueError, Module.find_module, "j5.Basic.NonExistent")
+        assert Module.find_module("j5basic") == os.path.dirname(target_file)
+        assert Module.find_module("j5basic.Module") == target_file
+        assert Utils.raises(ValueError, Module.find_module, "j5basic.NonExistent")
 
     def test_resolve(self):
-        assert Module.resolvemodule("j5.Basic.Module") == Module
+        assert Module.resolvemodule("j5basic.Module") == Module
         from j5.Config import ConfigTree
         assert Module.resolvemodule("j5.Config.ConfigTree.Node") == ConfigTree.Node
 

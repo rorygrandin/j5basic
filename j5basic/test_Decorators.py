@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import Decorators
+from j5basic import Decorators
 import threading
 import time
 from j5.Test.Utils import method_raises, raises

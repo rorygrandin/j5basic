@@ -1,4 +1,4 @@
-from j5.Basic import TzInfo
+from j5basic import TzInfo
 from j5.OS import datetime_tz
 import datetime
 import threading

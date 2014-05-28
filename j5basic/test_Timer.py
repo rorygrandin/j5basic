@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import Timer
+from j5basic import Timer
 from j5.Test import Utils
 from j5.Test import VirtualTime
 from j5.Test import test_VirtualTime

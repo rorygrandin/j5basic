@@ -13,7 +13,7 @@ class ObjTracker(object):
 
        To use, add something like:
 
-         from j5.Basic import ObjTracker
+         from j5basic import ObjTracker
          ot = ObjTracker.ObjTracker()
 
        to the top of a module, and then call

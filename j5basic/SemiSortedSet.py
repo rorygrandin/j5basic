@@ -2,7 +2,7 @@
 
 import operator
 import threading
-from j5.Basic import Decorators
+from j5basic import Decorators
 
 _base_min = min
 _base_max = max

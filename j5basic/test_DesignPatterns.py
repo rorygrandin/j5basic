@@ -5,7 +5,7 @@
 
 # Copyright 2006 St James Software
 
-from j5.Basic import DesignPatterns
+from j5basic import DesignPatterns
 import threading
 
 class TestMultiton(object):

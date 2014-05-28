@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from j5.Basic import Colours
+from j5basic import Colours
 
 def test_generate_colours():
     colours = Colours.get_colours(10)

@@ -3,7 +3,7 @@
 import sys
 import tempfile
 import unittest
-from j5.Basic.WithContextSkip import *  # Tests __all__
+from j5basic.WithContextSkip import *  # Tests __all__
 from test import test_support
 try:
     import threading

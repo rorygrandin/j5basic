@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import TimedLock
+from j5basic import TimedLock
 from j5.OS import ThreadControl
 from j5.Test import Utils
 import threading

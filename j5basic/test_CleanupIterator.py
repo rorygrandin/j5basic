@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import CleanupIterator
+from j5basic import CleanupIterator
 from j5.Test.Utils import raises
 
 class TestCleanupIterator:

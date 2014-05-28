@@ -5,7 +5,7 @@ import logging
 import time
 import threading
 import virtualtime
-from j5.Basic import Errors
+from j5basic import Errors
 
 def to_seconds(timedelta):
     """Converts timedelta to a float number of seconds"""

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Tests the j5.Basic.Singleton implementation"""
+"""Tests the j5basic.Singleton implementation"""
 
 from . import Singleton
 import gc

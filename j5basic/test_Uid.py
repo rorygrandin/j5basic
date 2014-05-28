@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import Uid
+from j5basic import Uid
 import re
 import time
 

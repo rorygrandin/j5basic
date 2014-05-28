@@ -2,8 +2,8 @@
 
 """Test module for Ranges"""
 
-from j5.Basic import Ranges
-from j5.Basic import DictUtils
+from j5basic import Ranges
+from j5basic import DictUtils
 
 def run_ranges_tst(ranges, expected_tagmap, expected_axislist):
     if isinstance(ranges, list):

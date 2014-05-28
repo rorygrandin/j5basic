@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from j5.Basic.InfiniteClasses import *
+from j5basic.InfiniteClasses import *
 
 class A(object):
     def __init__(self, v):

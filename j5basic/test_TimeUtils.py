@@ -1,4 +1,4 @@
-from j5.Basic import TimeUtils
+from j5basic import TimeUtils
 from j5.Test import Utils
 import datetime
 import time

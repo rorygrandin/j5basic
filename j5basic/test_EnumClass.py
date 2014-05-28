@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5.Basic import EnumClass
+from j5basic import EnumClass
 from j5.Test import Utils
 
 class MyEnum(EnumClass.enum):

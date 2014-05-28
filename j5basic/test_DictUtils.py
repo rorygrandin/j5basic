@@ -1,5 +1,5 @@
 
-from j5.Basic import DictUtils
+from j5basic import DictUtils
 from j5.Test.Utils import raises
 
 class TestUniqueItems(object):

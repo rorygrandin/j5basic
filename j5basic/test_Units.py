@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
-from j5.Basic import Units
+from j5basic import Units
 from j5.Test import Utils
 import operator
 
