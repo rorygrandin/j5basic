@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='j5.Basic',
+    name='j5basic',
     version='1.0',
-    packages=['j5', 'j5.Basic'],
+    packages=['j5basic'],
     license='Apache Software License',
     description='A collection of utility methods and classes.',
     long_description=open('README.md').read(),
