@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from j5.OS import datetime_tz
+from virtualtime import datetime_tz
 import logging
 import time
 import threading
-from j5.Test import VirtualTime
+import virtualtime
 from j5.Basic import Errors
 
 def to_seconds(timedelta):
@@ -16,8 +16,8 @@ class Timer(object):
     def __init__(self, target, args=None, kwargs=None, resolution=1):
         self.interrupt_event = threading.Event()
         self.virtual_time_callback_event = threading.Event()
-        VirtualTime.notify_on_change(self.interrupt_event)
-        VirtualTime.wait_for_callback_on_change(self.virtual_time_callback_event)
+        virtualtime.notify_on_change(self.interrupt_event)
+        virtualtime.wait_for_callback_on_change(self.virtual_time_callback_event)
         self._running = True
         self.target = target
         self.args = args
@@ -59,7 +59,7 @@ class Timer(object):
                     self.interrupt_event.wait(waitseconds)
                     self.interrupt_event.clear()
                     currenttime = datetime_tz.datetime_tz.now()
-                    if VirtualTime.in_skip_time_change():
+                    if virtualtime.in_skip_time_change():
                         nexttime = currenttime.replace(microsecond=0)
                 if self._running and nexttime <= currenttime:
                     self.setup_run(nexttime)

@@ -24,7 +24,7 @@ setup(
     extras_require = {
         'CleanXHTML':  ["cssutils", "lxml"],
         'Colours':  ["numpy"],
-        'Timer': ['j5.datetime_tz'],
+        'Timer': ['virtualtime'],
         'tests': ['j5.Test'],
     }
 )

@@ -6,7 +6,11 @@
 # Copyright 2002, 2003 St James Software
 
 from j5.Config import ConfigTree
-from j5.OS import datetime_tz
+try:
+    from virtualtime import datetime_tz
+except ImportError as e:
+    datetime_tz = None
+
 import datetime
 
 _DUMMY_ARG_ = object()
@@ -28,6 +32,7 @@ def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
     assert k1 == k2
     for key in k1:
         if datetimes_to_naive and isinstance(dict1[key], datetime.datetime) and isinstance(dict2[key], datetime.datetime):
+            assert datetime_tz
             assert (datetime_tz.localize(dict1[key]), key) == (datetime_tz.localize(dict2[key]), key)
         else:
             # this assert means we get the key if the assert fails
