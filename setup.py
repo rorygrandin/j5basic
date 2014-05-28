@@ -25,5 +25,6 @@ setup(
         'CleanXHTML':  ["cssutils", "lxml"],
         'Colours':  ["numpy"],
         'Timer': ['j5.datetime_tz'],
+        'tests': ['j5.Test'],
     }
 )
