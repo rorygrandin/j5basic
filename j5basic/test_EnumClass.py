@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from j5basic import EnumClass
-from j5.Test import Utils
+from j5test import Utils
 
 class MyEnum(EnumClass.enum):
     APPLES = 1

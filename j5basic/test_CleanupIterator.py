@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from j5basic import CleanupIterator
-from j5.Test.Utils import raises
+from j5test.Utils import raises
 
 class TestCleanupIterator:
     def test_simple_call(self):

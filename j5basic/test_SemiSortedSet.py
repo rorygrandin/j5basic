@@ -3,7 +3,7 @@
 """Tests the SemiSortedSet code"""
 
 from j5basic import SemiSortedSet
-from j5.Test import Utils
+from j5test import Utils
 import copy
 import datetime
 import random

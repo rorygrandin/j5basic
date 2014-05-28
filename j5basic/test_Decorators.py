@@ -3,7 +3,7 @@
 from j5basic import Decorators
 import threading
 import time
-from j5.Test.Utils import method_raises, raises
+from j5test.Utils import method_raises, raises
 
 class TestDecoratorDecorator(object):
 

@@ -21,7 +21,7 @@ def localminutenow():
     """Provides the current local time with seconds and microseconds set to 0."""
     return datetime_tz.datetime_tz.now().replace(second=0,microsecond=0)
 
-# NB: There is a copy of totalseconds_float in j5.Test.VirtualTime, to prevent circular imports - changes should be applied to both
+# NB: There is a copy of totalseconds_float in j5test.VirtualTime, to prevent circular imports - changes should be applied to both
 def totalseconds_float(timedelta):
     """Return the total number of seconds represented by a datetime.timedelta object, including fractions of seconds"""
     return timedelta.seconds + (timedelta.days * 24 * 60 * 60) + timedelta.microseconds/1000000.0

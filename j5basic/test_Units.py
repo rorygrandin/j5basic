@@ -2,7 +2,7 @@
 
 from __future__ import division
 from j5basic import Units
-from j5.Test import Utils
+from j5test import Utils
 import operator
 
 # TODO: Design decisions:

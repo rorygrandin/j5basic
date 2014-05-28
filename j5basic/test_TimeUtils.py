@@ -1,5 +1,5 @@
 from j5basic import TimeUtils
-from j5.Test import Utils
+from j5test import Utils
 import datetime
 import time
 import thread

@@ -1,5 +1,5 @@
 from j5basic import TimeCache
-from j5.Test.Utils import raises
+from j5test.Utils import raises
 import datetime
 import time
 

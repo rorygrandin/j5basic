@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from j5basic import Timer
-from j5.Test import Utils
-from j5.Test import VirtualTime
-from j5.Test import test_VirtualTime
+from j5test import Utils
+import virtualtime
+from virtualtime import test_virtualtime
 import threading
 import time
 
@@ -91,7 +91,7 @@ class TestTimer(object):
         timer = Timer.Timer(tm.sleepfunc, args=(iter([0,2,3,0,6]),))
         thread = threading.Thread(target=timer.start)
         thread.start()
-        start_time = VirtualTime._original_time()
+        start_time = virtualtime._original_time()
         # make sure our sleep happens within the last 6-second pause
         self.sleep(12)
         print time.time(), tm.lasttime
@@ -122,14 +122,14 @@ class TestTimer(object):
         assert tm.lasttime is None
         self.finish_wait(thread, tm.errors)
 
-class TestVirtualTimer(TestTimer, test_VirtualTime.RunPatched):
+class TestVirtualTimer(TestTimer, test_virtualtime.RunPatched):
     """Tests that Timers react appropriately to virtual time setting"""
     def sleep(self, seconds):
-        VirtualTime.fast_forward_time(seconds)
+        virtualtime.fast_forward_time(seconds)
 
     def finish_wait(self, thread, error_list, expected_sleep=0):
         """Waits for the thread to finish, checks for any errors in the given list. expected_sleep says how long we should have to wait for this..."""
         if expected_sleep:
-            VirtualTime.fast_forward_time(expected_sleep)
+            virtualtime.fast_forward_time(expected_sleep)
         super(TestVirtualTimer, self).finish_wait(thread, error_list, expected_sleep)
 

@@ -1,6 +1,6 @@
 
 from j5basic import DictUtils
-from j5.Test.Utils import raises
+from j5test.Utils import raises
 
 class TestUniqueItems(object):
     def test_unique_items(self):

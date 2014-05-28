@@ -2,7 +2,7 @@
 
 import os
 from j5basic import Module
-from j5.Test import Utils
+from j5test import Utils
 
 class TestModule:
     def test_find_module(self):

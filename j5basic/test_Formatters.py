@@ -1,5 +1,5 @@
-from j5.Test import IterativeTester
-from j5.Test import DictDim
+from j5test import IterativeTester
+from j5test import DictDim
 from j5basic import Formatters
 import datetime
 

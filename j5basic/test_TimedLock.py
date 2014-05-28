@@ -2,7 +2,7 @@
 
 from j5basic import TimedLock
 from j5.OS import ThreadControl
-from j5.Test import Utils
+from j5test import Utils
 import threading
 import time
 

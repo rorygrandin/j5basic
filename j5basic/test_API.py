@@ -5,7 +5,7 @@
 """
 
 from j5basic import API
-from j5.Test import Utils
+from j5test import Utils
 
 class ArbAPI(API.API):
     def i_support_api(self):
