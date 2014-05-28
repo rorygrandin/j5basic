@@ -11,7 +11,6 @@ class TestModule:
             source_file = target_file[:target_file.rfind(".")] + ".py"
             if os.path.exists(source_file):
                 target_file = source_file
-        assert Module.find_module("j5") == os.path.dirname(os.path.dirname(target_file))
         assert Module.find_module("j5basic") == os.path.dirname(target_file)
         assert Module.find_module("j5basic.Module") == target_file
         assert Utils.raises(ValueError, Module.find_module, "j5basic.NonExistent")

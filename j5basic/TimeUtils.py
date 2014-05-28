@@ -1,5 +1,5 @@
 from j5basic import TzInfo
-from j5.OS import datetime_tz
+from virtualtime import datetime_tz
 import datetime
 import threading
 import time
