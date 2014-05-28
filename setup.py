@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='j5.Basic',
@@ -20,4 +20,9 @@ setup(
         'Programming Language :: Python :: 2 :: Only',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
+    install_requires = ["pytz"],
+    extras_require = {
+        'CleanXHTML':  ["cssutils", "lxml"],
+        'Colours':  ["numpy"],
+    }
 )
