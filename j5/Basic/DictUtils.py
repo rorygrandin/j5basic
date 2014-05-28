@@ -5,7 +5,6 @@
 
 # Copyright 2002, 2003 St James Software
 
-from j5.Config import ConfigTree
 try:
     from virtualtime import datetime_tz
 except ImportError as e:
@@ -304,10 +303,22 @@ class setattrdict(attrdict):
         """Sets the attribute by setting the value in the dictionary"""
         self[attr] = value
 
+_non_attribifyable_classes = set()
+def do_not_attribify(clazz):
+    global _non_attribifyable_classes
+    _non_attribifyable_classes.add(clazz)
+
+def _can_attribify(o):
+    global _non_attribifyable_classes
+    for c in _non_attribifyable_classes:
+        if isinstance(o, c):
+            return False
+    return True
+
 def attribify(context, modifiable=False):
     """takes a set of nested dictionaries and converts them into attrdicts. Also searches through lists"""
     # We shouldn't convert Config nodes
-    if isinstance(context, dict) and not isinstance(context, attrdict) and not isinstance(context, ConfigTree.Node):
+    if isinstance(context, dict) and not isinstance(context, attrdict) and _can_attribify(context):
         newcontext = (attrdict if not modifiable else setattrdict)(context)
         for key, value in newcontext.items():
             if isinstance(value, (dict, list)):
