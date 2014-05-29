@@ -5,8 +5,6 @@
 
 # Copyright 2006 St James Software
 
-__all__ = ["decorator","SelfLocking"]
-
 import inspect, new, itertools
 import logging
 import time
