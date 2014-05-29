@@ -13,8 +13,6 @@
 
 # Copyright 2006 St James Software
 
-__all__ = ["str_uid"]
-
 import time
 import random
 import sys
