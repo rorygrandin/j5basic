@@ -4,7 +4,7 @@ setup(
     name='j5basic',
     version='1.0',
     packages=['j5basic'],
-    license='Apache Software License',
+    license='Apache License, Version 2.0',
     description='A collection of utility methods and classes.',
     long_description=open('README.md').read(),
     url='http://www.j5int.com/',
