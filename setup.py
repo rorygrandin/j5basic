@@ -7,8 +7,8 @@ setup(
     license='Apache License, Version 2.0',
     description='A collection of utility methods and classes.',
     long_description=open('README.md').read(),
-    url='http://www.j5int.com/',
-    author='j5 Software',
+    url='http://www.sjsoft.com/',
+    author='St James Software',
     author_email='support@sjsoft.com',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
