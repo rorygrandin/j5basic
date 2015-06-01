@@ -140,26 +140,9 @@ def strftime(d, format_str):
         return "".join(rs1)
     return d.strftime(format_str)
 
-strptimelock = threading.Lock()
 def safestrptime(*args, **kwargs):
-    # The problem with this function as it is currently implemented is
-    # there is no way to tell if _we_ are the thread who are holding the import lock
-    # New implementation: Block on getting the import lock.
-    imp.acquire_lock()
-    try:
-        return time.strptime(*args, **kwargs)
-    finally:
-        imp.release_lock()
-    #try:
-    #    #if import lock is held wait a random number of milliseconds
-    #    strptimelock.acquire()
-    #    total_time=0
-    #    while imp.lock_held():
-    #        if total_time>0.5:
-    #            raise ImportError('safestrptime has been waiting 0.5s to aqcuire a lock')
-    #        wait = random.random()*0.1
-    #        time.sleep(wait)
-    #        total_time += wait
-    #    return time.strptime(*args, **kwargs)
-    #finally:
-    #    strptimelock.release()
+    #DEPRECATED: This method is deprecated, just use time.strptime instead.
+
+    #the previous version of this function caused deadlocks on _strptime occasionally, another fix for the issue it
+    #was solving has been implemented
+    return time.strptime(*args, **kwargs)
