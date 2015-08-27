@@ -111,34 +111,45 @@ def _findall(text, substr):
          i=j+1
      return sites
 
-def strftime(d, format_str):
-    """Adjusted version of datetime's strftime that handles dates before 1900"""
-    if hasattr(d, "year") and d.year < 1900:
-        # Python datetime doesn't support formatting dates before 1900.
-        # Since the Gregorian calendar has a cycle of 400 years, flip the date into the future
-        # and adjust the year directly in the format string
-        year = d.year
-        while year < 1900: year += 400
-        d1 = d.replace(year=year)
-        d2 = d.replace(year=year+400)
-        ys1 = "%04d" % year
-        ys2 = "%04d" % (year + 400)
-        y = "%d" % d.year
-        replacers = {(ys1, ys2): "%d" % d.year}
-        s1 = d1.strftime(format_str)
-        s2 = d2.strftime(format_str)
-        p1 = _findall(s1, ys1)
-        p2 = _findall(s2, ys2)
-        sites = [site for site in p1 if site in p2]
-        rs1 = list(s1)
-        rs2 = list(s2)
-        for site in sites:
-            rs1[site:site+len(ys1)] = list(y)
-            rs2[site:site+len(ys2)] = list(y)
-        if rs1 != rs2:
-            raise ValueError("Error trying to calculate strftime(%r, %s): unexpected underlying values" % (d, format_str))
-        return "".join(rs1)
-    return d.strftime(format_str)
+_NEEDS_STRFTIME_PATCH = True
+try:
+    datetime.datetime(1,1,1).strftime("%Y-%m-%d")
+    _NEEDS_STRFTIME_PATCH = False
+except ValueError:
+    pass
+
+if _NEEDS_STRFTIME_PATCH:
+    def strftime(d, format_str):
+        """Adjusted version of datetime's strftime that handles dates before 1900"""
+        if hasattr(d, "year") and d.year < 1900:
+            # Python datetime doesn't support formatting dates before 1900.
+            # Since the Gregorian calendar has a cycle of 400 years, flip the date into the future
+            # and adjust the year directly in the format string
+            year = d.year
+            while year < 1900: year += 400
+            d1 = d.replace(year=year)
+            d2 = d.replace(year=year+400)
+            ys1 = "%04d" % year
+            ys2 = "%04d" % (year + 400)
+            y = "%d" % d.year
+            replacers = {(ys1, ys2): "%d" % d.year}
+            s1 = d1.strftime(format_str)
+            s2 = d2.strftime(format_str)
+            p1 = _findall(s1, ys1)
+            p2 = _findall(s2, ys2)
+            sites = [site for site in p1 if site in p2]
+            rs1 = list(s1)
+            rs2 = list(s2)
+            for site in sites:
+                rs1[site:site+len(ys1)] = list(y)
+                rs2[site:site+len(ys2)] = list(y)
+            if rs1 != rs2:
+                raise ValueError("Error trying to calculate strftime(%r, %s): unexpected underlying values" % (d, format_str))
+            return "".join(rs1)
+        return d.strftime(format_str)
+else:
+    def strftime(d, format_str):
+        return d.strftime(format_str)
 
 def safestrptime(*args, **kwargs):
     #DEPRECATED: This method is deprecated, just use time.strptime instead.
