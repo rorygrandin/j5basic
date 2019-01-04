@@ -22,7 +22,7 @@ class SemiSortedSet(set):
     @Decorators.SelfLocking.runwithlock
     def copy(self):
         """makes a copy of this SemiSortedSet (with a new lock)"""
-        new_self = set.copy(self)
+        new_self = SemiSortedSet(set.copy(self))
         new_self.lock = threading.RLock()
         if hasattr(self, "__min__"):
             new_self.__min__ = self.__min__
