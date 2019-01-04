@@ -290,6 +290,9 @@ class Unit(object):
         else:
             raise NotImplementedError("Can only generate Scalars for %r with numbers - got %r of type %r" % (self, value, type(value)))
 
+    def __hash__(self):
+        return id(self)
+
 class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
     def __init__(self, name):
@@ -378,7 +381,19 @@ class Scalar(object):
         if units_ratio.base_units:
             return False
         adjusted_value = units_ratio.op(self.value)
-        return cmp(adjusted_value, other.value)
+        return (adjusted_value > other.value) - (adjusted_value < other.value)
+
+    def __lt__(self, other):
+        return self.__cmp__(other) == -1
+
+    def __le__(self, other):
+        return self.__cmp__(other) < 1
+
+    def __ge__(self, other):
+        return self.__cmp__(other) > -1
+
+    def __gt__(self, other):
+        return self.__cmp__(other) == 1
 
     __add__ = scalar_operation(operator.add, Identity)
     __radd__ = scalar_operation(operator.add, Identity, reversed=True)
