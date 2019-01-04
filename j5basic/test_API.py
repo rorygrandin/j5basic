@@ -6,6 +6,7 @@
 
 from j5basic import API
 from j5test import Utils
+from future.utils import with_metaclass
 
 class ArbAPI(API.API):
     def i_support_api(self):
@@ -53,7 +54,7 @@ class TestAPI(object):
 
     def declare_basic_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueAndSimple(object, metaclass=API.APIMeta):
+        class TrueAndSimple(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI3)
             def i_never_give_up(self):
                 while True:
@@ -62,19 +63,19 @@ class TestAPI(object):
 
     def declare_inherited_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueChild(object, metaclass=API.APIMeta):
+        class TrueChild(with_metaclass(API.APIMeta, object)):
             pass
         return TrueChild
 
     def declare_false_support(self):
         """Try and declare a class as implementing an API that it doesn't"""
-        class LiarAndFraud(object, metaclass=API.APIMeta):
+        class LiarAndFraud(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI)
         return LiarAndFraud
 
     def declare_ill_support(self):
         """Try and declare a class as implementing an API but the method signatures are wrong"""
-        class SlightlyDeceptive(object, metaclass=API.APIMeta):
+        class SlightlyDeceptive(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI)
             def i_support_api(self, x):
                 return True
@@ -84,7 +85,7 @@ class TestAPI(object):
         """Check that declarations of support fail even if the API is declared implemented in parent classes"""
         class Parent(object):
             API.implements(ArbAPI2)
-        class FalseChild(Parent, metaclass=API.APIMeta):
+        class FalseChild(with_metaclass(API.APIMeta, Parent)):
             pass
         return FalseChild
 

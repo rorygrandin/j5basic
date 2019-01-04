@@ -13,15 +13,16 @@ from functools import wraps
 import sys
 import warnings
 from . import Singleton
+from future.utils import with_metaclass
 
 class SkipStatement(Exception):
     """Exception which when raised by a conditional context manager function will cause the controlled statement to be skipped"""
 
-class StatementNotSkippedType(metaclass=Singleton.Singleton):
+class StatementNotSkippedType(with_metaclass(Singleton.Singleton)):
     """A singleton object indicating that a context manager for a with clause has not directed the controlled statement to be skipped"""
     name = "StatementNotSkipped"
 
-class StatementSkippedType(metaclass=Singleton.Singleton):
+class StatementSkippedType(with_metaclass(Singleton.Singleton)):
     """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detector attribute"""
     name = "StatementSkipped"
     def __setattr__(self, attr, value):

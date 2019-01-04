@@ -6,6 +6,7 @@
 # Copyright 2006 St James Software
 
 import threading
+from future.utils import with_metaclass
 
 class MultitonMetaclass(type):
     """Metaclass for Multiton. Needs to add a per-subclass lock object and
@@ -17,7 +18,7 @@ class MultitonMetaclass(type):
         setattr(cls,"_multiton_lock",threading.Lock())
         setattr(cls,"_multiton_cache",{})
 
-class Multiton(object, metaclass=MultitonMetaclass):
+class Multiton(with_metaclass(MultitonMetaclass, object)):
     """Thread-safe multiton baseclass. Sub-classes return only one object per set of
        initialisation parameters. These parameters must all be hashable.
 
