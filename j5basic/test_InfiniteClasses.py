@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from j5basic.InfiniteClasses import *
+import sys
 
-def cmp(a, b):
-    return (a > b) - (a < b)
+if sys.version_info.major > 2:
+    # Python 3 doesn't have this
+    def cmp(a, b):
+        return (a > b) - (a < b)
 
 class A(object):
     def __init__(self, v):
@@ -130,18 +133,24 @@ class TestInfinite:
         self._comp(year, datetime.MAXYEAR)
 
     def test_object(self):
+        if sys.version_info.major > 2:
+            # Python 3 doesn't support this use due to different rules for __new__
+            return
         #Infinite Class implements rich comparisons. Should override parent class comparisons regardless of which side of the
         #comparison operator it is placed.
         class InfiniteA(InfiniteObject, A):
             def __new__(cls, positive=True):
-                return super(InfiniteA,cls).__new__(cls,1)
+                return super(InfiniteA,cls).__new__(cls, 1)
         self._do_compare_infinities(InfiniteA)
         self._do_comparisons(InfiniteA, A(35))
 
     def test_nonobject(self):
+        if sys.version_info.major > 2:
+            # Python 3 doesn't support this use due to different rules for __new__
+            return
         #Case: Class does not implement rich comparisons
         class InfiniteB(InfiniteObject, B):
             def __new__(cls, positive=True):
-                return super(InfiniteB,cls).__new__(cls,1)
+                return super(InfiniteB,cls).__new__(cls, 1)
         self._do_compare_infinities(InfiniteB)
         self._do_comparisons(InfiniteB, B(35))
