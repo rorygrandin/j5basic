@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 from j5basic import TimedLock
-from j5.OS import ThreadControl
+try:
+    from j5.OS import ThreadControl
+except ImportError:
+    ThreadControl = None
 from j5test import Utils
 import threading
 import time
@@ -55,7 +58,8 @@ class TestTimedLock(object):
         for thread in threads:
             if thread.isAlive():
                 threads_stopped.append(str(thread))
-                ThreadControl.stop_thread(thread)
+                if ThreadControl:
+                    ThreadControl.stop_thread(thread)
         if threads_stopped:
             raise ValueError("Threads %s did not release lock in expected time", ", ".join(threads_stopped))
 
