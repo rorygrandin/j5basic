@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division
 
 from j5basic import Units
 from j5test import Utils
