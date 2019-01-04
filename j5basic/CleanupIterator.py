@@ -31,3 +31,6 @@ class CleanupIterator(object):
             self.cleanup_call(*self.cleanup_args, **self.cleanup_kwargs)
             raise
 
+    def next(self):
+        return self.__next__()
+
