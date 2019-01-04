@@ -69,7 +69,7 @@ class timecache(dict):
         self.last_purged = n
     try:
         keystodelete = []
-        for key, (timestamp, value) in dict.iteritems(self):
+        for key, (timestamp, value) in dict.items(self):
           if self.expired(timestamp):
             keystodelete.append(key)
         for key in keystodelete:

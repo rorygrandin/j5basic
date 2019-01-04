@@ -5,6 +5,7 @@
 from . import Singleton
 import gc
 import types
+import sys
 
 def test_basic():
     """Tests most basic singleton definition, that it works and constructing always produces the same result"""
@@ -21,7 +22,9 @@ def test_non_oldstyle():
     class Highlander(metaclass=Singleton.Singleton):
         pass
     assert isinstance(Highlander, object)
-    assert not isinstance(Highlander, type)
+    # Old style has disappeared in Python 3, so this doesn't make sense
+    if sys.version_info.major < 3:
+        assert not isinstance(Highlander, type)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()

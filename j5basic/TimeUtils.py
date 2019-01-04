@@ -51,8 +51,8 @@ def timedelta_to_tuple(timedelta):
     """Expresses a timedelta object as a tuple containing days, hours, minutes and seconds (rounded)"""
     d = timedelta.days
     s_total = timedelta.seconds
-    h = s_total / 3600
-    m = (s_total / 60) % 60
+    h = s_total // 3600
+    m = (s_total // 60) % 60
     s = s_total % 60
     return (d, h, m, s)
 
