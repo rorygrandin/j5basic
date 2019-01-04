@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division
 
 import operator
 import decimal
+import sys
 
-numbers = (int, int, float, decimal.Decimal)
+if sys.version_info.major < 3:
+    numbers = (int, long, float, decimal.Decimal)
+else:
+    numbers = (int, float, decimal.Decimal)
 
 def Identity(x):
     """Returns the object given to it"""
@@ -434,7 +439,8 @@ class Scalar(object):
     # These conversions are of debatable value, but are included at the moment
     __complex__ = scalar_conversion(complex)
     __int__ = scalar_conversion(int)
-    __long__ = scalar_conversion(int)
+    if sys.version_info.major < 3:
+        __long__ = scalar_conversion(long)
     __float__ = scalar_conversion(float)
 
     # __oct__ not defined
