@@ -23,9 +23,6 @@ def test_non_oldstyle():
     class Highlander(with_metaclass(Singleton.Singleton)):
         pass
     assert isinstance(Highlander, object)
-    # Old style has disappeared in Python 3, so this doesn't make sense
-    if sys.version_info.major < 3:
-        assert not isinstance(Highlander, type)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()
