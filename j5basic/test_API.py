@@ -6,7 +6,7 @@
 
 from j5basic import API
 from j5test import Utils
-from future.utils import with_metaclass
+from six import with_metaclass
 
 class ArbAPI(API.API):
     def i_support_api(self):

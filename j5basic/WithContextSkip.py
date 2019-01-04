@@ -13,7 +13,7 @@ from functools import wraps
 import sys
 import warnings
 from . import Singleton
-from future.utils import with_metaclass
+from six import with_metaclass
 
 class SkipStatement(Exception):
     """Exception which when raised by a conditional context manager function will cause the controlled statement to be skipped"""

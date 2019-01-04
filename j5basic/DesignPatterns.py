@@ -6,7 +6,7 @@
 # Copyright 2006 St James Software
 
 import threading
-from future.utils import with_metaclass
+from six import with_metaclass
 
 class MultitonMetaclass(type):
     """Metaclass for Multiton. Needs to add a per-subclass lock object and

@@ -6,7 +6,7 @@ from . import Singleton
 import gc
 import types
 import sys
-from future.utils import with_metaclass
+from six import with_metaclass
 
 def test_basic():
     """Tests most basic singleton definition, that it works and constructing always produces the same result"""

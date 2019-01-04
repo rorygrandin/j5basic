@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from future.utils import with_metaclass
+from six import with_metaclass
 
 class enum_meta(type):
     def __iter__(cls):
