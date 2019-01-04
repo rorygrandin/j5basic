@@ -24,7 +24,7 @@ def unique_items(list1):
 
 def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
     """tests equality of two dicts"""
-    k1, k2 = dict1.keys(), dict2.keys()
+    k1, k2 = list(dict1.keys()), list(dict2.keys())
     k1.sort()
     k2.sort()
 
@@ -39,7 +39,7 @@ def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
 
 def assert_dicts_not_equal(dict1,dict2):
     """tests two dicts are not equal"""
-    k1, k2 = dict1.keys(), dict2.keys()
+    k1, k2 = list(dict1.keys()), list(dict2.keys())
     k1.sort()
     k2.sort()
 
@@ -67,7 +67,7 @@ def subtractdicts(ldict, rdict):
         if key in rdict:
             lvalue, rvalue = ldict[key], rdict[key]
             # type mismatch doesn't count if both are str/unicode
-            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in (str, unicode) and type(rvalue) in (str, unicode)):
+            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in (str, str) and type(rvalue) in (str, str)):
                 diffdict[key] = lvalue
             elif type(lvalue) != type(rvalue):
                 # handle str/unicode mismatch
@@ -96,12 +96,12 @@ def mapdict(thedict, keymap=None, valuemap=None):
         if valuemap is None:
             return thedict
         else:
-            return dict([(key, valuemap(value)) for key, value in thedict.iteritems()])
+            return dict([(key, valuemap(value)) for key, value in thedict.items()])
     else:
         if valuemap is None:
-            return dict([(keymap(key), value) for key, value in thedict.iteritems()])
+            return dict([(keymap(key), value) for key, value in thedict.items()])
         else:
-            return dict([(keymap(key), valuemap(value)) for key, value in thedict.iteritems()])
+            return dict([(keymap(key), valuemap(value)) for key, value in thedict.items()])
 
 def generalupper(str):
     """this uses the object's upper method - works with string and unicode"""
@@ -118,17 +118,17 @@ class cidict(dict):
             self.update(fromdict)
 
     def __getitem__(self, key):
-        if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
-        for akey in self.iterkeys():
+        if type(key) != str and type(key) != str:
+            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__getitem__(self, akey)
         raise IndexError
 
     def __setitem__(self, key, value):
-        if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
-        for akey in self.iterkeys():
+        if type(key) != str and type(key) != str:
+            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__setitem__(self, akey, value)
         return dict.__setitem__(self, key, value)
@@ -138,7 +138,7 @@ class cidict(dict):
         if _updatedict == _DUMMY_ARG_:
             pass
         elif hasattr(_updatedict, "keys"):
-            for key in _updatedict.keys():
+            for key in list(_updatedict.keys()):
                 self[key] = _updatedict[key]
         else:
             for key, value in _updatedict:
@@ -147,17 +147,17 @@ class cidict(dict):
             self[key] = kwargs[key]
 
     def __delitem__(self, key):
-        if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
-        for akey in self.iterkeys():
+        if type(key) != str and type(key) != str:
+            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__delitem__(self, akey)
         raise IndexError
 
     def __contains__(self, key):
-        if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
-        for akey in self.iterkeys():
+        if type(key) != str and type(key) != str:
+            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        for akey in self.keys():
             if akey.lower() == key.lower():
                 return 1
         return 0
@@ -166,7 +166,7 @@ class cidict(dict):
         return self.__contains__(key)
 
     def get(self, key, default=None):
-        if self.has_key(key):
+        if key in self:
             return self[key]
         else:
             return default
@@ -181,9 +181,9 @@ class ordereddict(dict):
             raise TypeError("ordereddict() takes at most 1 argument (%d given)" % len(args))
         else:
             initarg = args[0]
-            apply(super(ordereddict, self).__init__, args)
+            super(ordereddict, self).__init__(*args)
             if hasattr(initarg, "keys"):
-                self.order = initarg.keys()
+                self.order = list(initarg.keys())
             else:
                 # danger: could have duplicate keys...
                 self.order = []
@@ -212,7 +212,7 @@ class ordereddict(dict):
         if _updatedict == _DUMMY_ARG_:
             pass
         elif hasattr(_updatedict, "keys"):
-            for key in _updatedict.keys():
+            for key in list(_updatedict.keys()):
                 self[key] = _updatedict[key]
         else:
             for key, value in _updatedict:
@@ -320,7 +320,7 @@ def attribify(context, modifiable=False):
     # We shouldn't convert Config nodes
     if isinstance(context, dict) and not isinstance(context, attrdict) and _can_attribify(context):
         newcontext = (attrdict if not modifiable else setattrdict)(context)
-        for key, value in newcontext.items():
+        for key, value in list(newcontext.items()):
             if isinstance(value, (dict, list)):
                 newcontext[key] = attribify(value)
         return newcontext

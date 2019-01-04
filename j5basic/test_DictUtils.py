@@ -17,8 +17,8 @@ class TestCIDict(object):
         """tests that the key's original case is retained"""
         d = DictUtils.cidict()
         d["VaLuE"] = 5
-        assert "VaLuE" in d.keys()
-        assert "value" not in d.keys()
+        assert "VaLuE" in list(d.keys())
+        assert "value" not in list(d.keys())
 
 class TestAttrDict(object):
     def test_attrs(self):
@@ -36,7 +36,7 @@ class TestAttrDict(object):
     def test_missing_attr(self):
         d = DictUtils.attrdict()
         d["VaLuE"] = 5
-        assert "HeGeMoNy" not in d.keys()
+        assert "HeGeMoNy" not in list(d.keys())
         assert d.get("HeGeMoNy", 5) == 5
         assert raises(KeyError, d.__getitem__, "HeGeMoNy")
         assert getattr(d, "HeGeMoNy", 9) == 9
@@ -46,7 +46,7 @@ class TestAttrDict(object):
         d = DictUtils.attrdict()
         d["VaLuE"] = 5
         d.set_default_value(32)
-        assert "HeGeMoNy" not in d.keys()
+        assert "HeGeMoNy" not in list(d.keys())
         assert d.get("HeGeMoNy", 5) == 5
         assert raises(KeyError, d.__getitem__, "HeGeMoNy")
         assert getattr(d, "HeGeMoNy") == 32
@@ -66,7 +66,7 @@ class TestSetAttrDict(object):
     def test_missing_attr(self):
         d = DictUtils.setattrdict()
         d.VaLuE = 5
-        assert "HeGeMoNy" not in d.keys()
+        assert "HeGeMoNy" not in list(d.keys())
         assert d.get("HeGeMoNy", 5) == 5
         assert raises(KeyError, d.__getitem__, "HeGeMoNy")
         assert getattr(d, "HeGeMoNy", 9) == 9
@@ -76,7 +76,7 @@ class TestSetAttrDict(object):
         d = DictUtils.attrdict()
         d.VaLuE = 5
         d.set_default_value(32)
-        assert "HeGeMoNy" not in d.keys()
+        assert "HeGeMoNy" not in list(d.keys())
         assert d.get("HeGeMoNy", 5) == 5
         assert raises(KeyError, d.__getitem__, "HeGeMoNy")
         assert getattr(d, "HeGeMoNy") == 32
@@ -86,29 +86,29 @@ class TestOrderedDict(object):
     def test_key_and_value_ordering(self):
         k = [5,1,2,3,7,6]
         v = ["a","b","c","d","e","f"]
-        d = DictUtils.ordereddict(zip(k,v))
+        d = DictUtils.ordereddict(list(zip(k,v)))
 
-        assert d.keys() == k
-        assert d.values() == v
-        assert d.items() == zip(k,v)
-        assert list(d.iterkeys()) == k
-        assert list(d.itervalues()) == v
-        assert list(d.iteritems()) == zip(k,v)
+        assert list(d.keys()) == k
+        assert list(d.values()) == v
+        assert list(d.items()) == list(zip(k,v))
+        assert list(d.keys()) == k
+        assert list(d.values()) == v
+        assert list(d.items()) == list(zip(k,v))
 
     def test_setting(self):
         k = [5,1,2,3,7,6]
         v = ["a","b","c","d","e","f"]
-        d = DictUtils.ordereddict(zip(k,v))
+        d = DictUtils.ordereddict(list(zip(k,v)))
         d.setdefault(8,"g")
         k.append(8)
         v.append("g")
 
-        assert d.keys() == k
-        assert d.values() == v
-        assert d.items() == zip(k,v)
-        assert list(d.iterkeys()) == k
-        assert list(d.itervalues()) == v
-        assert list(d.iteritems()) == zip(k,v)
+        assert list(d.keys()) == k
+        assert list(d.values()) == v
+        assert list(d.items()) == list(zip(k,v))
+        assert list(d.keys()) == k
+        assert list(d.values()) == v
+        assert list(d.items()) == list(zip(k,v))
 
 class TestDictHelpers(object):
     def test_assert_dicts_equal(self):

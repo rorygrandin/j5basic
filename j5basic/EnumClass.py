@@ -10,8 +10,7 @@ class enum_meta(type):
 
 _NO_DEFAULT = object()
 
-class enum(object):
-    __metaclass__ = enum_meta
+class enum(object, metaclass=enum_meta):
     __constant_class__ = int
     @classmethod
     def _build_lookups(cls):

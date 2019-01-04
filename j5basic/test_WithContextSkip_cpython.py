@@ -72,7 +72,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
             state.append(1)
             try:
                 yield 42
-            except ZeroDivisionError, e:
+            except ZeroDivisionError as e:
                 state.append(e.args[0])
                 self.assertEqual(state, [1, 42, 999])
         with woohoo() as (x, StatementSkipped.detector):
@@ -85,7 +85,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
     def _create_contextmanager_attribs(self):
         def attribs(**kw):
             def decorate(func):
-                for k,v in kw.items():
+                for k,v in list(kw.items()):
                     setattr(func,k,v)
                 return func
             return decorate

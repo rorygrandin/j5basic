@@ -77,13 +77,13 @@ class Timer(object):
 
     def execute_run(self, target_time):
         """Executes a run of the timer target"""
-        apply(self.target, self.args, self.kwargs)
+        self.target(*self.args, **self.kwargs)
 
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     def print_time():
-        print time.time()
+        print(time.time())
 
     timer = Timer(print_time)
     timer.start()

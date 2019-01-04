@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division
+
 import operator
 import decimal
 
-numbers = (int, long, float, decimal.Decimal)
+numbers = (int, int, float, decimal.Decimal)
 
 def Identity(x):
     """Returns the object given to it"""
@@ -172,7 +172,7 @@ class Unit(object):
     def __repr__(self):
         """Returns a representation of the type"""
         n, d = [], []
-        for base, exponent in self.base_units.items():
+        for base, exponent in list(self.base_units.items()):
             if exponent == 1:
                 n.append(base.name)
             elif exponent > 0:
@@ -195,7 +195,7 @@ class Unit(object):
         if self.native_name:
             return self.name
         n, d = [], []
-        for base, exponent in self.base_units.items():
+        for base, exponent in list(self.base_units.items()):
             if exponent == 1:
                 n.append(base.name)
             elif exponent > 0:
@@ -234,7 +234,7 @@ class Unit(object):
             return Unit("%s/%r" % (self.name, other), self.base_units, SequentialConversion(self.op, Conversion(operator.truediv, other)))
         elif isinstance(other, Unit):
             new_units = self.base_units.copy()
-            for base_unit, exponent in other.base_units.items():
+            for base_unit, exponent in list(other.base_units.items()):
                 new_units[base_unit] = new_units.get(base_unit, 0) - exponent
                 if new_units[base_unit] == 0:
                     del new_units[base_unit]
@@ -258,7 +258,7 @@ class Unit(object):
             return Unit("%s*%r" % (self.name, other), self.base_units, SequentialConversion(self.op, Conversion(operator.mul, other)))
         elif isinstance(other, Unit):
             new_units = self.base_units.copy()
-            for base_unit, exponent in other.base_units.items():
+            for base_unit, exponent in list(other.base_units.items()):
                 new_units[base_unit] = new_units.get(base_unit, 0) + exponent
                 if new_units[base_unit] == 0:
                     del new_units[base_unit]
@@ -419,7 +419,7 @@ class Scalar(object):
     # These conversions are of debatable value, but are included at the moment
     __complex__ = scalar_conversion(complex)
     __int__ = scalar_conversion(int)
-    __long__ = scalar_conversion(long)
+    __long__ = scalar_conversion(int)
     __float__ = scalar_conversion(float)
 
     # __oct__ not defined

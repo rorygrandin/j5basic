@@ -53,8 +53,7 @@ class TestAPI(object):
 
     def declare_basic_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueAndSimple(object):
-            __metaclass__ = API.APIMeta
+        class TrueAndSimple(object, metaclass=API.APIMeta):
             API.implements(ArbAPI3)
             def i_never_give_up(self):
                 while True:
@@ -63,21 +62,19 @@ class TestAPI(object):
 
     def declare_inherited_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueChild(object):
-            __metaclass__ = API.APIMeta
+        class TrueChild(object, metaclass=API.APIMeta):
+            pass
         return TrueChild
 
     def declare_false_support(self):
         """Try and declare a class as implementing an API that it doesn't"""
-        class LiarAndFraud(object):
-            __metaclass__ = API.APIMeta
+        class LiarAndFraud(object, metaclass=API.APIMeta):
             API.implements(ArbAPI)
         return LiarAndFraud
 
     def declare_ill_support(self):
         """Try and declare a class as implementing an API but the method signatures are wrong"""
-        class SlightlyDeceptive(object):
-            __metaclass__ = API.APIMeta
+        class SlightlyDeceptive(object, metaclass=API.APIMeta):
             API.implements(ArbAPI)
             def i_support_api(self, x):
                 return True
@@ -87,8 +84,8 @@ class TestAPI(object):
         """Check that declarations of support fail even if the API is declared implemented in parent classes"""
         class Parent(object):
             API.implements(ArbAPI2)
-        class FalseChild(Parent):
-            __metaclass__ = API.APIMeta
+        class FalseChild(Parent, metaclass=API.APIMeta):
+            pass
         return FalseChild
 
     def test_meta_declaration(self):

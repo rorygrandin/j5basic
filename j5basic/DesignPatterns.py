@@ -17,7 +17,7 @@ class MultitonMetaclass(type):
         setattr(cls,"_multiton_lock",threading.Lock())
         setattr(cls,"_multiton_cache",{})
 
-class Multiton(object):
+class Multiton(object, metaclass=MultitonMetaclass):
     """Thread-safe multiton baseclass. Sub-classes return only one object per set of
        initialisation parameters. These parameters must all be hashable.
 
@@ -30,8 +30,6 @@ class Multiton(object):
        Object creation is thread-safe. It is the sub-classes responsibility to ensure
        that any methods other than multiton_setup (which will be called while holding
        a sub-class wide lock) are thread-safe."""
-
-    __metaclass__ = MultitonMetaclass
 
     def __new__(cls,*args):
         key = hash(tuple(args))

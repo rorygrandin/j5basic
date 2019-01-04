@@ -1,7 +1,7 @@
 try:
-    from cStringIO import StringIO as WrappedStringIO
+    from io import StringIO as WrappedStringIO
 except ImportError:
-    from StringIO import StringIO as WrappedStringIO
+    from io import StringIO as WrappedStringIO
 
 class StringIO(object):
     def __init__(self, stringio = None):
@@ -25,8 +25,8 @@ class StringIO(object):
     def isatty(self):
         return self.stringio_object.isatty()
 
-    def next(self):
-        return self.stringio_object.next()
+    def __next__(self):
+        return next(self.stringio_object)
 
     def read(self, s=None):
         return self.stringio_object.read(s)

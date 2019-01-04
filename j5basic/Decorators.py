@@ -15,8 +15,8 @@ import time
 
 def copyfunc(func): # not used internally
     "Creates an independent copy of a function."
-    return new.function(func.func_code, func.func_globals, func.func_name,
-                        func.func_defaults, func.func_closure)
+    return new.function(func.__code__, func.__globals__, func.__name__,
+                        func.__defaults__, func.__closure__)
 
 def getrightargs(function, args):
     """Returns a dictionary of only the arguments which the callable takes out of the args.
@@ -80,7 +80,7 @@ class decorator_helpers(object):
                     has_argdefault = True
                 elif isinstance(extendedarg, tuple) and len(extendedarg) == 1:
                     argname = extendedarg[0]
-                elif isinstance(extendedarg, basestring):
+                elif isinstance(extendedarg, str):
                     argname = extendedarg
                 else:
                     raise ValueError("Extended argument should be (keyword, default), (keyword,), or just keyword: got %r" % extendedarg)
@@ -112,7 +112,7 @@ class decorator_helpers(object):
         counter = itertools.count()
         fullsign = inspect.formatargspec(
             regargs, varargs, varkwargs, defaults,
-            formatvalue=lambda value: "=defarg[%i]" % counter.next())[1:-1]
+            formatvalue=lambda value: "=defarg[%i]" % next(counter))[1:-1]
         shortsign = inspect.formatargspec(
             regargs, varargs, varkwargs, defaults,
             formatvalue=lambda value: "")[1:-1]
@@ -152,15 +152,15 @@ class decorator_helpers(object):
                 func_src = """def %(name)s(%(fullsign)s):
                 %(calling_frame_arg)s = inspect.currentframe().f_back
                 return _call_(_func_, %(shortsign)s, %(calling_frame_arg)s=%(calling_frame_arg)s)""" % infodict
-            func_code = compile(func_src, func.func_code.co_filename, 'exec')
+            func_code = compile(func_src, func.__code__.co_filename, 'exec')
         elif func.__name__ == "<lambda>" and not calling_frame_arg:
             lambda_src = "lambda %(fullsign)s: _call_(_func_, %(shortsign)s)" \
                          % infodict
-            func_code = compile(lambda_src, func.func_code.co_filename, 'eval')
+            func_code = compile(lambda_src, func.__code__.co_filename, 'eval')
         else:
             func_src = """def %(name)s(%(fullsign)s):
             return _call_(_func_, %(shortsign)s)""" % infodict
-            func_code = compile(func_src, func.func_code.co_filename, 'exec')
+            func_code = compile(func_src, func.__code__.co_filename, 'exec')
         func_internal_code = func_code.co_consts[len(defaults or ())]
         dec_func = new.function(func_internal_code, execdict, func.__name__, defaults)
         dec_func.__doc__ = func.__doc__
@@ -243,7 +243,7 @@ class SelfLocking(object):
             return ret
 
         wrapper.__doc__ = f.__doc__
-        wrapper.func_name = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
+        wrapper.__name__ = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
 
         return wrapper
 
@@ -270,7 +270,7 @@ def notimplemented(f):
         raise NotImplementedError(f.__doc__)
 
     wrapper.__doc__ = f.__doc__
-    wrapper.func_name = f.func_name
+    wrapper.__name__ = f.__name__
 
     return wrapper
 
@@ -278,7 +278,7 @@ def wraptimer(function):
     """Log the time a function takes to run."""
     def timecall(self, *args, **kw):
         start_time = time.time()
-        argstr = ", ".join([repr(arg) for arg in args]) + ", ".join(["%s=%r" % (kw, val) for kw, val in kw.iteritems()])
+        argstr = ", ".join([repr(arg) for arg in args]) + ", ".join(["%s=%r" % (kw, val) for kw, val in kw.items()])
         logging.debug("about to call %s(%s)" % (function.__name__, argstr))
         result = function(self, *args, **kw)
         end_time = time.time()

@@ -50,7 +50,7 @@ class TestTimeCache(object):
         TimeCache.GLOBAL_CACHE_DISABLED = True
         assert 1 not in d
         d[2] = "missing"
-        assert not d.items()
+        assert not list(d.items())
         TimeCache.GLOBAL_CACHE_DISABLED = False
         assert d[1] == "test"
         assert 2 not in d
@@ -68,7 +68,7 @@ class TestTimeCache(object):
         assert 1 in e
         d[2] = "missing"
         e[2] = "missing"
-        assert not d.items()
+        assert not list(d.items())
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
         TimeCache.LOCAL_CACHE_DISABLED = False
         assert d[1] == "test"
@@ -89,7 +89,7 @@ class TestTimeCache(object):
         assert 1 in e
         d[2] = "missing"
         e[2] = "missing"
-        assert d.items() == [(2, "missing")]
+        assert list(d.items()) == [(2, "missing")]
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
         TimeCache.LOCAL_CACHE_TIMELIMIT = None
         time.sleep(0.2)

@@ -94,14 +94,14 @@ class timecache(dict):
   def __getitem__(self, key):
     """[] access of items"""
     if self.is_disabled():
-      raise KeyError, key
+      raise KeyError(key)
     timestamp, value = dict.__getitem__(self, key)
     if self.expired(timestamp):
       self.expire(key)
       # this allows expire to actually reset the value
       if dict.__contains__(self, key):
         return dict.__getitem__(self, key)[1]
-      raise KeyError, key
+      raise KeyError(key)
     return value
 
   def __iter__(self):
@@ -116,7 +116,7 @@ class timecache(dict):
     if self.is_disabled():
       return "<GLOBAL_CACHE_DISABLED>"
     self.purge()
-    return repr(dict(self.items()))
+    return repr(dict(list(self.items())))
 
   def __setitem__(self, key, value):
     """[] setting of items"""
@@ -221,7 +221,7 @@ class timecache(dict):
     if self.is_disabled():
       return
     self.purge()
-    for key in updatedict.keys():
+    for key in list(updatedict.keys()):
       self[key] = updatedict[key]
 
   def size(self):
