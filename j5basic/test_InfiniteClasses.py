@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 from j5basic.InfiniteClasses import *
 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
 class A(object):
     def __init__(self, v):
         self.value = v
