@@ -3,6 +3,7 @@
 from j5basic import Decorators, DictUtils
 import threading
 import time
+import inspect
 from j5test.Utils import method_raises, raises
 
 class TestDecoratorDecorator(object):
@@ -45,6 +46,11 @@ class TestDecoratorDecorator(object):
         return f(x, calling_frame)
 
     @staticmethod
+    def override_x(f, *args, **kw):
+        args, kw = Decorators.override_arg("x", 50, args, kw, inspect.getargspec(f))
+        return f(*args, **kw)
+
+    @staticmethod
     def g(x):
         """returns x plus 25"""
         return x + 25
@@ -70,6 +76,10 @@ class TestDecoratorDecorator(object):
     def g2(x, z=4):
         """returns x plus z plus 25"""
         return x + z + 25
+
+    @staticmethod
+    def g3(y, x=0):
+        return y + x + 25
 
     def test_getinfo(self):
         """tests that the getinfo function returns the correct information about a function signature"""
@@ -211,6 +221,14 @@ class TestDecoratorDecorator(object):
         result = ext_g()
         assert result == (0 + 3*5) + 3 + 25
         assert self.g2.calls[-1] == "Called with x=0, y=5, z=3"
+
+    def test_override_arg(self):
+        override_decorator = Decorators.decorator(self.override_x)
+        override_g = override_decorator(self.g)
+        assert override_g(0) == 75
+
+        override_g3 = override_decorator(self.g3)
+        assert override_g3(25, 0) == 100
 
 class TestSelfLocking(object):
 

@@ -296,6 +296,8 @@ def override_arg(argname,value,args,kwargs,argspec):
         return (args, kwargs)
     regargs, varargs, varkwargs, defaults = argspec
     if argname in regargs:
+        if isinstance(args, tuple):
+            args = list(args)
         args[regargs.index(argname)] = value
     else:
         kwargs[argname] = value
