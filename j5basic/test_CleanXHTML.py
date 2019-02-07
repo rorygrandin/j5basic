@@ -9,4 +9,4 @@ Testing fragment<br/>
 
 def test_clean_html():
     cleaned_html = CleanXHTML.clean_html(DIRTY_XHTML)
-    assert cleaned_html == "Testing Fragment<br/>\n<span>TEXT</span>\n"
+    assert cleaned_html == "\nTesting fragment<br/>\nTEXT\n\n"
