@@ -327,6 +327,10 @@ def test_get_right_args():
     rightargs = Decorators.getrightargs(my_arg_class, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
     DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'filip': None})
 
+    rightargs, rightkw = Decorators.conform_to_argspec((1, 2), {'billybob': 5, 'jim': 3}, inspect.getargspec(my_arg_function))
+    assert rightargs == [1, 2, 3]
+    assert not rightkw
+
 def test_get_or_pop_arg():
     def my_arg_function(foo, bar, jim=3):
         pass
