@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from j5basic import Decorators
+from j5basic import Decorators, DictUtils
 import threading
 import time
 from j5test.Utils import method_raises, raises
@@ -293,3 +293,18 @@ def test_chain_decorators():
 
     assert underlying(3) == ((3*6)*2) + 1
 
+def test_get_right_args():
+    def my_arg_function(foo, bar, jim=3):
+        pass
+
+    rightargs = Decorators.getrightargs(my_arg_function, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4, 'jim': 5})
+    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'bar': 2, 'jim': 5})
+    rightargs = Decorators.getrightargs(my_arg_function, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
+    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'bar': 2})
+
+    class my_arg_class(object):
+        def __init__(self, foo, filip):
+            pass
+
+    rightargs = Decorators.getrightargs(my_arg_class, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
+    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'filip': None})
