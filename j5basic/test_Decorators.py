@@ -326,3 +326,23 @@ def test_get_right_args():
 
     rightargs = Decorators.getrightargs(my_arg_class, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
     DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'filip': None})
+
+def test_get_or_pop_arg():
+    def my_arg_function(foo, bar, jim=3):
+        pass
+
+    args = (1, 2)
+    kw = {'jim': 3}
+
+    assert Decorators.get_or_pop_arg('bar', args, kw, inspect.getargspec(my_arg_function)) == 2
+    assert args == (1, 2)
+    DictUtils.assert_dicts_equal(kw, {'jim': 3})
+    assert Decorators.get_or_pop_arg('jim', args, kw, inspect.getargspec(my_arg_function)) == 3
+    assert args == (1, 2)
+    DictUtils.assert_dicts_equal(kw, {'jim': 3})
+
+    kw['billybob'] = 4
+    assert Decorators.get_or_pop_arg('billybob', args, kw, inspect.getargspec(my_arg_function)) == 4
+    assert args == (1, 2)
+    DictUtils.assert_dicts_equal(kw, {'jim': 3})
+
