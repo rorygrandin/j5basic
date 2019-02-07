@@ -2,16 +2,17 @@ import cssutils
 from xml.sax import saxutils
 from lxml.html import tostring, fromstring, clean
 from lxml import etree
+import six
 
 import logging
 
 class Cleaner(clean.Cleaner):
     def clean_html(self, html):
-        if not isinstance(html, str):
+        if not isinstance(html, six.text_type):
             raise ValueError('We only support cleaning unicode HTML fragments')
 
         #We wrap the content up in an extra div tag (otherwise lxml does wierd things to it - like adding in <p> tags and stuff)
-        divnode = fromstring('<div>' + html + '</div>')
+        divnode = fromstring(six.text_type('<div>') + html + six.text_type('</div>'))
         self(divnode)
 
         # Strip all class attributes
@@ -50,7 +51,7 @@ class Cleaner(clean.Cleaner):
         cleaned = saxutils.escape(divnode.text) if divnode.text else ''
 
         for n in divnode:
-            cleaned += tostring(n, encoding = str, method = 'xml')
+            cleaned += tostring(n, encoding = six.text_type, method = 'xml')
         return cleaned
 
 # We need safe_attrs_only set to False, otherwise it strips out style attributes completely
