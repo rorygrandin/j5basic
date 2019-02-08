@@ -147,6 +147,30 @@ class TestOrderedDict(object):
         assert list(d.values()) == v
         assert list(d.items()) == list(zip(k,v))
 
+    def test_dict(self):
+        # Make an empty one
+        d = DictUtils.ordereddict()
+
+        # Make one from another
+        k = [5,1,2,3,7,6]
+        v = ["a","b","c","d","e","f"]
+        d = DictUtils.ordereddict(DictUtils.ordereddict(list(zip(k,v))))
+        def bad_dict():
+            d = DictUtils.ordereddict(*k)
+
+        d.setdefault(5,"g")
+        assert d.get(5, None) == "a"
+        d.update(t="g")
+        assert d["t"] == "g"
+        d.update([(7, "g")])
+        assert d[7] == "g"
+        d.update({8: "h"})
+        assert d[8] == "h"
+        assert raises(TypeError, bad_dict)
+
+        del d[1]
+        assert d.keys() == [5,2,3,7,6,"t",8]
+
 class TestDictHelpers(object):
     def test_assert_dicts_equal(self):
         d1 = {1:2, 3:4}
