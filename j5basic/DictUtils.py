@@ -68,7 +68,7 @@ def subtractdicts(ldict, rdict):
         if key in rdict:
             lvalue, rvalue = ldict[key], rdict[key]
             # type mismatch doesn't count if both are str/unicode
-            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in six.string_types and type(rvalue) in six.string_types):
+            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in (six.text_type, six.binary_type) and type(rvalue) in (six.text_type, six.binary_type)):
                 diffdict[key] = lvalue
             elif type(lvalue) != type(rvalue):
                 # handle str/unicode mismatch
