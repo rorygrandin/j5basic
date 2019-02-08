@@ -23,6 +23,40 @@ class TestCIDict(object):
         assert "VaLuE" in list(d.keys())
         assert "value" not in list(d.keys())
 
+    def test_dict(self):
+        """tests the normal dict functions, with thecidict peculiarities"""
+        d = DictUtils.cidict({'VaLuE': 5})
+        def setvalue(k, v):
+            d[k] = v
+        def delvalue(k):
+            del d[k]
+        def invalue(k):
+            return k in d
+        assert raises(TypeError, lambda: d[5])
+        assert raises(IndexError, lambda: d['5'])
+        assert raises(TypeError, setvalue, 5, 5)
+
+        d['value'] = 6
+        assert d['VaLuE'] == 6
+
+        d.update(vaLue=7)
+        assert d['VaLuE'] == 7
+        d.update([('VALUE', 8)])
+        assert d['VaLuE'] == 8
+        d.update({'VAlue': 9})
+        assert d['VaLuE'] == 9
+
+        assert raises(TypeError, delvalue, 5)
+        assert raises(IndexError, delvalue, '5')
+        d['5'] = 5
+        del d['5']
+        assert d.get('5', None) is None
+
+        assert raises(TypeError, invalue, 5)
+        assert 'VALuE' in d
+        assert d.has_key('vALUE')
+        assert d.get('vaLUE') == 9
+
 class TestAttrDict(object):
     def test_attrs(self):
         d = DictUtils.attrdict()
