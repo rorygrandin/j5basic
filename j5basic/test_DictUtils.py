@@ -149,7 +149,7 @@ class TestOrderedDict(object):
 
     def test_dict(self):
         # Make an empty one
-        d = DictUtils.ordereddict()
+        cleand = DictUtils.ordereddict()
 
         # Make one from another
         k = [5,1,2,3,7,6]
@@ -170,6 +170,21 @@ class TestOrderedDict(object):
 
         del d[1]
         assert d.keys() == [5,2,3,7,6,"t",8]
+        copyd = d.copy()
+
+        assert list(copyd.iterkeys()) == [5, 2, 3, 7, 6, "t", 8]
+        assert list(copyd.itervalues()) == ["a", "c", "d", "g", "f", "g", "h"]
+
+        assert list(copyd.iteritems())
+
+        assert raises(KeyError, cleand.popitem)
+        assert copyd.popitem() == (8, "h")
+        assert copyd.pop(9, "default") == "default"
+        assert copyd.pop(3) == "d"
+
+        assert copyd.keys() == [5,2,7,6,"t"]
+        copyd.clear()
+        assert copyd.keys() == []
 
 class TestDictHelpers(object):
     def test_assert_dicts_equal(self):
