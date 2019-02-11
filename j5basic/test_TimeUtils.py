@@ -48,7 +48,7 @@ def test_strftime():
 def always_skip(*args, **kwargs):
     return True
 
-@Utils.skip_test_for("This test is too slow to run by default", always_skip)
+@Utils.if_long_test_run()
 def test_sequence():
     """Checks that the day names are in order from 1/1/1 until August 2000"""
     # from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/306860
