@@ -17,9 +17,14 @@ class TestModule:
 
     def test_resolve(self):
         assert Module.resolvemodule("j5basic.Module") == Module
+        # Run this twice to cover the cached usage
+        assert Module.resolvemodule("j5basic.Module") == Module
         try:
             from j5.Config import ConfigTree
             assert Module.resolvemodule("j5.Config.ConfigTree.Node") == ConfigTree.Node
         except ImportError:
             pass
+
+        assert Module.resolvemodule("j5basic.Module.canonicalize") == Module.canonicalize
+        assert Utils.raises(ImportError, Module.resolvemodule, "j5basic.Moodle")
 
