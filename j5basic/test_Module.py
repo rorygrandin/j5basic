@@ -32,6 +32,9 @@ class TestModule:
         def mro_target1(self):
             print ("A")
 
+        def mro_target3(self):
+            print ("A")
+
     class B(object):
         def mro_target1(self):
             print ("B")
@@ -44,7 +47,8 @@ class TestModule:
             print ("C")
 
     class D(B, C):
-        pass
+        def mro_target3(self):
+            print ("D")
 
     def test_get_all_distinct_mro_targets(self):
         print (Module.get_all_distinct_mro_targets(self.D, 'mro_target1'))
@@ -53,3 +57,5 @@ class TestModule:
 
         assert Module.get_all_distinct_mro_targets(self.D, 'mro_target2') == \
                [self.B.mro_target2, self.C.mro_target2]
+        assert Module.get_all_distinct_mro_targets(self.D, "mro_target3") == \
+            [self.D.mro_target3]
