@@ -25,9 +25,7 @@ def unique_items(list1):
 
 def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
     """tests equality of two dicts"""
-    k1, k2 = list(dict1.keys()), list(dict2.keys())
-    k1.sort()
-    k2.sort()
+    k1, k2 = set(dict1.keys()), set(dict2.keys())
 
     assert k1 == k2
     for key in k1:
