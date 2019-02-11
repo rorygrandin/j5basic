@@ -38,7 +38,7 @@ class Conversion(object):
     def __mul__(self, other):
         """Returns a related Conversion"""
         if not isinstance(other, Conversion):
-            raise NotImplementedError("Cannot divide %r and %r" % (self, other))
+            raise NotImplementedError("Cannot multiply %r and %r" % (self, other))
         return SequentialConversion(self, other)
 
     def __truediv__(self, other):

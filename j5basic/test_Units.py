@@ -95,3 +95,9 @@ def test_unit_class_combination():
     assert m_per_s(9) < km_per_hour(36)
     assert m_per_s(20) > km_per_hour(70)
 
+def test_random_calls_for_coverage():
+    assert Units.Identity(3) == 3
+    m = Units.BaseUnit("m")
+    km = 1000 * m
+    assert repr(km) == "Unit(m, SequentialConversion(Conversion(<built-in function mul>, *(1000,))))"
+    assert repr(m)
