@@ -4,6 +4,7 @@ import logging
 import os
 import pkgutil
 import sys
+import six
 
 importedmodules = {}
 
@@ -96,7 +97,7 @@ def get_all_distinct_mro_targets(obj, functionname):
     for t in reversed(obj.__mro__):
         base_hook_fn = getattr(t, functionname, None)
         if base_hook_fn:
-            t_f = base_hook_fn.__func__
+            t_f = six.get_unbound_function(base_hook_fn)
             if t_f not in sources:
                 sources[t_f] = t
                 sources[t] = (t_f, base_hook_fn)
