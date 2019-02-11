@@ -28,3 +28,28 @@ class TestModule:
         assert Module.resolvemodule("j5basic.Module.canonicalize") == Module.canonicalize
         assert Utils.raises(ImportError, Module.resolvemodule, "j5basic.Moodle")
 
+    class A(object):
+        def mro_target1(self):
+            print ("A")
+
+    class B(object):
+        def mro_target1(self):
+            print ("B")
+
+        def mro_target2(self):
+            print ("B")
+
+    class C(A):
+        def mro_target2(self):
+            print ("C")
+
+    class D(B, C):
+        pass
+
+    def test_get_all_distinct_mro_targets(self):
+        print (Module.get_all_distinct_mro_targets(self.D, 'mro_target1'))
+        assert Module.get_all_distinct_mro_targets(self.D, 'mro_target1') ==\
+            [self.B.mro_target1, self.A.mro_target1]
+
+        assert Module.get_all_distinct_mro_targets(self.D, 'mro_target2') == \
+               [self.B.mro_target2, self.C.mro_target2]
