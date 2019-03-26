@@ -172,10 +172,10 @@ class TestOrderedDict(object):
         assert d.keys() == [5,2,3,7,6,"t",8]
         copyd = d.copy()
 
-        assert list(copyd.iterkeys()) == [5, 2, 3, 7, 6, "t", 8]
-        assert list(copyd.itervalues()) == ["a", "c", "d", "g", "f", "g", "h"]
+        assert list(copyd.keys()) == [5, 2, 3, 7, 6, "t", 8]
+        assert list(copyd.values()) == ["a", "c", "d", "g", "f", "g", "h"]
 
-        assert list(copyd.iteritems())
+        assert list(copyd.items())
 
         assert raises(KeyError, cleand.popitem)
         assert copyd.popitem() == (8, "h")

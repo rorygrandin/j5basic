@@ -140,9 +140,9 @@ class TestTimeCache(object):
         assert list(d.keys()) == [2]
         assert None not in d.values()
         assert d.size() == 1
-        assert list(d.iteritems())[0][0] == 2
-        assert list(d.iterkeys()) == [2]
-        assert list(d.itervalues())
+        assert list(d.items())[0][0] == 2
+        assert list(d.keys()) == [2]
+        assert list(d.values())
         time.sleep(1)
         assert list(d) == []
         d[3] = datetime.datetime.now()
