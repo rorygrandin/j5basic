@@ -84,9 +84,9 @@ def test_never_yields():
     try:
         with ignorant_peasant() as StatementSkipped.detector:
             code_run = True
-    except RuntimeError, e:
+    except RuntimeError as e:
         raised = True
-        assert "SkipStatement" in e.message
+        assert "SkipStatement" in e.args[0]
     assert raised and not code_run
 
 

@@ -3,6 +3,7 @@
 from j5basic import Uid
 import re
 import time
+from functools import reduce
 
 def birthday_problem(g, n):
      """returns the probability that n independent choices from a set of g objects are all unique"""
@@ -13,14 +14,14 @@ class TestUid(object):
         ids = {}
         for i in range(10000):
             ids[Uid.uid_digit_str()] = None
-        print len(ids)
+        print(len(ids))
         assert len(ids) == 10000 # no duplicates
 
         # check format
         uid_re = re.compile("[0-9]{17,22}")
         for uid in ids:
             if not uid_re.match(uid):
-                print uid
+                print(uid)
                 assert uid_re.match(uid)
 
     def test_uid_digit_str_with_time(self):
@@ -32,7 +33,7 @@ class TestUid(object):
         timestamp = time.time()
         for i in range(100):
             ids[Uid.uid_digit_str(timestamp)] = None
-        print len(ids)
+        print(len(ids))
         assert len(ids) == 100 # no duplicates
 
         # check format
@@ -43,7 +44,7 @@ class TestUid(object):
             if initial_letters is None:
                 initial_letters = uid[:12]
             if not uid_re.match(uid):
-                print uid
+                print(uid)
                 assert uid_re.match(uid)
             assert uid.startswith(initial_letters)
 
@@ -52,13 +53,13 @@ class TestUid(object):
         for i in range(10000):
             ids[Uid.uid_id_str()] = None
 
-        print len(ids)
+        print(len(ids))
         assert len(ids) == 10000 # no duplicates
 
         # check format
         uid_re = re.compile("ID[0-9]{17,22}")
         for uid in ids:
             if not uid_re.match(uid):
-                print uid
+                print(uid)
                 assert uid_re.match(uid)
 

@@ -5,11 +5,13 @@
 from . import Singleton
 import gc
 import types
+import sys
+from six import with_metaclass
 
 def test_basic():
     """Tests most basic singleton definition, that it works and constructing always produces the same result"""
-    class Highlander(object):
-        __metaclass__ = Singleton.Singleton
+    class Highlander(with_metaclass(Singleton.Singleton, object)):
+        pass
     assert issubclass(Highlander, object)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
@@ -18,10 +20,9 @@ def test_basic():
 
 def test_non_oldstyle():
     """Tests that Singleton classes are implictly newstyle"""
-    class Highlander:
-        __metaclass__ = Singleton.Singleton
+    class Highlander(with_metaclass(Singleton.Singleton)):
+        pass
     assert isinstance(Highlander, object)
-    assert not isinstance(Highlander, types.ClassType)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()
@@ -29,8 +30,8 @@ def test_non_oldstyle():
 
 def test_subclass():
     """Tests that subclasses are distinct singletons"""
-    class Highlander(object):
-        __metaclass__ = Singleton.Singleton
+    class Highlander(with_metaclass(Singleton.Singleton, object)):
+        pass
     class VeryHighlander(Highlander):
         pass
     assert issubclass(VeryHighlander, Highlander)
@@ -44,8 +45,8 @@ def test_subclass():
 
 def test_deletion():
     """Tests that deletion and garbage collection don't destroy the singleton"""
-    class Highlander(object):
-        __metaclass__ = Singleton.Singleton
+    class Highlander(with_metaclass(Singleton.Singleton, object)):
+        pass
     assert issubclass(Highlander, object)
     highlander = Highlander()
     highlander.value = 3
@@ -59,8 +60,7 @@ def test_deletion():
 
 def test_args_irrelevant():
     """Tests that arguments passed to the constructor don't have any effect after the initial construction"""
-    class Highlander(object):
-        __metaclass__ = Singleton.Singleton
+    class Highlander(with_metaclass(Singleton.Singleton, object)):
         def __init__(self, clan):
             self.clan = clan
     assert issubclass(Highlander, object)

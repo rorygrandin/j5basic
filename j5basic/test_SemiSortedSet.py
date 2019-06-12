@@ -10,7 +10,7 @@ import random
 
 ORWELL = datetime.date(1984,1,1)
 SPACE = datetime.date(2001,1,1)
-_SHUFFLE_DAYS = range(0, 365)
+_SHUFFLE_DAYS = list(range(0, 365))
 random.shuffle(_SHUFFLE_DAYS)
 SPACE_YEAR = [datetime.datetime(2001,1,1) + datetime.timedelta(days=n) for n in _SHUFFLE_DAYS]
 
@@ -21,7 +21,7 @@ class TestSemiSortedSet(object):
     def setup_class(cls):
         cls.empty = SemiSortedSet.SemiSortedSet()
         cls.single_item = SemiSortedSet.SemiSortedSet([1])
-        cls.hundred = SemiSortedSet.SemiSortedSet(range(50,101)+range(1,50))
+        cls.hundred = SemiSortedSet.SemiSortedSet(list(range(50,101))+list(range(1,50)))
         cls.date = SemiSortedSet.SemiSortedSet([ORWELL, SPACE])
         cls.space_year = SemiSortedSet.SemiSortedSet(SPACE_YEAR)
 

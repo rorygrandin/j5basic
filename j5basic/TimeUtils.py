@@ -1,5 +1,5 @@
 from j5basic import TzInfo
-from virtualtime import datetime_tz
+from virtualtime import datetime_tz, _underlying_datetime_type
 import datetime
 import threading
 import time
@@ -51,8 +51,8 @@ def timedelta_to_tuple(timedelta):
     """Expresses a timedelta object as a tuple containing days, hours, minutes and seconds (rounded)"""
     d = timedelta.days
     s_total = timedelta.seconds
-    h = s_total / 3600
-    m = (s_total / 60) % 60
+    h = s_total // 3600
+    m = (s_total // 60) % 60
     s = s_total % 60
     return (d, h, m, s)
 
@@ -113,7 +113,7 @@ def _findall(text, substr):
 
 _NEEDS_STRFTIME_PATCH = True
 try:
-    datetime.datetime(1,1,1).strftime("%Y-%m-%d")
+    _underlying_datetime_type(1,1,1).strftime("%Y-%m-%d")
     _NEEDS_STRFTIME_PATCH = False
 except ValueError:
     pass

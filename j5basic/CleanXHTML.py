@@ -2,16 +2,17 @@ import cssutils
 from xml.sax import saxutils
 from lxml.html import tostring, fromstring, clean
 from lxml import etree
+import six
 
 import logging
 
 class Cleaner(clean.Cleaner):
     def clean_html(self, html):
-        if not isinstance(html, unicode):
+        if not isinstance(html, six.text_type):
             raise ValueError('We only support cleaning unicode HTML fragments')
 
         #We wrap the content up in an extra div tag (otherwise lxml does wierd things to it - like adding in <p> tags and stuff)
-        divnode = fromstring(u'<div>' + html + u'</div>')
+        divnode = fromstring(six.text_type('<div>') + html + six.text_type('</div>'))
         self(divnode)
 
         # Strip all class attributes
@@ -21,13 +22,13 @@ class Cleaner(clean.Cleaner):
         # stripping of any bad css styles
         # Also drop id and class attributes - these are not useful in RichTextEditor
         for node in divnode.xpath("//*"):
-            for key, value in node.attrib.iteritems():
+            for key, value in node.attrib.items():
                 if key.lower() in ('xml:lang', 'lang','id','class'):
                     node.attrib.pop(key, None)
                 elif 'style' == key.lower():
                     try:
                         cssStyle = cssutils.parseStyle(value)
-                    except Exception, e:
+                    except Exception as e:
                         logging.info("Style %s failed to parse with error %s." % (value, e))
                         node.attrib.pop(key, None)
                         continue
@@ -43,14 +44,14 @@ class Cleaner(clean.Cleaner):
                     else:
                         node.attrib[key] = new_style
             # Drop all empty span tags
-            if node.tag == 'span' and not node.keys():
+            if node.tag == 'span' and not list(node.keys()):
                 node.drop_tag()
 
         #Now unwrap the divnode (i.e. just serialize the children of our extra div node)
         cleaned = saxutils.escape(divnode.text) if divnode.text else ''
 
         for n in divnode:
-            cleaned += tostring(n, encoding = unicode, method = 'xml')
+            cleaned += tostring(n, encoding = six.text_type, method = 'xml')
         return cleaned
 
 # We need safe_attrs_only set to False, otherwise it strips out style attributes completely

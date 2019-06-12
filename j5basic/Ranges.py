@@ -62,7 +62,7 @@ import math
 def tagmaptoaxismap(tagmap):
   """converts a tag: (score, axis) dict to a axis: [tag, tag, tag...] dict"""
   axismap = {}
-  for tag, (score, axis) in tagmap.iteritems():
+  for tag, (score, axis) in tagmap.items():
     if axis in axismap:
       axismap[axis].append(tag)
     else:
@@ -82,28 +82,28 @@ def score(ranges, tagmap):
   score = 0
   if not tagmap:
     return 0
-  for tag, (rmin, rmax) in ranges.iteritems():
+  for tag, (rmin, rmax) in ranges.items():
     amin, amax = tagmap[tag]
     try:
       score += 1 / ((rmax - rmin) / float(amax - amin))
     except ZeroDivisionError:
       score += 1
-  numaxes = len(dict.fromkeys(tagmap.values()))
+  numaxes = len(dict.fromkeys(list(tagmap.values())))
   wastedspace = (numaxes - 1) * 5
   return ((100 - wastedspace) / score) / numaxes
 
 def calculateaxes(ranges):
   """flagrantly override the previous method"""
-  for tagname, (rmin, rmax) in ranges.items():
+  for tagname, (rmin, rmax) in list(ranges.items()):
     ranges[tagname] = math.floor(rmin),math.ceil(rmax)
   # print 'ranges', ranges
   def groups2tagmap(groups):
     tagmap = {}
-    for group, range in groups.iteritems():
+    for group, range in groups.items():
       for tag in group:
         tagmap[tag] = range
     return tagmap
-  groups = dict([((tag,), (rmin, rmax)) for tag, (rmin, rmax) in ranges.iteritems()])
+  groups = dict([((tag,), (rmin, rmax)) for tag, (rmin, rmax) in ranges.items()])
   tagmap = groups2tagmap(groups)
   bestscore = score(ranges, tagmap)
   bestgroups = groups
@@ -114,8 +114,8 @@ def calculateaxes(ranges):
     thisbestgroups = bestgroups
     foundimprovement = False
     # print "trying for improvement at", numaxes
-    for group1, (a1_min, a1_max) in bestgroups.iteritems():
-      for group2, (a2_min, a2_max) in bestgroups.iteritems():
+    for group1, (a1_min, a1_max) in bestgroups.items():
+      for group2, (a2_min, a2_max) in bestgroups.items():
         # don't need to try both ways or on the same tag
         if group1 <= group2: continue
         if (a1_min, a1_max) == (a2_min, a2_max): continue
@@ -136,7 +136,7 @@ def calculateaxes(ranges):
       numaxes = len(bestgroups)
       # print "best at", numaxes, bestscore, bestgroups
   bestmap = groups2tagmap(bestgroups)
-  for tag1, (r1_min, r1_max) in bestmap.items():
+  for tag1, (r1_min, r1_max) in list(bestmap.items()):
     bestmap[tag1] = (0, (r1_min, r1_max))
   return bestmap
 

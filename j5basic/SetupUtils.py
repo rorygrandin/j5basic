@@ -48,7 +48,7 @@ def find_packages_and_data(where='.', exclude_packages=(), exclude_package_data=
 
     for pat in list(exclude_packages)+['ez_setup']:
         packages = [item for item in packages if not fnmatch.fnmatchcase(item,pat)]
-    return packages, dict((k,v) for k, v in package_data.iteritems() if k in packages)
+    return packages, dict((k,v) for k, v in package_data.items() if k in packages)
 
 class fileset(list):
     """this is a installation list of a set of files from a directory"""
