@@ -9,3 +9,4 @@ Testing fragment<br/>
 
 def test_clean_html():
     cleaned_html = CleanXHTML.clean_html(six.text_type(DIRTY_XHTML))
+    assert cleaned_html == six.text_type("\nTesting fragment<br/>\nTEXT\n\n")
