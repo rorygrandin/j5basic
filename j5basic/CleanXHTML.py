@@ -57,7 +57,7 @@ class Cleaner(clean.Cleaner):
         cleaned = saxutils.escape(divnode.text) if divnode.text else ''
 
         for n in divnode:
-            cleaned += tostring(n, encoding = str, method = 'xml')
+            cleaned += tostring(n, encoding = 'unicode', method = 'xml')
         return cleaned
 
 # We need safe_attrs_only set to False, otherwise it strips out style attributes completely
