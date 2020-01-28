@@ -112,7 +112,7 @@ def mapdict(thedict, keymap=None, valuemap=None):
             return dict([(keymap(key), valuemap(value)) for key, value in thedict.items()])
 
 def generalupper(str):
-    """this uses the object's upper method - works with string and unicode"""
+    """this uses the object's upper method - works with string"""
     if str is None: return str
     return str.upper()
 
@@ -126,16 +126,16 @@ class cidict(dict):
             self.update(fromdict)
 
     def __getitem__(self, key):
-        if type(key) != str and type(key) != str:
-            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise_(TypeError, "cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__getitem__(self, akey)
         raise IndexError
 
     def __setitem__(self, key, value):
-        if type(key) != str and type(key) != str:
-            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise_(TypeError, "cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__setitem__(self, akey, value)
@@ -155,16 +155,16 @@ class cidict(dict):
             self[key] = kwargs[key]
 
     def __delitem__(self, key):
-        if type(key) != str and type(key) != str:
-            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise_(TypeError, "cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__delitem__(self, akey)
         raise IndexError
 
     def __contains__(self, key):
-        if type(key) != str and type(key) != str:
-            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise_(TypeError, "cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return 1
