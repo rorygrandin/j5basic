@@ -75,13 +75,13 @@ def subtractdicts(ldict, rdict):
         if key in rdict:
             lvalue, rvalue = ldict[key], rdict[key]
             # type mismatch doesn't count if both are str/unicode
-            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in (str, str) and type(rvalue) in (str, str)):
+            if (type(lvalue) != type(rvalue)) and not (isinstance(lvalue, str) and isinstance(rvalue, str)):
                 diffdict[key] = lvalue
             elif type(lvalue) != type(rvalue):
                 # handle str/unicode mismatch
-                if type(lvalue) == str: lvaluecmp = lvalue.decode('UTF-8')
+                if isinstance(lvalue, bytes): lvaluecmp = lvalue.decode('UTF-8')
                 else: lvaluecmp = lvalue
-                if type(rvalue) == str: rvaluecmp = rvalue.decode('UTF-8')
+                if isinstance(lvalue, bytes): rvaluecmp = rvalue.decode('UTF-8')
                 else: rvaluecmp = rvalue
                 if lvaluecmp != rvaluecmp:
                     diffdict[key] = lvalue
