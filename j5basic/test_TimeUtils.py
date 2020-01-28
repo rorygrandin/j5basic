@@ -113,6 +113,8 @@ def test_threading_fail():
     assert threadsrun != 10
 
 threadsrun_ = 0
+
+# This test is failing? But do we even use multiple threads?
 def test_threading_fix():
     def f(event):
         try:

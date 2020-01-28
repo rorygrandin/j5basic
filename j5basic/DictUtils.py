@@ -147,11 +147,17 @@ class cidict(dict):
             pass
         elif hasattr(_updatedict, "keys"):
             for key in list(_updatedict.keys()):
+                if isinstance(key, bytes):
+                    key = key.decode('utf-8')
                 self[key] = _updatedict[key]
         else:
             for key, value in _updatedict:
+                if isinstance(key, bytes):
+                    key = key.decode('utf-8')
                 self[key] = value
         for key in kwargs:
+            if isinstance(key, bytes):
+                key = key.decode('utf-8')
             self[key] = kwargs[key]
 
     def __delitem__(self, key):

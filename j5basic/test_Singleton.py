@@ -29,7 +29,7 @@ def test_non_oldstyle():
     """Tests that Singleton classes are implictly newstyle"""
     class Highlander(with_metaclass(Singleton.Singleton, object)):
         pass
-    assert isinstance(Highlander, object)
+    assert issubclass(Highlander, object)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()
