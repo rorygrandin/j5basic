@@ -18,7 +18,7 @@ class Cleaner(clean.Cleaner):
             raise ValueError('We only support cleaning unicode HTML fragments')
 
         #We wrap the content up in an extra div tag (otherwise lxml does wierd things to it - like adding in <p> tags and stuff)
-        divnode = fromstring(u'<div>' + html + u'</div>')
+        divnode = fromstring('<div>' + str(html) + u'</div>')
         self(divnode)
 
         # Strip all class attributes

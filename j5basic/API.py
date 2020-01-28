@@ -28,7 +28,13 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *
 from builtins import object
+from future.utils import PY3
 import inspect
+
+if not PY3:
+    INSPECT_METHOD = inspect.ismethod
+else:
+    INSPECT_METHOD = inspect.isfunction
 
 class APIError(Exception):
     """Exception base class for errors with APIs."""
@@ -63,10 +69,7 @@ class APIMeta(type):
         new_class = type.__new__(cls, name, bases, d)
 
         for interface in check_interfaces:
-            for method in dir(interface):
-                interface_method = getattr(interface, method)
-                if not inspect.ismethod(interface_method):
-                    continue
+            for method, interface_method in inspect.getmembers(interface, INSPECT_METHOD):
                 # PyPy has API inheriting stuff from the base object; we should ignore these if the interface doesn't declare them explicitly
                 if interface_method == getattr(API, method, None):
                     continue

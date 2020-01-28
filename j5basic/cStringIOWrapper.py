@@ -7,10 +7,7 @@ standard_library.install_aliases()
 from builtins import next
 from builtins import *
 from builtins import object
-try:
-    from io import StringIO as WrappedStringIO
-except ImportError:
-    from io import StringIO as WrappedStringIO
+from io import StringIO as WrappedStringIO
 
 class StringIO(object):
     def __init__(self, stringio = None):

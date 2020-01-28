@@ -41,6 +41,9 @@ class ImplementingAPIClass(object):
     def i_add_value(self):
         return self.value1 + self.value2
 
+class NotAnAPI(object):
+    pass
+
 class TestAPI(object):
     def test_check_implementing(self):
         """checks the sample implementing class"""

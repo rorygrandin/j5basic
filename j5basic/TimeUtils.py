@@ -7,7 +7,7 @@ standard_library.install_aliases()
 from builtins import *
 from past.utils import old_div
 from j5basic import TzInfo
-from virtualtime import datetime_tz
+from virtualtime import datetime_tz, _underlying_datetime_type
 import datetime
 import threading
 import time
@@ -121,7 +121,7 @@ def _findall(text, substr):
 
 _NEEDS_STRFTIME_PATCH = True
 try:
-    datetime.datetime(1,1,1).strftime("%Y-%m-%d")
+    _underlying_datetime_type(1,1,1).strftime("%Y-%m-%d")
     _NEEDS_STRFTIME_PATCH = False
 except ValueError:
     pass

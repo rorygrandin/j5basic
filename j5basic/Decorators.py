@@ -15,7 +15,7 @@ from builtins import next
 from past.builtins import basestring
 from builtins import *
 from builtins import object
-import inspect, new, itertools
+import inspect, types, itertools
 import logging
 import time
 
@@ -25,7 +25,7 @@ import time
 
 def copyfunc(func): # not used internally
     "Creates an independent copy of a function."
-    return new.function(func.__code__, func.__globals__, func.__name__,
+    return types.FunctionType(func.__code__, func.__globals__, func.__name__,
                         func.__defaults__, func.__closure__)
 
 def getrightargs(function, args):
@@ -90,7 +90,7 @@ class decorator_helpers(object):
                     has_argdefault = True
                 elif isinstance(extendedarg, tuple) and len(extendedarg) == 1:
                     argname = extendedarg[0]
-                elif isinstance(extendedarg, basestring):
+                elif isinstance(extendedarg, str):
                     argname = extendedarg
                 else:
                     raise ValueError("Extended argument should be (keyword, default), (keyword,), or just keyword: got %r" % extendedarg)
@@ -172,7 +172,7 @@ class decorator_helpers(object):
             return _call_(_func_, %(shortsign)s)""" % infodict
             func_code = compile(func_src, func.__code__.co_filename, 'exec')
         func_internal_code = func_code.co_consts[len(defaults or ())]
-        dec_func = new.function(func_internal_code, execdict, func.__name__, defaults)
+        dec_func = types.FunctionType(func_internal_code, execdict, func.__name__, defaults)
         dec_func.__doc__ = func.__doc__
         dec_func.__dict__ = func.__dict__
         return dec_func
@@ -306,6 +306,8 @@ def override_arg(argname,value,args,kwargs,argspec):
         return (args, kwargs)
     regargs, varargs, varkwargs, defaults = argspec
     if argname in regargs:
+        if isinstance(args, tuple):
+            args = list(args)
         args[regargs.index(argname)] = value
     else:
         kwargs[argname] = value

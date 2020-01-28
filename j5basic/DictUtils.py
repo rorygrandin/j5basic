@@ -231,7 +231,7 @@ class ordereddict(dict):
     def __delitem__(self, key):
         alreadypresent = key in self
         result = dict.__delitem__(self, key)
-        if not alreadypresent: del self.order[self.order.find(key)]
+        if alreadypresent: self.order.remove(key)
         return result
 
     def copy(self):
@@ -273,7 +273,7 @@ class ordereddict(dict):
         """D.popitem() -> (k, v), remove and return some (key, value) pair as a 2-tuple; but raise KeyError if D is empty"""
         if len(self.order) == 0:
             raise KeyError("popitem(): ordered dictionary is empty")
-        k = self.order.pop()
+        k = self.order[-1]
         v = self[k]
         del self[k]
         return (k,v)

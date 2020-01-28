@@ -77,7 +77,7 @@ class timecache(dict):
         self.last_purged = n
     try:
         keystodelete = []
-        for key, (timestamp, value) in dict.iteritems(self):
+        for key, (timestamp, value) in dict.items(self):
           if self.expired(timestamp):
             keystodelete.append(key)
         for key in keystodelete:
@@ -102,14 +102,14 @@ class timecache(dict):
   def __getitem__(self, key):
     """[] access of items"""
     if self.is_disabled():
-      raise_(KeyError, key)
+      raise KeyError(key)
     timestamp, value = dict.__getitem__(self, key)
     if self.expired(timestamp):
       self.expire(key)
       # this allows expire to actually reset the value
       if dict.__contains__(self, key):
         return dict.__getitem__(self, key)[1]
-      raise_(KeyError, key)
+      raise KeyError(key)
     return value
 
   def __iter__(self):
@@ -172,21 +172,21 @@ class timecache(dict):
     """D.iteritems() -> an iterator over the (key, value) items of D"""
     if not GLOBAL_CACHE_DISABLED:
       self.purge()
-      for key, (timestamp, value) in dict.iteritems(self):
+      for key, (timestamp, value) in dict.items(self):
         yield (key, value)
 
   def iterkeys(self):
     """D.iterkeys() -> an iterator over the keys of D"""
     if self.is_disabled():
-      return dict.iterkeys({})
+      return dict.keys({})
     self.purge()
-    return dict.iterkeys(self)
+    return dict.keys(self)
 
   def itervalues(self):
     """D.itervalues() -> an iterator over the values of D"""
     if not GLOBAL_CACHE_DISABLED:
       self.purge()
-      for timestamp, value in dict.itervalues(self):
+      for timestamp, value in dict.values(self):
         yield value
 
   def keys(self):

@@ -15,7 +15,7 @@ from future.utils import python_2_unicode_compatible
 import operator
 import decimal
 
-numbers = (int, int, float, decimal.Decimal)
+numbers = (int, float, decimal.Decimal)
 
 def Identity(x):
     """Returns the object given to it"""
@@ -44,7 +44,7 @@ class Conversion(object):
     def __mul__(self, other):
         """Returns a related Conversion"""
         if not isinstance(other, Conversion):
-            raise NotImplementedError("Cannot divide %r and %r" % (self, other))
+            raise NotImplementedError("Cannot multiply %r and %r" % (self, other))
         return SequentialConversion(self, other)
 
     def __truediv__(self, other):
@@ -303,6 +303,9 @@ class Unit(object):
         else:
             raise NotImplementedError("Can only generate Scalars for %r with numbers - got %r of type %r" % (self, value, type(value)))
 
+    def __hash__(self):
+        return id(self)
+
 class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
     def __init__(self, name):
@@ -392,7 +395,19 @@ class Scalar(object):
         if units_ratio.base_units:
             return False
         adjusted_value = units_ratio.op(self.value)
-        return cmp(adjusted_value, other.value)
+        return (adjusted_value > other.value) - (adjusted_value < other.value)
+
+    def __lt__(self, other):
+        return self.__cmp__(other) == -1
+
+    def __le__(self, other):
+        return self.__cmp__(other) < 1
+
+    def __ge__(self, other):
+        return self.__cmp__(other) > -1
+
+    def __gt__(self, other):
+        return self.__cmp__(other) == 1
 
     __add__ = scalar_operation(operator.add, Identity)
     __radd__ = scalar_operation(operator.add, Identity, reversed=True)
@@ -433,7 +448,6 @@ class Scalar(object):
     # These conversions are of debatable value, but are included at the moment
     __complex__ = scalar_conversion(complex)
     __int__ = scalar_conversion(int)
-    __long__ = scalar_conversion(int)
     __float__ = scalar_conversion(float)
 
     # __oct__ not defined
