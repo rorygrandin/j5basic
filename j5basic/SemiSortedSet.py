@@ -117,7 +117,7 @@ def lock_wrapper(f, target_function):
             self.lock.release()
         return result
     wrapper.__doc__ = f.__doc__
-    wrapper.func_name = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
+    wrapper.__name__ = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
     return wrapper
 
 # Override all inherited methods from set so that they lock safely

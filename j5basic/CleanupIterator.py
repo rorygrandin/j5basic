@@ -24,7 +24,7 @@ class CleanupIterator(object):
             # this class should only be used on iterators that stop if they raise an error, otherwise the cleanup point is indeterminable
             raise StopIteration()
         try:
-            return self.iterator.next()
+            return next(self.iterator)
         except (Exception, StopIteration):
             self.cleaned_up = True
             # if a clean up error happens, it will be raised instead of the iterator error

@@ -5,6 +5,7 @@
 
 # Copyright 2002, 2003 St James Software
 
+from future.utils import raise_
 import datetime
 import time
 import threading
@@ -94,14 +95,14 @@ class timecache(dict):
   def __getitem__(self, key):
     """[] access of items"""
     if self.is_disabled():
-      raise KeyError, key
+      raise_(KeyError, key)
     timestamp, value = dict.__getitem__(self, key)
     if self.expired(timestamp):
       self.expire(key)
       # this allows expire to actually reset the value
       if dict.__contains__(self, key):
         return dict.__getitem__(self, key)[1]
-      raise KeyError, key
+      raise_(KeyError, key)
     return value
 
   def __iter__(self):

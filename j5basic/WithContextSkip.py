@@ -63,17 +63,17 @@ class ConditionalContextManager(object):
 
     def __enter__(self):
         try:
-            return self.gen.next(), StatementNotSkipped
-        except SkipStatement, e:
+            return next(self.gen), StatementNotSkipped
+        except SkipStatement as e:
             # set flag
             return StatementSkipped, StatementSkipped
-        except StopIteration, e:
+        except StopIteration as e:
             raise RuntimeError("generator didn't yield or raise SkipStatement")
 
     def __exit__(self, type, value, traceback):
         if type is None:
             try:
-                self.gen.next()
+                next(self.gen)
             except StopIteration:
                 return
             else:
@@ -88,7 +88,7 @@ class ConditionalContextManager(object):
             try:
                 self.gen.throw(type, value, traceback)
                 raise RuntimeError("generator didn't stop after throw()")
-            except StopIteration, exc:
+            except StopIteration as exc:
                 # Suppress the exception *unless* it's the same exception that
                 # was passed to throw().  This prevents a StopIteration
                 # raised inside the "with" statement from being suppressed

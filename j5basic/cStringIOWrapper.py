@@ -26,7 +26,7 @@ class StringIO(object):
         return self.stringio_object.isatty()
 
     def next(self):
-        return self.stringio_object.next()
+        return next(self.stringio_object)
 
     def read(self, s=None):
         return self.stringio_object.read(s)

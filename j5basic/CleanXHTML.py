@@ -27,7 +27,7 @@ class Cleaner(clean.Cleaner):
                 elif 'style' == key.lower():
                     try:
                         cssStyle = cssutils.parseStyle(value)
-                    except Exception, e:
+                    except Exception as e:
                         logging.info("Style %s failed to parse with error %s." % (value, e))
                         node.attrib.pop(key, None)
                         continue

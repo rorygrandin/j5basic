@@ -98,7 +98,7 @@ class TestInfinite:
 
     def test_object_numeric(self):
         self._do_compare_infinities(InfiniteObject)
-        self._do_comparisons(InfiniteObject, 99999999999999L)
+        self._do_comparisons(InfiniteObject, 99999999999999)
         self._do_comparisons(InfiniteObject, 1e200)
         infinity1 = InfiniteObject()
         infinity2 = float("inf")

@@ -17,7 +17,7 @@ class PushBack(object):
         if self.pushedback:
             return self.pushedback.pop(0)
         else:
-            return self.iterator.next()
+            return next(self.iterator)
 
 class PushToBack(object):
     def __init__(self, iterator):
@@ -34,7 +34,7 @@ class PushToBack(object):
     def next(self):
         if not self.iterator_done:
             try:
-                return self.iterator.next()
+                return next(self.iterator)
             except StopIteration:
                 self.iterator_done = True
         if len(self.pushedtoback):

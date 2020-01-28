@@ -3,6 +3,7 @@
 
 """Tools for profiling object usage.
    """
+from __future__ import print_function
 
 # Copyright 2007 St James Software
 
@@ -81,15 +82,15 @@ class ObjTracker(object):
     def print_changes(self):
         diff, unreachable, garbage = self._gather_changes()
 
-        print "BIGGEST INCREASES:"
+        print("BIGGEST INCREASES:")
         for objtype, inc in self.top_items(diff,10):
-            print "\t", inc, objtype
+            print("\t", inc, objtype)
 
-        print "SMALLEST INCREASES:"
+        print("SMALLEST INCREASES:")
         for objtype, inc in self.bottom_items(diff,10):
-            print "\t", inc, objtype
+            print("\t", inc, objtype)
 
-        print "# COLLECTED:", unreachable - garbage
-        print "# GC.GARBAGE:", garbage
+        print("# COLLECTED:", unreachable - garbage)
+        print("# GC.GARBAGE:", garbage)
 
-        print "----"
+        print("----")

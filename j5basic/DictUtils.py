@@ -5,6 +5,7 @@
 
 # Copyright 2002, 2003 St James Software
 
+from future.utils import raise_
 try:
     from virtualtime import datetime_tz
 except ImportError as e:
@@ -119,7 +120,7 @@ class cidict(dict):
 
     def __getitem__(self, key):
         if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
+            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
         for akey in self.iterkeys():
             if akey.lower() == key.lower():
                 return dict.__getitem__(self, akey)
@@ -127,7 +128,7 @@ class cidict(dict):
 
     def __setitem__(self, key, value):
         if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
+            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
         for akey in self.iterkeys():
             if akey.lower() == key.lower():
                 return dict.__setitem__(self, akey, value)
@@ -148,7 +149,7 @@ class cidict(dict):
 
     def __delitem__(self, key):
         if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
+            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
         for akey in self.iterkeys():
             if akey.lower() == key.lower():
                 return dict.__delitem__(self, akey)
@@ -156,7 +157,7 @@ class cidict(dict):
 
     def __contains__(self, key):
         if type(key) != str and type(key) != unicode:
-            raise TypeError, "cidict can only have str or unicode as key (got %r)" % type(key)
+            raise_(TypeError, "cidict can only have str or unicode as key (got %r)" % type(key))
         for akey in self.iterkeys():
             if akey.lower() == key.lower():
                 return 1
@@ -166,7 +167,7 @@ class cidict(dict):
         return self.__contains__(key)
 
     def get(self, key, default=None):
-        if self.has_key(key):
+        if key in self:
             return self[key]
         else:
             return default
@@ -181,7 +182,7 @@ class ordereddict(dict):
             raise TypeError("ordereddict() takes at most 1 argument (%d given)" % len(args))
         else:
             initarg = args[0]
-            apply(super(ordereddict, self).__init__, args)
+            super(ordereddict, self).__init__(*args)
             if hasattr(initarg, "keys"):
                 self.order = initarg.keys()
             else:

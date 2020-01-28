@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from j5basic import TimedLock
 from j5.OS import ThreadControl
 from j5test import Utils
@@ -28,26 +29,26 @@ def schedule_acquire_release(lock, t1, t2, t3, ea=None, er=None):
     start_time = time.time()
     def elapsed_time():
         return "%0.3f" % (time.time() - start_time)
-    print elapsed_time(), name, "sleep", t1
+    print(elapsed_time(), name, "sleep", t1)
     time.sleep(t1)
-    print elapsed_time(),  name, "acquire", t2
+    print(elapsed_time(),  name, "acquire", t2)
     if lock.acquire(t2):
         if ea:
             ea.ts = time.time()
-            print elapsed_time(),  name, "acquired", ea.ts
+            print(elapsed_time(),  name, "acquired", ea.ts)
             ea.set()
         else:
-            print elapsed_time(),  name, "acquired"
-        print elapsed_time(),  name, "sleep", t3
+            print(elapsed_time(),  name, "acquired")
+        print(elapsed_time(),  name, "sleep", t3)
         time.sleep(t3)
-        print elapsed_time(),  name, "release"
+        print(elapsed_time(),  name, "release")
         lock.release()
     if er:
         er.ts = time.time()
-        print elapsed_time(),  name, "finished", er.ts
+        print(elapsed_time(),  name, "finished", er.ts)
         er.set()
     else:
-        print elapsed_time(),  name, "finished"
+        print(elapsed_time(),  name, "finished")
 
 class TestTimedLock(object):
     def ensure_stopped(self, *threads):
@@ -109,7 +110,7 @@ class TestTimedLock(object):
         assert bt2_ea.isSet()
         assert bt2_er.isSet()
         # check that we didn't wait very long to catch the event
-        print "delay time", bt2_ea.ts - bt1_er.ts
+        print("delay time", bt2_ea.ts - bt1_er.ts)
         assert bt2_ea.ts - bt1_er.ts < 0.1
 
     @Utils.if_long_test_run()
@@ -124,24 +125,24 @@ class TestTimedLock(object):
         [bt_n.start() for bt_n in bt]
         [e.wait(1*thread_count*3) for e in bt_er]
         wait_complete_time = time.time()
-        print "wait completed at %0.2f" % time.time()
+        print("wait completed at %0.2f" % time.time())
         # allow a short amount of time for threads to exit after setting the event
         time.sleep(0.01)
         self.ensure_stopped(*bt)
         def elapsed_time(e):
             ts = getattr(e, "ts", None)
             return ts - start_time if ts else None
-        print "n, acquired, ts, released, ts"
+        print("n, acquired, ts, released, ts")
         for i in range(thread_count):
-            print i, bt_ea[i].isSet(), elapsed_time(bt_ea[i]), bt_er[i].isSet(), elapsed_time(bt_er[i])
+            print(i, bt_ea[i].isSet(), elapsed_time(bt_ea[i]), bt_er[i].isSet(), elapsed_time(bt_er[i]))
         for i in range(thread_count):
-            print i
+            print(i)
             assert bt_ea[i].isSet()
             assert bt_er[i].isSet()
         # check that we didn't wait very long to catch the event
         final_er = max(bt_er_n.ts for bt_er_n in bt_er)
         first_ea = min(bt_ea_n.ts for bt_ea_n in bt_ea)
-        print "elapsed time", final_er - first_ea
+        print("elapsed time", final_er - first_ea)
         assert final_er - first_ea < 0.03*thread_count*3
 
     @Utils.if_long_test_run()

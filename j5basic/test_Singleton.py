@@ -21,7 +21,7 @@ def test_non_oldstyle():
     class Highlander:
         __metaclass__ = Singleton.Singleton
     assert isinstance(Highlander, object)
-    assert not isinstance(Highlander, types.ClassType)
+    assert not isinstance(Highlander, type)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()
