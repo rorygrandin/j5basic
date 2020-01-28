@@ -11,6 +11,7 @@ from builtins import zip
 from builtins import str
 from builtins import *
 from builtins import object
+from future.utils import python_2_unicode_compatible
 import operator
 import decimal
 
@@ -64,6 +65,7 @@ def DivideBy(conversion):
         return conversion
     raise ValueError("Could not calculate the inverse of %r" % (conversion,))
 
+@python_2_unicode_compatible
 class SequentialConversion(Conversion):
     """Performs conversions in sequence"""
     def __init__(self, *conversions):
@@ -169,6 +171,7 @@ class SequentialConversion(Conversion):
 
 identity = Conversion(Identity)
 
+@python_2_unicode_compatible
 class Unit(object):
     """A Base Unit that can be used in calculations"""
     def __init__(self, name, base_units, op):
@@ -353,6 +356,7 @@ def scalar_conversion(target_type):
         return target_type(self.value)
     return __conversion__
 
+@python_2_unicode_compatible
 class Scalar(object):
     """An object representing a value with units"""
     def __init__(self, value, unit):

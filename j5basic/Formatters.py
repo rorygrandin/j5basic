@@ -12,6 +12,7 @@ standard_library.install_aliases()
 from builtins import range
 from builtins import *
 from builtins import object
+from future.utils import python_2_unicode_compatible
 import datetime
 import logging
 import time
@@ -19,6 +20,7 @@ from j5basic import TimeUtils
 
 # Formatted Types
 
+@python_2_unicode_compatible
 class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
@@ -26,8 +28,9 @@ class StrftimeFormattedTypeMixIn(object):
         if isinstance(self.format_str, str):
             # flip through into string world and back again
             return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
-        return TimeUtils.strftime(self, self.format_str)
+        return TimeUtils.strftime(self, self.format_str).decode("UTF-8")
 
+@python_2_unicode_compatible
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
 
