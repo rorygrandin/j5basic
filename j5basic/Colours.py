@@ -5,6 +5,14 @@
 """
 Some simple functions to generate colours.
 """
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from past.utils import old_div
 import numpy as np
 
 def pastel(colour, weight=2.4):
@@ -25,7 +33,7 @@ def pastel(colour, weight=2.4):
     # want to increase weight from total to weight
     # pick x s.t.  slack * x == weight - total
     # x = (weight - total) / slack
-    x = (weight - total) / slack
+    x = old_div((weight - total), slack)
 
     rgb = [c + (x * (1.0-c)) for c in rgb]
 
@@ -40,7 +48,7 @@ def get_colours(n):
 
     # how many new colours to we need to insert between
     # red and green and between green and blue?
-    needed = (((n - 3) + 1) / 2, (n - 3) / 2)
+    needed = (old_div(((n - 3) + 1), 2), old_div((n - 3), 2))
 
     colours = []
     for start in (0, 1):

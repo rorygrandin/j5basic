@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
+from future.utils import with_metaclass
 class enum_meta(type):
     def __iter__(cls):
         """iterates over the constants defined in the class"""
@@ -10,8 +19,7 @@ class enum_meta(type):
 
 _NO_DEFAULT = object()
 
-class enum(object):
-    __metaclass__ = enum_meta
+class enum(with_metaclass(enum_meta, object)):
     __constant_class__ = int
     @classmethod
     def _build_lookups(cls):

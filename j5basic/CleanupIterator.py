@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
 """this is an iterator wrapper that allows things to be cleaned up when the end of the iterator is reached"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 class CleanupIterator(object):
     """this is an iterator wrapper that allows things to be cleaned up when the end of the iterator is reached or an error occurs"""
     def __init__(self, iterator, cleanup_call, *cleanup_args, **cleanup_kwargs):
@@ -16,7 +25,7 @@ class CleanupIterator(object):
         """Mark that we are our own iterator"""
         return self
 
-    def next(self):
+    def __next__(self):
         """return the next result for the iterator, and call cleanup_call once the iterator stops, or if an error is raised"""
         if self.cleaned_up:
             # do not allow any more iteration once we have cleaned up

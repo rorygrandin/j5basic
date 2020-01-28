@@ -4,9 +4,16 @@
 """Tools for profiling object usage.
    """
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
 
 # Copyright 2007 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 import gc
 
 class ObjTracker(object):
@@ -44,14 +51,14 @@ class ObjTracker(object):
             key = type(x)
             usage[key] = usage.setdefault(key,0) + 1
 
-        for key, count in usage.iteritems():
+        for key, count in usage.items():
             if key in self._prev_objs:
                 diff[key] = count - self._prev_objs[key]
                 del self._prev_objs[key]
             else:
                 diff[key] = count
 
-        for key, count in self._prev_objs.iteritems():
+        for key, count in self._prev_objs.items():
             diff[key] = -count
 
         self._prev_objs = usage
@@ -63,7 +70,7 @@ class ObjTracker(object):
 
            Returns a list (length=size) of (type, increase) tuples.
            """
-        top_items = diff.items()
+        top_items = list(diff.items())
         top_items.sort(key=lambda x: x[1],reverse=True)
         top_items = top_items[:size]
         return top_items
@@ -73,7 +80,7 @@ class ObjTracker(object):
 
            Returns a list (length=size) of (type, -decrease) tuples.
            """
-        bottom_items = diff.items()
+        bottom_items = list(diff.items())
         bottom_items.sort(key=lambda x: x[1],reverse=False)
         bottom_items = bottom_items[:size]
         bottom_items.reverse()

@@ -2,9 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """Various decorators"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2006 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from past.builtins import basestring
+from builtins import *
+from builtins import object
 import inspect, new, itertools
 import logging
 import time
@@ -278,7 +288,7 @@ def wraptimer(function):
     """Log the time a function takes to run."""
     def timecall(self, *args, **kw):
         start_time = time.time()
-        argstr = ", ".join([repr(arg) for arg in args]) + ", ".join(["%s=%r" % (kw, val) for kw, val in kw.iteritems()])
+        argstr = ", ".join([repr(arg) for arg in args]) + ", ".join(["%s=%r" % (kw, val) for kw, val in kw.items()])
         logging.debug("about to call %s(%s)" % (function.__name__, argstr))
         result = function(self, *args, **kw)
         end_time = time.time()

@@ -2,10 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """Utilities for implementing various object-orientated design pattern concepts"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2006 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 import threading
+from future.utils import with_metaclass
 
 class MultitonMetaclass(type):
     """Metaclass for Multiton. Needs to add a per-subclass lock object and
@@ -17,7 +26,7 @@ class MultitonMetaclass(type):
         setattr(cls,"_multiton_lock",threading.Lock())
         setattr(cls,"_multiton_cache",{})
 
-class Multiton(object):
+class Multiton(with_metaclass(MultitonMetaclass, object)):
     """Thread-safe multiton baseclass. Sub-classes return only one object per set of
        initialisation parameters. These parameters must all be hashable.
 
@@ -30,8 +39,6 @@ class Multiton(object):
        Object creation is thread-safe. It is the sub-classes responsibility to ensure
        that any methods other than multiton_setup (which will be called while holding
        a sub-class wide lock) are thread-safe."""
-
-    __metaclass__ = MultitonMetaclass
 
     def __new__(cls,*args):
         key = hash(tuple(args))

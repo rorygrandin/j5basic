@@ -6,25 +6,33 @@ PEP 377 (rejected) proposed making this a standard language feature, and was rej
 This implementation uses the fact that variable assignments in the with ... as ...: syntax are considered part of the with block
 Exceptions raised in these assignments are passed to the __exit__ function of the context manager, and can be used to skip the block.
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 import threading
 import contextlib
 from functools import wraps
 import sys
 import warnings
 from . import Singleton
+from future.utils import with_metaclass
 
 class SkipStatement(Exception):
     """Exception which when raised by a conditional context manager function will cause the controlled statement to be skipped"""
 
-class StatementNotSkippedType:
+class StatementNotSkippedType(with_metaclass(Singleton.Singleton, object)):
     """A singleton object indicating that a context manager for a with clause has not directed the controlled statement to be skipped"""
-    __metaclass__ = Singleton.Singleton
     name = "StatementNotSkipped"
 
-class StatementSkippedType:
+class StatementSkippedType(with_metaclass(Singleton.Singleton, object)):
     """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detector attribute"""
-    __metaclass__ = Singleton.Singleton
     name = "StatementSkipped"
     def __setattr__(self, attr, value):
         """Only the detector attribute may be set on StatementSkipped"""

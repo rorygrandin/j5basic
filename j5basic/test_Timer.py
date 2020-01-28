@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 from j5basic import Timer
 from j5test import Utils
 import virtualtime
@@ -8,7 +16,7 @@ from virtualtime import test_virtualtime
 import threading
 import time
 
-class TimerDriver:
+class TimerDriver(object):
     def __init__(self, expecteddiff=1, expectarg=False):
         self.lasttime = None
         self.expecteddiff = expecteddiff

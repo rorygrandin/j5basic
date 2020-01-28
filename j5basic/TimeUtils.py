@@ -1,3 +1,11 @@
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from past.utils import old_div
 from j5basic import TzInfo
 from virtualtime import datetime_tz
 import datetime
@@ -51,8 +59,8 @@ def timedelta_to_tuple(timedelta):
     """Expresses a timedelta object as a tuple containing days, hours, minutes and seconds (rounded)"""
     d = timedelta.days
     s_total = timedelta.seconds
-    h = s_total / 3600
-    m = (s_total / 60) % 60
+    h = old_div(s_total, 3600)
+    m = (old_div(s_total, 60)) % 60
     s = s_total % 60
     return (d, h, m, s)
 

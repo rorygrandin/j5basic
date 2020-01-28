@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 from j5basic import PushBack
 
-class TestPushBack:
+class TestPushBack(object):
     def test_wrap(self):
         i = [1,2,3,4,5]
         g = PushBack.PushBack(i.__iter__())
@@ -30,7 +39,7 @@ class TestPushBack:
         l = list(g)
         assert l == []
 
-class TestPushToBack:
+class TestPushToBack(object):
     def test_wrap(self):
         i = [1,2,3,4,5]
         g = PushBack.PushToBack(i.__iter__())

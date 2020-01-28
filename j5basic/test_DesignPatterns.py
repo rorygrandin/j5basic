@@ -2,9 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """Tests for design pattern utilities"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2006 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import *
+from builtins import object
 from j5basic import DesignPatterns
 import threading
 
@@ -44,7 +53,7 @@ class TestMultiton(object):
         for thrd in threads:
             thrd.join()
 
-        for objs in results.values():
+        for objs in list(results.values()):
             assert len(objs) == THREADS
             for i in range(len(objs) - 1):
                 assert id(objs[i]) == id(objs[i+1])

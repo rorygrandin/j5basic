@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """Module for tools for easing creating setup files"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 import os
 import fnmatch
 from distutils import log
@@ -48,7 +55,7 @@ def find_packages_and_data(where='.', exclude_packages=(), exclude_package_data=
 
     for pat in list(exclude_packages)+['ez_setup']:
         packages = [item for item in packages if not fnmatch.fnmatchcase(item,pat)]
-    return packages, dict((k,v) for k, v in package_data.iteritems() if k in packages)
+    return packages, dict((k,v) for k, v in package_data.items() if k in packages)
 
 class fileset(list):
     """this is a installation list of a set of files from a directory"""

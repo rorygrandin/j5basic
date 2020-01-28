@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from past.builtins import cmp
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from j5basic.InfiniteClasses import *
 
 class A(object):
@@ -27,7 +36,7 @@ class A(object):
     def __gt__(self, other):
         return self.__cmp__(other) == 1
 
-class B():
+class B(object):
     def __init__(self, v):
         self.value = v
     def __cmp__(self, other):
@@ -35,7 +44,7 @@ class B():
             return cmp(self.value, other.value)
         return cmp(self.value, other)
 
-class C():
+class C(object):
     def __init__(self, v):
         self.value = v
     def __cmp__(self, other):
@@ -45,7 +54,7 @@ class C():
     def __lt__(self, other):
         return self.__cmp__(other) == -1
 
-class TestInfinite:
+class TestInfinite(object):
 
     def _do_comparisons(self, infinite_class, value):
         p_inf = infinite_class()

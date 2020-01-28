@@ -1,7 +1,16 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 try:
-    from cStringIO import StringIO as WrappedStringIO
+    from io import StringIO as WrappedStringIO
 except ImportError:
-    from StringIO import StringIO as WrappedStringIO
+    from io import StringIO as WrappedStringIO
 
 class StringIO(object):
     def __init__(self, stringio = None):
@@ -25,7 +34,7 @@ class StringIO(object):
     def isatty(self):
         return self.stringio_object.isatty()
 
-    def next(self):
+    def __next__(self):
         return next(self.stringio_object)
 
     def read(self, s=None):

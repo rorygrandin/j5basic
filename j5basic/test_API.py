@@ -3,9 +3,18 @@
 """Testing module for our API structure
    Also serves as a helper to understand how the API declarations etc work
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from j5basic import API
 from j5test import Utils
+from future.utils import with_metaclass
 
 class ArbAPI(API.API):
     def i_support_api(self):
@@ -53,8 +62,7 @@ class TestAPI(object):
 
     def declare_basic_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueAndSimple(object):
-            __metaclass__ = API.APIMeta
+        class TrueAndSimple(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI3)
             def i_never_give_up(self):
                 while True:
@@ -63,21 +71,19 @@ class TestAPI(object):
 
     def declare_inherited_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
-        class TrueChild(object):
-            __metaclass__ = API.APIMeta
+        class TrueChild(with_metaclass(API.APIMeta, object)):
+            pass
         return TrueChild
 
     def declare_false_support(self):
         """Try and declare a class as implementing an API that it doesn't"""
-        class LiarAndFraud(object):
-            __metaclass__ = API.APIMeta
+        class LiarAndFraud(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI)
         return LiarAndFraud
 
     def declare_ill_support(self):
         """Try and declare a class as implementing an API but the method signatures are wrong"""
-        class SlightlyDeceptive(object):
-            __metaclass__ = API.APIMeta
+        class SlightlyDeceptive(with_metaclass(API.APIMeta, object)):
             API.implements(ArbAPI)
             def i_support_api(self, x):
                 return True
@@ -87,8 +93,8 @@ class TestAPI(object):
         """Check that declarations of support fail even if the API is declared implemented in parent classes"""
         class Parent(object):
             API.implements(ArbAPI2)
-        class FalseChild(Parent):
-            __metaclass__ = API.APIMeta
+        class FalseChild(with_metaclass(API.APIMeta, Parent)):
+            pass
         return FalseChild
 
     def test_meta_declaration(self):

@@ -2,9 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """class for caching objects with timed expiry"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2002, 2003 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 from future.utils import raise_
 import datetime
 import time
@@ -117,7 +124,7 @@ class timecache(dict):
     if self.is_disabled():
       return "<GLOBAL_CACHE_DISABLED>"
     self.purge()
-    return repr(dict(self.items()))
+    return repr(dict(list(self.items())))
 
   def __setitem__(self, key, value):
     """[] setting of items"""
@@ -222,7 +229,7 @@ class timecache(dict):
     if self.is_disabled():
       return
     self.purge()
-    for key in updatedict.keys():
+    for key in list(updatedict.keys()):
       self[key] = updatedict[key]
 
   def size(self):

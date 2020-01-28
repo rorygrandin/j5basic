@@ -1,5 +1,12 @@
 """Unit tests for contextlib.py, adapted with WithContextSkip."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 import sys
 import tempfile
 import unittest
@@ -85,7 +92,7 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
     def _create_contextmanager_attribs(self):
         def attribs(**kw):
             def decorate(func):
-                for k,v in kw.items():
+                for k,v in list(kw.items()):
                     setattr(func,k,v)
                 return func
             return decorate
