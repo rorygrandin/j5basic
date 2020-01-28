@@ -43,14 +43,14 @@ class ObjTracker(object):
             key = type(x)
             usage[key] = usage.setdefault(key,0) + 1
 
-        for key, count in usage.items():
+        for key, count in usage.iteritems():
             if key in self._prev_objs:
                 diff[key] = count - self._prev_objs[key]
                 del self._prev_objs[key]
             else:
                 diff[key] = count
 
-        for key, count in self._prev_objs.items():
+        for key, count in self._prev_objs.iteritems():
             diff[key] = -count
 
         self._prev_objs = usage
@@ -62,7 +62,7 @@ class ObjTracker(object):
 
            Returns a list (length=size) of (type, increase) tuples.
            """
-        top_items = list(diff.items())
+        top_items = diff.items()
         top_items.sort(key=lambda x: x[1],reverse=True)
         top_items = top_items[:size]
         return top_items
@@ -72,7 +72,7 @@ class ObjTracker(object):
 
            Returns a list (length=size) of (type, -decrease) tuples.
            """
-        bottom_items = list(diff.items())
+        bottom_items = diff.items()
         bottom_items.sort(key=lambda x: x[1],reverse=False)
         bottom_items = bottom_items[:size]
         bottom_items.reverse()
@@ -81,15 +81,15 @@ class ObjTracker(object):
     def print_changes(self):
         diff, unreachable, garbage = self._gather_changes()
 
-        print("BIGGEST INCREASES:")
+        print "BIGGEST INCREASES:"
         for objtype, inc in self.top_items(diff,10):
-            print("\t", inc, objtype)
+            print "\t", inc, objtype
 
-        print("SMALLEST INCREASES:")
+        print "SMALLEST INCREASES:"
         for objtype, inc in self.bottom_items(diff,10):
-            print("\t", inc, objtype)
+            print "\t", inc, objtype
 
-        print("# COLLECTED:", unreachable - garbage)
-        print("# GC.GARBAGE:", garbage)
+        print "# COLLECTED:", unreachable - garbage
+        print "# GC.GARBAGE:", garbage
 
-        print("----")
+        print "----"

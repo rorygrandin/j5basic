@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-from j5basic import Decorators, DictUtils
+from j5basic import Decorators
 import threading
 import time
-import inspect
 from j5test.Utils import method_raises, raises
 
 class TestDecoratorDecorator(object):
@@ -46,11 +45,6 @@ class TestDecoratorDecorator(object):
         return f(x, calling_frame)
 
     @staticmethod
-    def override_x(f, *args, **kw):
-        args, kw = Decorators.override_arg("x", 50, args, kw, inspect.getargspec(f))
-        return f(*args, **kw)
-
-    @staticmethod
     def g(x):
         """returns x plus 25"""
         return x + 25
@@ -76,10 +70,6 @@ class TestDecoratorDecorator(object):
     def g2(x, z=4):
         """returns x plus z plus 25"""
         return x + z + 25
-
-    @staticmethod
-    def g3(y, x=0):
-        return y + x + 25
 
     def test_getinfo(self):
         """tests that the getinfo function returns the correct information about a function signature"""
@@ -222,14 +212,6 @@ class TestDecoratorDecorator(object):
         assert result == (0 + 3*5) + 3 + 25
         assert self.g2.calls[-1] == "Called with x=0, y=5, z=3"
 
-    def test_override_arg(self):
-        override_decorator = Decorators.decorator(self.override_x)
-        override_g = override_decorator(self.g)
-        assert override_g(0) == 75
-
-        override_g3 = override_decorator(self.g3)
-        assert override_g3(25, 0) == 100
-
 class TestSelfLocking(object):
 
     def test_runwithlock(self):
@@ -310,43 +292,4 @@ def test_chain_decorators():
         return x * 6
 
     assert underlying(3) == ((3*6)*2) + 1
-
-def test_get_right_args():
-    def my_arg_function(foo, bar, jim=3):
-        pass
-
-    rightargs = Decorators.getrightargs(my_arg_function, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4, 'jim': 5})
-    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'bar': 2, 'jim': 5})
-    rightargs = Decorators.getrightargs(my_arg_function, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
-    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'bar': 2})
-
-    class my_arg_class(object):
-        def __init__(self, foo, filip):
-            pass
-
-    rightargs = Decorators.getrightargs(my_arg_class, {'foo': 1, 'bar': 2, 'bob': 3, 'mary': 4})
-    DictUtils.assert_dicts_equal(rightargs, {'foo': 1, 'filip': None})
-
-    rightargs, rightkw = Decorators.conform_to_argspec((1, 2), {'billybob': 5, 'jim': 3}, inspect.getargspec(my_arg_function))
-    assert rightargs == [1, 2, 3]
-    assert not rightkw
-
-def test_get_or_pop_arg():
-    def my_arg_function(foo, bar, jim=3):
-        pass
-
-    args = (1, 2)
-    kw = {'jim': 3}
-
-    assert Decorators.get_or_pop_arg('bar', args, kw, inspect.getargspec(my_arg_function)) == 2
-    assert args == (1, 2)
-    DictUtils.assert_dicts_equal(kw, {'jim': 3})
-    assert Decorators.get_or_pop_arg('jim', args, kw, inspect.getargspec(my_arg_function)) == 3
-    assert args == (1, 2)
-    DictUtils.assert_dicts_equal(kw, {'jim': 3})
-
-    kw['billybob'] = 4
-    assert Decorators.get_or_pop_arg('billybob', args, kw, inspect.getargspec(my_arg_function)) == 4
-    assert args == (1, 2)
-    DictUtils.assert_dicts_equal(kw, {'jim': 3})
 

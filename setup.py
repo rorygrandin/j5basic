@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='j5basic',
-    version='1.3',
+    version='1.2',
     packages=['j5basic'],
     license='Apache License, Version 2.0',
     description='A collection of utility methods and classes.',

@@ -22,7 +22,7 @@ class SemiSortedSet(set):
     @Decorators.SelfLocking.runwithlock
     def copy(self):
         """makes a copy of this SemiSortedSet (with a new lock)"""
-        new_self = SemiSortedSet(set.copy(self))
+        new_self = set.copy(self)
         new_self.lock = threading.RLock()
         if hasattr(self, "__min__"):
             new_self.__min__ = self.__min__
@@ -117,7 +117,7 @@ def lock_wrapper(f, target_function):
             self.lock.release()
         return result
     wrapper.__doc__ = f.__doc__
-    wrapper.__name__ = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
+    wrapper.func_name = getattr(f, 'func_name', getattr(f, '__name__', 'locked_function'))
     return wrapper
 
 # Override all inherited methods from set so that they lock safely

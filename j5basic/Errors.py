@@ -20,7 +20,7 @@ def error_to_str(e):
     except UnicodeError as ue:
         logging.warning("Error converting error %r to str: %s", e, ue)
         try:
-            return str(e).encode("UTF-8")
+            return unicode(e).encode("UTF-8")
         except UnicodeError as ue2:
             logging.warning("Error converting error %r to unicode: %s", e, ue2)
             return "Error %r, args %r" % (e, e.args)

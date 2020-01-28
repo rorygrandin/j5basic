@@ -13,14 +13,11 @@ class PushBack(object):
     def pushback(self, item):
         self.pushedback.append(item)
 
-    def __next__(self):
+    def next(self):
         if self.pushedback:
             return self.pushedback.pop(0)
         else:
-            return next(self.iterator)
-
-    def next(self):
-        return self.__next__()
+            return self.iterator.next()
 
 class PushToBack(object):
     def __init__(self, iterator):
@@ -34,15 +31,13 @@ class PushToBack(object):
     def pushback(self, item):
         self.pushedtoback.append(item)
 
-    def __next__(self):
+    def next(self):
         if not self.iterator_done:
             try:
-                return next(self.iterator)
+                return self.iterator.next()
             except StopIteration:
                 self.iterator_done = True
         if len(self.pushedtoback):
             return self.pushedtoback.pop(0)
         raise StopIteration()
 
-    def next(self):
-        return self.__next__()

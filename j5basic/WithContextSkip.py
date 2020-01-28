@@ -13,17 +13,18 @@ from functools import wraps
 import sys
 import warnings
 from . import Singleton
-from six import with_metaclass
 
 class SkipStatement(Exception):
     """Exception which when raised by a conditional context manager function will cause the controlled statement to be skipped"""
 
-class StatementNotSkippedType(with_metaclass(Singleton.Singleton)):
+class StatementNotSkippedType:
     """A singleton object indicating that a context manager for a with clause has not directed the controlled statement to be skipped"""
+    __metaclass__ = Singleton.Singleton
     name = "StatementNotSkipped"
 
-class StatementSkippedType(with_metaclass(Singleton.Singleton)):
+class StatementSkippedType:
     """A singleton object indicating that a context manager for a with clause has directed the controlled statement to be skipped - also contains the .detector attribute"""
+    __metaclass__ = Singleton.Singleton
     name = "StatementSkipped"
     def __setattr__(self, attr, value):
         """Only the detector attribute may be set on StatementSkipped"""
@@ -62,17 +63,17 @@ class ConditionalContextManager(object):
 
     def __enter__(self):
         try:
-            return next(self.gen), StatementNotSkipped
-        except SkipStatement as e:
+            return self.gen.next(), StatementNotSkipped
+        except SkipStatement, e:
             # set flag
             return StatementSkipped, StatementSkipped
-        except StopIteration as e:
+        except StopIteration, e:
             raise RuntimeError("generator didn't yield or raise SkipStatement")
 
     def __exit__(self, type, value, traceback):
         if type is None:
             try:
-                next(self.gen)
+                self.gen.next()
             except StopIteration:
                 return
             else:
@@ -87,7 +88,7 @@ class ConditionalContextManager(object):
             try:
                 self.gen.throw(type, value, traceback)
                 raise RuntimeError("generator didn't stop after throw()")
-            except StopIteration as exc:
+            except StopIteration, exc:
                 # Suppress the exception *unless* it's the same exception that
                 # was passed to throw().  This prevents a StopIteration
                 # raised inside the "with" statement from being suppressed

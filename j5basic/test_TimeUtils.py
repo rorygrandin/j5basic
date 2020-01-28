@@ -2,7 +2,7 @@ from j5basic import TimeUtils
 from j5test import Utils
 import datetime
 import time
-import _thread
+import thread
 import threading
 
 td = datetime.timedelta
@@ -48,7 +48,7 @@ def test_strftime():
 def always_skip(*args, **kwargs):
     return True
 
-@Utils.if_long_test_run()
+@Utils.skip_test_for("This test is too slow to run by default", always_skip)
 def test_sequence():
     """Checks that the day names are in order from 1/1/1 until August 2000"""
     # from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/306860
@@ -57,7 +57,7 @@ def test_sequence():
     if s != "1800 has the same days as 1980 and 2008":
         raise AssertionError(s)
 
-    print("Testing all day names from 0001/01/01 until 2000/08/01")
+    print "Testing all day names from 0001/01/01 until 2000/08/01"
     # Get the weekdays.  Can't hard code them; they could be
     # localized.
     days = []
@@ -76,7 +76,7 @@ def test_sequence():
     while testdate < enddate:
         if (testdate.day == 1 and testdate.month == 1 and
             (testdate.year % 100 == 0)):
-            print("Testing century", testdate.year)
+            print "Testing century", testdate.year
         day = TimeUtils.strftime(testdate, "%A")
         if nextday[prevday] != day:
             raise AssertionError(str(testdate))
@@ -88,17 +88,17 @@ threadsrun = 0
 def test_threading_fail():
     def f(event):
         try:
-            for m in range(1,13):
-                for d in range(1,29):
+            for m in xrange(1,13):
+                for d in xrange(1,29):
                     time.strptime("2010%02d%02d"%(m,d),"%Y%m%d")
             global threadsrun
             threadsrun += 1
         finally:
             event.set()
     threads = []
-    for _ in range(10):
+    for _ in xrange(10):
         threads.append(threading.Event())
-        _thread.start_new_thread(f, (threads[-1],))
+        thread.start_new_thread(f, (threads[-1],))
     for t in threads:
         t.wait()
     assert threadsrun != 10
@@ -107,29 +107,18 @@ threadsrun_ = 0
 def test_threading_fix():
     def f(event):
         try:
-            for m in range(1,13):
-                for d in range(1,29):
+            for m in xrange(1,13):
+                for d in xrange(1,29):
                     TimeUtils.safestrptime("2010%02d%02d"%(m,d),"%Y%m%d")
             global threadsrun_
             threadsrun_ += 1
         finally:
             event.set()
     threads = []
-    for _ in range(10):
+    for _ in xrange(10):
         threads.append(threading.Event())
-        _thread.start_new_thread(f, (threads[-1],))
+        thread.start_new_thread(f, (threads[-1],))
     for t in threads:
         t.wait()
     assert threadsrun_ == 10
 
-
-def test_functions():
-    assert TimeUtils.utcnow()
-    assert TimeUtils.localminutenow()
-    assert TimeUtils.localsecondnow()
-    assert TimeUtils.totalhours(datetime.timedelta(hours=4, minutes=10)) > 4
-    assert TimeUtils.hoursandminutes(datetime.timedelta(seconds=4*3600 + 4*60 + 4)) == (4, 4)
-    assert TimeUtils.str_to_timedelta(TimeUtils.timedelta_to_str(datetime.timedelta(hours=4, minutes=10)))
-    assert TimeUtils.str_to_timedelta(TimeUtils.timedelta_to_str(datetime.timedelta(days=1, hours=4, minutes=10)))
-
-    assert TimeUtils.timetuple2datetime((2019, 8, 4, 5, 4, 3, 200))

@@ -23,16 +23,16 @@ class TimerDriver:
             actual_diff = tm - self.lasttime
             if abs(actual_diff - self.expecteddiff) > (float(self.expecteddiff) / 10):
                 self.errors.append("timefunc started at %r was %r later than last time %r" % (tm, actual_diff, self.lasttime))
-                print(self.errors[-1])
+                print self.errors[-1]
         self.lasttime = tm
 
     def sleepfunc(self, testarg=None):
         """takes an iterable and sleeps for item seconds for each item"""
-        next_sleep = next(testarg)
+        next_sleep = testarg.next()
         tm = time.time()
         self.lasttime = tm
         self.ticks += 1
-        print(tm, next_sleep, self.ticks)
+        print tm, next_sleep, self.ticks
         if next_sleep:
             time.sleep(next_sleep)
 
@@ -94,7 +94,7 @@ class TestTimer(object):
         start_time = virtualtime._original_time()
         # make sure our sleep happens within the last 6-second pause
         self.sleep(12)
-        print(time.time(), tm.lasttime)
+        print time.time(), tm.lasttime
         timer.stop = True
         assert tm.lasttime is not None
         assert 4 <= tm.ticks <= 5

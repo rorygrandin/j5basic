@@ -50,20 +50,10 @@ class TestTimeCache(object):
         TimeCache.GLOBAL_CACHE_DISABLED = True
         assert 1 not in d
         d[2] = "missing"
-        assert not list(d.items())
-        assert not list(d)
-        assert not d.has_key(2)
-        assert d.get(2) is None
-        assert d.keys() == []
-        assert d.values() == []
-        d.update({3: 4, 5: 6})
-        assert raises(KeyError, lambda: d.popitem())
-        assert repr(d) == "<GLOBAL_CACHE_DISABLED>"
+        assert not d.items()
         TimeCache.GLOBAL_CACHE_DISABLED = False
         assert d[1] == "test"
         assert 2 not in d
-        assert repr(d) != "<GLOBAL_CACHE_DISABLED>"
-
 
     def test_local_disable(self):
         d = TimeCache.timecache(10)
@@ -78,9 +68,8 @@ class TestTimeCache(object):
         assert 1 in e
         d[2] = "missing"
         e[2] = "missing"
-        assert not list(d.items())
+        assert not d.items()
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
-        assert raises(KeyError, lambda: d[1])
         TimeCache.LOCAL_CACHE_DISABLED = False
         assert d[1] == "test"
         assert 2 not in d
@@ -100,7 +89,7 @@ class TestTimeCache(object):
         assert 1 in e
         d[2] = "missing"
         e[2] = "missing"
-        assert list(d.items()) == [(2, "missing")]
+        assert d.items() == [(2, "missing")]
         assert sorted(e.items()) == [(1, "test"), (2, "missing")]
         TimeCache.LOCAL_CACHE_TIMELIMIT = None
         time.sleep(0.2)
@@ -115,37 +104,11 @@ class TestTimeCache(object):
         assert len(d) == 2
         time.sleep(2)
         assert len(d) == 2
-        d.set(2, datetime.datetime.now())
+        d[2] = datetime.datetime.now()
         assert len(d) == 1
         time.sleep(1)
         d[3] = datetime.datetime.now()
         time.sleep(1)
         d[4] = datetime.datetime.now()
         assert len(d) == 1
-        d.clear()
 
-    def test_purge(self):
-        d = TimeCache.timecache(1)
-        d[0] = datetime.datetime.now()
-        d[1] = datetime.datetime.now()
-        assert d.get(0)
-        assert len(d) == 2
-        time.sleep(2)
-        assert d.get(0) is None
-        assert raises(KeyError, lambda: d[0])
-        assert not d.has_key(1)
-        assert len(d) == 0
-        d[2] = datetime.datetime.now()
-        assert list(d) == [2]
-        assert list(d.keys()) == [2]
-        assert None not in d.values()
-        assert d.size() == 1
-        assert list(d.items())[0][0] == 2
-        assert list(d.keys()) == [2]
-        assert list(d.values())
-        time.sleep(1)
-        assert list(d) == []
-        d[3] = datetime.datetime.now()
-        assert d.popitem()[0] == 3
-        d.update({3: 4, 5: 6})
-        assert d.setdefault(3, 7) == 4

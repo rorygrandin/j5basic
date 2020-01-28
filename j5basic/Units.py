@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
-
 import operator
 import decimal
-import sys
 
-if sys.version_info.major < 3:
-    numbers = (int, long, float, decimal.Decimal)
-else:
-    numbers = (int, float, decimal.Decimal)
+numbers = (int, long, float, decimal.Decimal)
 
 def Identity(x):
     """Returns the object given to it"""
@@ -38,7 +33,7 @@ class Conversion(object):
     def __mul__(self, other):
         """Returns a related Conversion"""
         if not isinstance(other, Conversion):
-            raise NotImplementedError("Cannot multiply %r and %r" % (self, other))
+            raise NotImplementedError("Cannot divide %r and %r" % (self, other))
         return SequentialConversion(self, other)
 
     def __truediv__(self, other):
@@ -177,7 +172,7 @@ class Unit(object):
     def __repr__(self):
         """Returns a representation of the type"""
         n, d = [], []
-        for base, exponent in list(self.base_units.items()):
+        for base, exponent in self.base_units.items():
             if exponent == 1:
                 n.append(base.name)
             elif exponent > 0:
@@ -200,7 +195,7 @@ class Unit(object):
         if self.native_name:
             return self.name
         n, d = [], []
-        for base, exponent in list(self.base_units.items()):
+        for base, exponent in self.base_units.items():
             if exponent == 1:
                 n.append(base.name)
             elif exponent > 0:
@@ -239,7 +234,7 @@ class Unit(object):
             return Unit("%s/%r" % (self.name, other), self.base_units, SequentialConversion(self.op, Conversion(operator.truediv, other)))
         elif isinstance(other, Unit):
             new_units = self.base_units.copy()
-            for base_unit, exponent in list(other.base_units.items()):
+            for base_unit, exponent in other.base_units.items():
                 new_units[base_unit] = new_units.get(base_unit, 0) - exponent
                 if new_units[base_unit] == 0:
                     del new_units[base_unit]
@@ -263,7 +258,7 @@ class Unit(object):
             return Unit("%s*%r" % (self.name, other), self.base_units, SequentialConversion(self.op, Conversion(operator.mul, other)))
         elif isinstance(other, Unit):
             new_units = self.base_units.copy()
-            for base_unit, exponent in list(other.base_units.items()):
+            for base_unit, exponent in other.base_units.items():
                 new_units[base_unit] = new_units.get(base_unit, 0) + exponent
                 if new_units[base_unit] == 0:
                     del new_units[base_unit]
@@ -294,9 +289,6 @@ class Unit(object):
             return Scalar(adjusted_value, self)
         else:
             raise NotImplementedError("Can only generate Scalars for %r with numbers - got %r of type %r" % (self, value, type(value)))
-
-    def __hash__(self):
-        return id(self)
 
 class BaseUnit(Unit):
     """A simply constructed Scalar Unit"""
@@ -386,19 +378,7 @@ class Scalar(object):
         if units_ratio.base_units:
             return False
         adjusted_value = units_ratio.op(self.value)
-        return (adjusted_value > other.value) - (adjusted_value < other.value)
-
-    def __lt__(self, other):
-        return self.__cmp__(other) == -1
-
-    def __le__(self, other):
-        return self.__cmp__(other) < 1
-
-    def __ge__(self, other):
-        return self.__cmp__(other) > -1
-
-    def __gt__(self, other):
-        return self.__cmp__(other) == 1
+        return cmp(adjusted_value, other.value)
 
     __add__ = scalar_operation(operator.add, Identity)
     __radd__ = scalar_operation(operator.add, Identity, reversed=True)
@@ -439,8 +419,7 @@ class Scalar(object):
     # These conversions are of debatable value, but are included at the moment
     __complex__ = scalar_conversion(complex)
     __int__ = scalar_conversion(int)
-    if sys.version_info.major < 3:
-        __long__ = scalar_conversion(long)
+    __long__ = scalar_conversion(long)
     __float__ = scalar_conversion(float)
 
     # __oct__ not defined

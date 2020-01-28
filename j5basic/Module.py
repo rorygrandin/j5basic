@@ -4,7 +4,6 @@ import logging
 import os
 import pkgutil
 import sys
-import six
 
 importedmodules = {}
 
@@ -27,7 +26,7 @@ def find_module(modulename):
 
 def resolvemodule(modulename, loglevel=logging.WARN):
     """Imports a.b.c as far as possible then returns the value of a.b.c.d.e"""
-    if modulename in importedmodules:
+    if importedmodules.has_key(modulename):
         return importedmodules[modulename]
 
     try:
@@ -97,7 +96,7 @@ def get_all_distinct_mro_targets(obj, functionname):
     for t in reversed(obj.__mro__):
         base_hook_fn = getattr(t, functionname, None)
         if base_hook_fn:
-            t_f = six.get_unbound_function(base_hook_fn)
+            t_f = base_hook_fn.im_func
             if t_f not in sources:
                 sources[t_f] = t
                 sources[t] = (t_f, base_hook_fn)

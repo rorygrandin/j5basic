@@ -6,7 +6,6 @@
 import datetime
 import logging
 import time
-import sys
 from j5basic import TimeUtils
 
 # Formatted Types
@@ -15,7 +14,7 @@ class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
-        if sys.version_info.major < 3 and isinstance(self.format_str, unicode):
+        if isinstance(self.format_str, unicode):
             # flip through into string world and back again
             return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
         return TimeUtils.strftime(self, self.format_str)

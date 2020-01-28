@@ -15,13 +15,13 @@ class Converter(object):
         """Convert from given units to default units"""
         if from_units in self.convert_from_methods:
             return self.convert_from_methods[from_units](float(value))
-        raise NotImplementedError("No method found for converting from %s" % from_units)
+        raise NotImplementedError("No method found for converting from " % from_units)
 
     def convert_to(self,value,to_units):
         """Convert from default units to given units"""
         if to_units in self.convert_to_methods:
             return self.convert_to_methods[to_units](float(value))
-        raise NotImplementedError("No method found for converting to %s" % to_units)
+        raise NotImplementedError("No method found for converting to " % to_units)
 
     @staticmethod
     def no_conversion(value):

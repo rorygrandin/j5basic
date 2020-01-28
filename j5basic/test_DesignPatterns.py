@@ -44,7 +44,7 @@ class TestMultiton(object):
         for thrd in threads:
             thrd.join()
 
-        for objs in list(results.values()):
+        for objs in results.values():
             assert len(objs) == THREADS
             for i in range(len(objs) - 1):
                 assert id(objs[i]) == id(objs[i+1])
