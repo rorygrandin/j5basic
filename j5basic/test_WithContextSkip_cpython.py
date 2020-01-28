@@ -11,7 +11,7 @@ import sys
 import tempfile
 import unittest
 from j5basic.WithContextSkip import *  # Tests __all__
-from test import test_support
+from test import support as test_support
 try:
     import threading
 except ImportError:

@@ -17,7 +17,7 @@ class MyEnum(EnumClass.enum):
     ORANGES = 2
 
 class MyStringEnum(EnumClass.enum):
-    __constant_class__ = basestring
+    __constant_class__ = str
     NEW_YORK = "Big Apple"
     ORANGE_RIVER = "A Rafting Opportunity"
 

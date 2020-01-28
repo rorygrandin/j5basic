@@ -30,7 +30,6 @@ def test_non_oldstyle():
     class Highlander(with_metaclass(Singleton.Singleton, object)):
         pass
     assert isinstance(Highlander, object)
-    assert not isinstance(Highlander, type)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()

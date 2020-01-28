@@ -57,7 +57,7 @@ def test_strftime():
 def always_skip(*args, **kwargs):
     return True
 
-@Utils.skip_test_for("This test is too slow to run by default", always_skip)
+@Utils.if_long_test_run()
 def test_sequence():
     """Checks that the day names are in order from 1/1/1 until August 2000"""
     # from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/306860
@@ -131,3 +131,14 @@ def test_threading_fix():
         t.wait()
     assert threadsrun_ == 10
 
+
+def test_functions():
+    assert TimeUtils.utcnow()
+    assert TimeUtils.localminutenow()
+    assert TimeUtils.localsecondnow()
+    assert TimeUtils.totalhours(datetime.timedelta(hours=4, minutes=10)) > 4
+    assert TimeUtils.hoursandminutes(datetime.timedelta(seconds=4*3600 + 4*60 + 4)) == (4, 4)
+    assert TimeUtils.str_to_timedelta(TimeUtils.timedelta_to_str(datetime.timedelta(hours=4, minutes=10)))
+    assert TimeUtils.str_to_timedelta(TimeUtils.timedelta_to_str(datetime.timedelta(days=1, hours=4, minutes=10)))
+
+    assert TimeUtils.timetuple2datetime((2019, 8, 4, 5, 4, 3, 200))

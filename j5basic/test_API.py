@@ -62,6 +62,7 @@ class TestAPI(object):
         assert not API.supports(x, ArbAPI, ArbAPI3)
         assert x.i_support_api()
         assert x.i_add_value() == 7
+        assert not API.supports(ImplementingAPIClass, NotAnAPI)
 
     def declare_basic_support(self):
         """Check that declarations of support work if the API is implemented in parent classes"""
