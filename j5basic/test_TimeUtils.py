@@ -92,48 +92,6 @@ def test_sequence():
         prevday = day
         testdate = testdate + one_day
 
-threadsrun = 0
-@Utils.skip_test_for("This test does not reliably pass, as sometimes we do not hit the race condition, and everything is fine with strptime", always_skip)
-def test_threading_fail():
-    def f(event):
-        try:
-            for m in range(1,13):
-                for d in range(1,29):
-                    time.strptime("2010%02d%02d"%(m,d),"%Y%m%d")
-            global threadsrun
-            threadsrun += 1
-        finally:
-            event.set()
-    threads = []
-    for _ in range(10):
-        threads.append(threading.Event())
-        _thread.start_new_thread(f, (threads[-1],))
-    for t in threads:
-        t.wait()
-    assert threadsrun != 10
-
-threadsrun_ = 0
-
-# This test is failing? But do we even use multiple threads?
-def test_threading_fix():
-    def f(event):
-        try:
-            for m in range(1,13):
-                for d in range(1,29):
-                    TimeUtils.safestrptime("2010%02d%02d"%(m,d),"%Y%m%d")
-            global threadsrun_
-            threadsrun_ += 1
-        finally:
-            event.set()
-    threads = []
-    for _ in range(10):
-        threads.append(threading.Event())
-        _thread.start_new_thread(f, (threads[-1],))
-    for t in threads:
-        t.wait()
-    assert threadsrun_ == 10
-
-
 def test_functions():
     assert TimeUtils.utcnow()
     assert TimeUtils.localminutenow()

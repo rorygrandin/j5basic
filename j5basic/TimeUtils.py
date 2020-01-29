@@ -158,10 +158,3 @@ if _NEEDS_STRFTIME_PATCH:
 else:
     def strftime(d, format_str):
         return d.strftime(format_str)
-
-def safestrptime(*args, **kwargs):
-    #DEPRECATED: This method is deprecated, just use time.strptime instead.
-
-    #the previous version of this function caused deadlocks on _strptime occasionally, another fix for the issue it
-    #was solving has been implemented
-    return time.strptime(*args, **kwargs)
