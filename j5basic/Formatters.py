@@ -33,9 +33,21 @@ class StrftimeFormattedTypeMixIn(object):
 @python_2_unicode_compatible
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
+    def __init__(self, *args, **kwargs):
+        self._re_entered = False
 
     def __str__(self):
-        return self.format_str % self
+        # For some reason the IntFormatter reenters this function, causing
+        # infinite recursion. We break the recursion by calling the super method
+        # if this method is re-entered
+        if not self._re_entered:
+            try:
+                self._re_entered = True
+                return self.format_str % self
+            finally:
+                self._re_entered = False
+        else:
+            return super(StrFormattedMixIn, self).__str__()
 
 class FormattedDatetime(StrftimeFormattedTypeMixIn,datetime.datetime):
     def __new__(cls,format_str,*args,**kwargs):
