@@ -3,10 +3,18 @@
 """Testing module for our API structure
    Also serves as a helper to understand how the API declarations etc work
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from j5basic import API
 from j5test import Utils
-from six import with_metaclass
+from future.utils import with_metaclass
 
 class ArbAPI(API.API):
     def i_support_api(self):

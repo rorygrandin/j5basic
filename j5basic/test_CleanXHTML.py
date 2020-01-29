@@ -1,6 +1,11 @@
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 from j5basic import CleanXHTML
-import six
 
 DIRTY_XHTML = """
 Testing fragment<br/>
@@ -9,5 +14,5 @@ Testing fragment<br/>
 """
 
 def test_clean_html():
-    cleaned_html = CleanXHTML.clean_html(six.text_type(DIRTY_XHTML))
-    assert cleaned_html == six.text_type("\nTesting fragment<br/>\nTEXT\n\n")
+    cleaned_html = CleanXHTML.clean_html(DIRTY_XHTML)
+    assert cleaned_html == "\nTesting fragment<br/>\nTEXT\n\n"

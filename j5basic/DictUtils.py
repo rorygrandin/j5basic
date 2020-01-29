@@ -2,8 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """Implements a case-insensitive (on keys) dictionary and various dictionary functions"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2002, 2003 St James Software
+
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 
 try:
     from virtualtime import datetime_tz
@@ -11,7 +19,6 @@ except ImportError as e:
     datetime_tz = None
 
 import datetime
-import six
 
 _DUMMY_ARG_ = object()
 
@@ -25,7 +32,9 @@ def unique_items(list1):
 
 def assert_dicts_equal(dict1,dict2, datetimes_to_naive=False):
     """tests equality of two dicts"""
-    k1, k2 = set(dict1.keys()), set(dict2.keys())
+    k1, k2 = list(dict1.keys()), list(dict2.keys())
+    k1.sort()
+    k2.sort()
 
     assert k1 == k2
     for key in k1:
@@ -66,13 +75,13 @@ def subtractdicts(ldict, rdict):
         if key in rdict:
             lvalue, rvalue = ldict[key], rdict[key]
             # type mismatch doesn't count if both are str/unicode
-            if (type(lvalue) != type(rvalue)) and not (type(lvalue) in (six.text_type, six.binary_type) and type(rvalue) in (six.text_type, six.binary_type)):
+            if (type(lvalue) != type(rvalue)) and not (isinstance(lvalue, str) and isinstance(rvalue, str)):
                 diffdict[key] = lvalue
             elif type(lvalue) != type(rvalue):
                 # handle str/unicode mismatch
-                if type(lvalue) == six.binary_type: lvaluecmp = lvalue.decode('UTF-8')
+                if isinstance(lvalue, bytes): lvaluecmp = lvalue.decode('UTF-8')
                 else: lvaluecmp = lvalue
-                if type(rvalue) == six.binary_type: rvaluecmp = rvalue.decode('UTF-8')
+                if isinstance(lvalue, bytes): rvaluecmp = rvalue.decode('UTF-8')
                 else: rvaluecmp = rvalue
                 if lvaluecmp != rvaluecmp:
                     diffdict[key] = lvalue
@@ -102,13 +111,8 @@ def mapdict(thedict, keymap=None, valuemap=None):
         else:
             return dict([(keymap(key), valuemap(value)) for key, value in thedict.items()])
 
-def generalupper(str):
-    """this uses the object's upper method - works with string and unicode"""
-    if str is None: return str
-    return str.upper()
-
 def upperkeys(thedict):
-    return mapdict(thedict, generalupper, None)
+    return mapdict(thedict, lambda s: s if s is None else s.upper(), None)
 
 class cidict(dict):
     def __init__(self, fromdict = None):
@@ -117,16 +121,16 @@ class cidict(dict):
             self.update(fromdict)
 
     def __getitem__(self, key):
-        if type(key) != str and type(key) != str:
-            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise TypeError("cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__getitem__(self, akey)
         raise IndexError
 
     def __setitem__(self, key, value):
-        if type(key) != str and type(key) != str:
-            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise TypeError("cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__setitem__(self, akey, value)
@@ -138,24 +142,30 @@ class cidict(dict):
             pass
         elif hasattr(_updatedict, "keys"):
             for key in list(_updatedict.keys()):
+                if isinstance(key, bytes):
+                    key = key.decode('utf-8')
                 self[key] = _updatedict[key]
         else:
             for key, value in _updatedict:
+                if isinstance(key, bytes):
+                    key = key.decode('utf-8')
                 self[key] = value
         for key in kwargs:
+            if isinstance(key, bytes):
+                key = key.decode('utf-8')
             self[key] = kwargs[key]
 
     def __delitem__(self, key):
-        if type(key) != str and type(key) != str:
-            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise TypeError("cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return dict.__delitem__(self, akey)
         raise IndexError
 
     def __contains__(self, key):
-        if type(key) != str and type(key) != str:
-            raise TypeError("cidict can only have str or unicode as key (got %r)" % type(key))
+        if not isinstance(key, str):
+            raise TypeError("cidict can only have str as key (got %r)" % type(key))
         for akey in self.keys():
             if akey.lower() == key.lower():
                 return 1

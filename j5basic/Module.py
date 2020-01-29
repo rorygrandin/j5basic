@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 import logging
 import os
 import pkgutil
 import sys
-import six
 
 importedmodules = {}
 
@@ -97,7 +103,7 @@ def get_all_distinct_mro_targets(obj, functionname):
     for t in reversed(obj.__mro__):
         base_hook_fn = getattr(t, functionname, None)
         if base_hook_fn:
-            t_f = six.get_unbound_function(base_hook_fn)
+            t_f = base_hook_fn.__func__
             if t_f not in sources:
                 sources[t_f] = t
                 sources[t] = (t_f, base_hook_fn)

@@ -2,24 +2,35 @@
 # Copyright 2007 St James Software
 
 """Classes for formatting and parsing string representations of common Python types."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import *
+from builtins import object
+from future.utils import python_2_unicode_compatible
 import datetime
 import logging
 import time
-import sys
 from j5basic import TimeUtils
 
 # Formatted Types
 
+@python_2_unicode_compatible
 class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
-        if sys.version_info.major < 3 and isinstance(self.format_str, unicode):
+        if isinstance(self.format_str, str):
             # flip through into string world and back again
             return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
-        return TimeUtils.strftime(self, self.format_str)
+        return TimeUtils.strftime(self, self.format_str).decode("UTF-8")
 
+@python_2_unicode_compatible
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
 

@@ -56,7 +56,15 @@ problem for variable number of axes:
   Hope:
     The solution set S can be find by choosing the best improvements in order
 """
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from past.utils import old_div
 import math
 
 def tagmaptoaxismap(tagmap):
@@ -85,12 +93,12 @@ def score(ranges, tagmap):
   for tag, (rmin, rmax) in ranges.items():
     amin, amax = tagmap[tag]
     try:
-      score += 1 / ((rmax - rmin) / float(amax - amin))
+      score += old_div(1, ((rmax - rmin) / float(amax - amin)))
     except ZeroDivisionError:
       score += 1
   numaxes = len(dict.fromkeys(list(tagmap.values())))
   wastedspace = (numaxes - 1) * 5
-  return ((100 - wastedspace) / score) / numaxes
+  return old_div((old_div((100 - wastedspace), score)), numaxes)
 
 def calculateaxes(ranges):
   """flagrantly override the previous method"""

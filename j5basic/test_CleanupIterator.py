@@ -1,35 +1,44 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from j5basic import CleanupIterator
 from j5test.Utils import raises
-import six
 
-class TestCleanupIterator:
+from functools import partial
+
+class TestCleanupIterator(object):
     def test_simple_call(self):
         """tests that a cleanup generator runs through an iterator and calls the cleanup at the end"""
         i = iter([1,2,3,4,5])
         def cleanup():
-            assert raises(StopIteration, lambda: six.next(i))
+            assert raises(StopIteration, partial(next, i))
             cleanup.cleanup_called = True
         cleanup.cleanup_called = False
         g = CleanupIterator.CleanupIterator(i, cleanup)
         l = list(g)
         assert l == [1,2,3,4,5]
         assert cleanup.cleanup_called
-        assert raises(StopIteration, lambda: six.next(i))
+        assert raises(StopIteration, partial(next, i))
 
     def test_empty_call(self):
         """tests that a cleanup generator runs through an empty iterator and calls the cleanup at the end"""
         i = iter([])
         def cleanup():
-            assert raises(StopIteration, lambda: six.next(i))
+            assert raises(StopIteration, partial(next, i))
             cleanup.cleanup_called = True
         cleanup.cleanup_called = False
         g = CleanupIterator.CleanupIterator(i, cleanup)
         l = list(g)
         assert l == []
         assert cleanup.cleanup_called
-        assert raises(StopIteration, lambda: six.next(i))
+        assert raises(StopIteration, partial(next, i))
 
     def test_args_call(self):
         """tests that a cleanup generator runs through an iterator and passes arguments successfully"""
@@ -55,8 +64,6 @@ class TestCleanupIterator:
                 if self.n == 3:
                     raise ValueError("self.n is %s" % self.n)
                 return self.n
-            def next(self):
-                return self.__next__()
         i = MyFailingIterator()
         def cleanup():
             cleanup.cleanup_called = True

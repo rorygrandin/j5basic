@@ -2,11 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """Utilities for implementing various object-orientated design pattern concepts"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2006 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 import threading
-from six import with_metaclass
+from future.utils import with_metaclass
 
 class MultitonMetaclass(type):
     """Metaclass for Multiton. Needs to add a per-subclass lock object and

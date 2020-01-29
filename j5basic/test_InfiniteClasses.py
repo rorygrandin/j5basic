@@ -1,8 +1,17 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from past.builtins import cmp
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from j5basic.InfiniteClasses import *
-import sys
+from future.utils import PY3
 
-if sys.version_info.major > 2:
+if PY3:
     # Python 3 doesn't have this
     def cmp(a, b):
         return (a > b) - (a < b)
@@ -33,7 +42,7 @@ class A(object):
     def __gt__(self, other):
         return self.__cmp__(other) == 1
 
-class B():
+class B(object):
     def __init__(self, v):
         self.value = v
     def __cmp__(self, other):
@@ -41,7 +50,7 @@ class B():
             return cmp(self.value, other.value)
         return cmp(self.value, other)
 
-class C():
+class C(object):
     def __init__(self, v):
         self.value = v
     def __cmp__(self, other):
@@ -51,7 +60,7 @@ class C():
     def __lt__(self, other):
         return self.__cmp__(other) == -1
 
-class TestInfinite:
+class TestInfinite(object):
 
     def _do_comparisons(self, infinite_class, value):
         p_inf = infinite_class()
@@ -133,7 +142,7 @@ class TestInfinite:
         self._comp(year, datetime.MAXYEAR)
 
     def test_object(self):
-        if sys.version_info.major > 2:
+        if PY3:
             # Python 3 doesn't support this use due to different rules for __new__
             return
         #Infinite Class implements rich comparisons. Should override parent class comparisons regardless of which side of the
@@ -145,7 +154,7 @@ class TestInfinite:
         self._do_comparisons(InfiniteA, A(35))
 
     def test_nonobject(self):
-        if sys.version_info.major > 2:
+        if PY3:
             # Python 3 doesn't support this use due to different rules for __new__
             return
         #Case: Class does not implement rich comparisons

@@ -1,10 +1,13 @@
-try:
-    from cStringIO import StringIO as WrappedStringIO
-except ImportError:
-    try:
-        from StringIO import StringIO as WrappedStringIO
-    except ImportError:
-        from io import StringIO as WrappedStringIO
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
+from io import StringIO as WrappedStringIO
 
 class StringIO(object):
     def __init__(self, stringio = None):
@@ -30,9 +33,6 @@ class StringIO(object):
 
     def __next__(self):
         return next(self.stringio_object)
-
-    def next(self):
-        return self.stringio_object.next()
 
     def read(self, s=None):
         return self.stringio_object.read(s)

@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
 """this is an iterator wrapper that allows things to be pushed back"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import *
+from builtins import object
 class PushBack(object):
     def __init__(self, iterator):
         self.iterator = iterator
@@ -18,9 +27,6 @@ class PushBack(object):
             return self.pushedback.pop(0)
         else:
             return next(self.iterator)
-
-    def next(self):
-        return self.__next__()
 
 class PushToBack(object):
     def __init__(self, iterator):
@@ -44,5 +50,3 @@ class PushToBack(object):
             return self.pushedtoback.pop(0)
         raise StopIteration()
 
-    def next(self):
-        return self.__next__()

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='j5basic',
-    version='1.3',
+    version='1.4',
     packages=['j5basic'],
     license='Apache License, Version 2.0',
     description='A collection of utility methods and classes.',
@@ -20,6 +20,7 @@ setup(
         'Programming Language :: Python :: 2 :: Only',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    install_requires = ["future"],
     extras_require = {
         'CleanXHTML':  ["cssutils", "lxml"],
         'Colours':  ["numpy"],

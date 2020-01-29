@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
+from past.utils import old_div
 from virtualtime import datetime_tz
 import logging
 import time
@@ -48,7 +57,7 @@ class Timer(object):
                 if nexttime < currenttime:
                     first_missed_time = nexttime
                     missed_time_delta = currenttime - first_missed_time
-                    missed_count = int(to_seconds(missed_time_delta)/to_seconds(self.resolution))
+                    missed_count = int(old_div(to_seconds(missed_time_delta),to_seconds(self.resolution)))
                     if missed_count > 0:
                         nexttime += missed_count * self.resolution
                         logging.info("Timer function missed %04d ticks between %s and %s (at %s) - running behind schedule" % (missed_count+1, first_missed_time, nexttime, currenttime))

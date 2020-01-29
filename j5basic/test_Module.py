@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 import os
 from j5basic import Module
 from j5test import Utils
 
-class TestModule:
+class TestModule(object):
     def test_find_module(self):
         target_file = Module.__file__
         if target_file.endswith(".pyc") or target_file.endswith(".pyo"):

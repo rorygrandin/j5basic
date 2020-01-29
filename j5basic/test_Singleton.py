@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
 """Tests the j5basic.Singleton implementation"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
 from . import Singleton
 import gc
 import types
-import sys
-from six import with_metaclass
+from future.utils import with_metaclass
 
 def test_basic():
     """Tests most basic singleton definition, that it works and constructing always produces the same result"""
@@ -20,9 +27,9 @@ def test_basic():
 
 def test_non_oldstyle():
     """Tests that Singleton classes are implictly newstyle"""
-    class Highlander(with_metaclass(Singleton.Singleton)):
+    class Highlander(with_metaclass(Singleton.Singleton, object)):
         pass
-    assert isinstance(Highlander, object)
+    assert issubclass(Highlander, object)
     highlander = Highlander()
     assert isinstance(highlander, Highlander)
     highlander2 = Highlander()

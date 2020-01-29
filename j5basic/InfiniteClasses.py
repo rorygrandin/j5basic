@@ -1,6 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from builtins import object
+from future.utils import python_2_unicode_compatible
 import datetime
 
+@python_2_unicode_compatible
 class InfiniteObject(object):
     """This mixin can be used to create "infinite" subclasses of numeric objects (eg datetime).
        Currently, this is only useful for comparison and does not support arithmetic operations like additon, subtraction etc.
@@ -58,6 +68,7 @@ class InfiniteObject(object):
     def __gt__(self, other):
         return self.__cmp__(other) == 1
 
+@python_2_unicode_compatible
 class InfiniteDate(InfiniteObject, datetime.datetime):
     def __new__(cls, positive=True):
         if positive:

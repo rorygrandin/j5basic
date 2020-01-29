@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from past.builtins import basestring
+from builtins import *
+from builtins import object
 from j5basic import EnumClass
 from j5test import Utils
 

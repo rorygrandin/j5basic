@@ -2,9 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """Various decorators"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 # Copyright 2006 St James Software
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from past.builtins import basestring
+from builtins import *
+from builtins import object
 import inspect, types, itertools
 import logging
 import time
