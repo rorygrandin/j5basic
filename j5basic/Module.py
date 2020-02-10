@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import *
+from future.utils import PY3, PY2
 import logging
 import os
 import pkgutil
@@ -103,7 +104,21 @@ def get_all_distinct_mro_targets(obj, functionname):
     for t in reversed(obj.__mro__):
         base_hook_fn = getattr(t, functionname, None)
         if base_hook_fn:
-            t_f = base_hook_fn.__func__
+            # TODO: This im_func is not python3 compatible, but neither is the __func__ that futurize replaced it with
+            # as a temporary workaround until we can actually do AND test a proper solution for python3 you can set:
+            if PY3:
+                t_f = base_hook_fn
+
+            # (and it is possible that this will be the correct solution as it does look like some of the things that
+            # were odd about bound methods in py2 and not so odd in py3 - e.g. you can just set attributes directly
+            # on them - I am just not able to test this at the moment.)
+            if PY2:
+                t_f = base_hook_fn.im_func
+
+            # Yaseen: The problem above is because in Python 2 accessing a method from a class without an instance
+            # gives you an "unbound method". To get the function of the underlying unbound method you have to
+            # use __func__.
+            # However in Python 3 it will just give you the function.
             if t_f not in sources:
                 sources[t_f] = t
                 sources[t] = (t_f, base_hook_fn)
