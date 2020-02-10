@@ -38,7 +38,7 @@ def uid_digit_str(base_time=None):
        Generated using the current time (unless specified) and a random integer
        to complete it to 22 digits"""
     base_time = base_time or time.time()
-    return str(int(base_time*10**TIME_PRECISION)) + (RAND_FORMAT % random.randint(1,10**RAND_PRECISION))
+    return str(int(base_time*10**TIME_PRECISION)) + (RAND_FORMAT % random.randint(1,10**RAND_PRECISION-1))
 
 def uid_id_str(base_time=None):
     """Returns a unique string consisting of the prefix ID followed by only digits.
