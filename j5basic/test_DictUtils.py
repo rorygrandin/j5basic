@@ -223,12 +223,6 @@ class TestDictHelpers(object):
 
         DictUtils.assert_dicts_equal(DictUtils.filterdict(d1, {1,2,3}), {1:2, 3:4})
 
-    def test_subtractdicts(self):
-        d1 = {1:2, 3:4, 5:6, 7:8, 9:six.b("10"), 11:six.text_type("12")}
-        d2 = {1:2, 3:5, 5: "6", 11: six.b("12"), 9: six.text_type("11")}
-
-        DictUtils.assert_dicts_equal(DictUtils.subtractdicts(d1, d2), {3:4, 5:6, 7:8, 9: six.b("10")})
-
     def test_merge_dicts(self):
         d1 = {1:2, 3:4, 5:6, 7:8}
         d2 = {3:5, 7:9, 11:13}

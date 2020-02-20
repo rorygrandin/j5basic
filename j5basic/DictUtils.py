@@ -68,28 +68,6 @@ def filterdict(origdict, keyset):
             newdict[key] = origdict[key]
     return newdict
 
-def subtractdicts(ldict, rdict):
-    """returns a dictionary containing those keys&values in ldict that aren't in rdict or differ from rdict"""
-    diffdict = {}
-    for key in ldict:
-        if key in rdict:
-            lvalue, rvalue = ldict[key], rdict[key]
-            # type mismatch doesn't count if both are str/unicode
-            if (type(lvalue) != type(rvalue)) and not (isinstance(lvalue, str) and isinstance(rvalue, str)):
-                diffdict[key] = lvalue
-            elif type(lvalue) != type(rvalue):
-                # handle str/unicode mismatch
-                if isinstance(lvalue, bytes): lvaluecmp = lvalue.decode('UTF-8')
-                else: lvaluecmp = lvalue
-                if isinstance(lvalue, bytes): rvaluecmp = rvalue.decode('UTF-8')
-                else: rvaluecmp = rvalue
-                if lvaluecmp != rvaluecmp:
-                    diffdict[key] = lvalue
-            elif lvalue != rvalue:
-                diffdict[key] = lvalue
-        else:
-            diffdict[key] = ldict[key]
-    return diffdict
 
 def merge_dicts(dict1, *dicts):
     """returns a dictionary consisting of all the dicts, overriding key values in the order they're passed in"""
