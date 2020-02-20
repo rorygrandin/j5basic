@@ -12,7 +12,7 @@ standard_library.install_aliases()
 from builtins import range
 from builtins import *
 from builtins import object
-from future.utils import python_2_unicode_compatible
+from future.utils import python_2_unicode_compatible, text_to_native_str
 import datetime
 import logging
 import time
@@ -25,10 +25,13 @@ class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
-        if isinstance(self.format_str, str):
-            # flip through into string world and back again
-            return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
-        return TimeUtils.strftime(self, self.format_str).decode("UTF-8")
+        format_str = self.format_str
+        if isinstance(format_str, bytes):
+            format_str = format_str.decode('utf-8')
+        fstr = TimeUtils.strftime(self, text_to_native_str(format_str, "utf-8"))
+        if isinstance(fstr, bytes):
+            fstr = fstr.decode("utf-8")
+        return fstr
 
 @python_2_unicode_compatible
 class StrFormattedMixIn(object):
