@@ -89,9 +89,6 @@ def mapdict(thedict, keymap=None, valuemap=None):
         else:
             return dict([(keymap(key), valuemap(value)) for key, value in thedict.items()])
 
-def upperkeys(thedict):
-    return mapdict(thedict, lambda s: s if s is None else s.upper(), None)
-
 class cidict(dict):
     def __init__(self, fromdict = None):
         """constructs the cidict, optionally using another dict to do so"""

@@ -243,8 +243,3 @@ class TestDictHelpers(object):
         DictUtils.assert_dicts_equal(DictUtils.mapdict(td, None, valuemap), {1: 3, 3: 5, 5: 7})
         DictUtils.assert_dicts_equal(DictUtils.mapdict(td, keymap, valuemap), {"1": 3, "3": 5, "5": 7})
 
-    def test_upperkeys(self):
-        td = {six.b("t"):1, six.text_type("u"): 2, None: 3}
-
-        DictUtils.assert_dicts_equal(DictUtils.upperkeys(td), {six.b("T"): 1, six.text_type("U"): 2, None: 3})
-
