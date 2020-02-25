@@ -21,21 +21,6 @@ class FormatTestResource(object):
 class TestFormatters(IterativeTester.IterativeTester):
 
     FORMAT_TESTS = {
-        'float': FormatTestResource(Formatters.FloatFormatter("%.2f"),Formatters.FormattedFloat,[
-                    (5.5,"5.50"),
-                    (10.617,"10.62"),
-                    ("5.15","5.15"),
-                    ('foo',None),
-                    (Formatters.FormattedFloat("%.2f",10.2234),"10.22")
-                 ]),
-        'int': FormatTestResource(Formatters.IntFormatter("%03d"),Formatters.FormattedInt,[
-                    (55,"055"),
-                    (101,"101"),
-                    ("515","515"),
-                    ('foo',None),
-                    ('5.5',None),
-                    (Formatters.FormattedInt("%03d",55),"055")
-                 ]),
         'datetime': FormatTestResource(Formatters.DatetimeFormatter("%Y:%m:%d %H:%M:%S"),Formatters.FormattedDatetime,[
                     (datetime.datetime(1993,11,3,12,51,50),"1993:11:03 12:51:50"),
                     ("1994:12:07 13:17:25","1994:12:07 13:17:25"),

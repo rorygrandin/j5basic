@@ -40,17 +40,7 @@ class StrFormattedMixIn(object):
         self._re_entered = False
 
     def __str__(self):
-        # For some reason the IntFormatter reenters this function, causing
-        # infinite recursion. We break the recursion by calling the super method
-        # if this method is re-entered
-        if not self._re_entered:
-            try:
-                self._re_entered = True
-                return self.format_str % self
-            finally:
-                self._re_entered = False
-        else:
-            return super(StrFormattedMixIn, self).__str__()
+        return self.format_str % self
 
 class FormattedDatetime(StrftimeFormattedTypeMixIn,datetime.datetime):
     def __new__(cls,format_str,*args,**kwargs):
@@ -77,18 +67,6 @@ class FormattedDate(StrftimeFormattedTypeMixIn,datetime.date):
 class FormattedTime(StrftimeFormattedTypeMixIn,datetime.time):
     def __new__(cls,format_str,*args,**kwargs):
         self = super(FormattedTime,cls).__new__(cls,*args,**kwargs)
-        self.format_str = format_str
-        return self
-
-class FormattedFloat(StrFormattedMixIn,float):
-    def __new__(cls,format_str,*args,**kwargs):
-        self = super(FormattedFloat,cls).__new__(cls,*args,**kwargs)
-        self.format_str = format_str
-        return self
-
-class FormattedInt(StrFormattedMixIn,int):
-    def __new__(cls,format_str,*args,**kwargs):
-        self = super(FormattedInt,cls).__new__(cls,*args,**kwargs)
         self.format_str = format_str
         return self
 
@@ -135,38 +113,6 @@ class FormatterStrBase(FormatterBase):
     def _parseString(self,value):
         """Sub-classes should implement this."""
         raise NotImplementedError
-
-class FloatFormatter(FormatterStrBase):
-    """Formats a float for user interaction.
-       format_str is a Python %-string."""
-
-    FormattedType = FormattedFloat
-    UnformattedType = float
-
-    def _parseUnformattedType(self, value):
-        return FormattedFloat(self.format_str,value)
-
-    def _parseString(self, value):
-        try:
-            return FormattedFloat(self.format_str,value)
-        except (TypeError,ValueError):
-            return None
-
-class IntFormatter(FormatterStrBase):
-    """Formats an int for user interaction.
-       format_str is a Python %-string."""
-
-    FormattedType = FormattedInt
-    UnformattedType = int
-
-    def _parseUnformattedType(self, value):
-        return FormattedInt(self.format_str,value)
-
-    def _parseString(self, value):
-        try:
-            return FormattedInt(self.format_str,value)
-        except (TypeError,ValueError):
-            return None
 
 class DatetimeFormatter(FormatterStrBase):
     """Formats and parses dates for user interaction.
