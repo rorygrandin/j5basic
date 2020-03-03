@@ -12,7 +12,7 @@ standard_library.install_aliases()
 from builtins import range
 from builtins import *
 from builtins import object
-from future.utils import python_2_unicode_compatible
+from future.utils import python_2_unicode_compatible, text_to_native_str
 import datetime
 import logging
 import time
@@ -25,15 +25,17 @@ class StrftimeFormattedTypeMixIn(object):
     """Mixin for formatting with a Strftime format string."""
 
     def __str__(self):
-        if isinstance(self.format_str, str):
-            # flip through into string world and back again
-            return TimeUtils.strftime(self, self.format_str.encode("UTF-8")).decode("UTF-8")
-        return TimeUtils.strftime(self, self.format_str).decode("UTF-8")
+        format_str = self.format_str
+        if isinstance(format_str, bytes):
+            format_str = format_str.decode('utf-8')
+        fstr = TimeUtils.strftime(self, text_to_native_str(format_str, "utf-8"))
+        if isinstance(fstr, bytes):
+            fstr = fstr.decode("utf-8")
+        return fstr
 
 @python_2_unicode_compatible
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
-
     def __str__(self):
         return self.format_str % self
 
@@ -62,18 +64,6 @@ class FormattedDate(StrftimeFormattedTypeMixIn,datetime.date):
 class FormattedTime(StrftimeFormattedTypeMixIn,datetime.time):
     def __new__(cls,format_str,*args,**kwargs):
         self = super(FormattedTime,cls).__new__(cls,*args,**kwargs)
-        self.format_str = format_str
-        return self
-
-class FormattedFloat(StrFormattedMixIn,float):
-    def __new__(cls,format_str,*args,**kwargs):
-        self = super(FormattedFloat,cls).__new__(cls,*args,**kwargs)
-        self.format_str = format_str
-        return self
-
-class FormattedInt(StrFormattedMixIn,int):
-    def __new__(cls,format_str,*args,**kwargs):
-        self = super(FormattedInt,cls).__new__(cls,*args,**kwargs)
         self.format_str = format_str
         return self
 
@@ -120,38 +110,6 @@ class FormatterStrBase(FormatterBase):
     def _parseString(self,value):
         """Sub-classes should implement this."""
         raise NotImplementedError
-
-class FloatFormatter(FormatterStrBase):
-    """Formats a float for user interaction.
-       format_str is a Python %-string."""
-
-    FormattedType = FormattedFloat
-    UnformattedType = float
-
-    def _parseUnformattedType(self, value):
-        return FormattedFloat(self.format_str,value)
-
-    def _parseString(self, value):
-        try:
-            return FormattedFloat(self.format_str,value)
-        except (TypeError,ValueError):
-            return None
-
-class IntFormatter(FormatterStrBase):
-    """Formats an int for user interaction.
-       format_str is a Python %-string."""
-
-    FormattedType = FormattedInt
-    UnformattedType = int
-
-    def _parseUnformattedType(self, value):
-        return FormattedInt(self.format_str,value)
-
-    def _parseString(self, value):
-        try:
-            return FormattedInt(self.format_str,value)
-        except (TypeError,ValueError):
-            return None
 
 class DatetimeFormatter(FormatterStrBase):
     """Formats and parses dates for user interaction.

@@ -105,8 +105,8 @@ def get_all_distinct_mro_targets(obj, functionname):
         if base_hook_fn:
             t_f = getattr(base_hook_fn, '__func__', None)
             if t_f is None:
-                logging.critical("__func__ was None while trying to find all distinct mro targets for %s on %s, mro was %s" % (functionname, obj, obj.__mro__))
-                continue
+                logging.warning("__func__ was None while trying to find all distinct mro targets for %s on %s, mro was %s" % (functionname, obj, obj.__mro__))
+                t_f = base_hook_fn
 
             if t_f not in sources:
                 sources[t_f] = t
