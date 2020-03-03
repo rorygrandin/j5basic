@@ -36,9 +36,6 @@ class StrftimeFormattedTypeMixIn(object):
 @python_2_unicode_compatible
 class StrFormattedMixIn(object):
     """Mixin for formatting with a Python % string."""
-    def __init__(self, *args, **kwargs):
-        self._re_entered = False
-
     def __str__(self):
         return self.format_str % self
 
