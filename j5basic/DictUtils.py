@@ -8,6 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 # Copyright 2002, 2003 St James Software
+import copy
 
 from future import standard_library
 standard_library.install_aliases()
@@ -182,6 +183,15 @@ class ordereddict(dict):
         result = dict.__setitem__(self, key, value)
         if not alreadypresent: self.order.append(key)
         return result
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        dict_copy = copy.deepcopy(dict(self), memo)
+        new_ordereddict = ordereddict(dict_copy)
+        new_ordereddict.order = self.order[:]
+        return new_ordereddict
 
     def setdefault(self, key, default):
         """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
