@@ -13,6 +13,7 @@ from j5test.Utils import raises
 import datetime_tz
 import pytz
 import six
+import copy
 
 class TestUniqueItems(object):
     def test_unique_items(self):
@@ -243,3 +244,81 @@ class TestDictHelpers(object):
         DictUtils.assert_dicts_equal(DictUtils.mapdict(td, None, valuemap), {1: 3, 3: 5, 5: 7})
         DictUtils.assert_dicts_equal(DictUtils.mapdict(td, keymap, valuemap), {"1": 3, "3": 5, "5": 7})
 
+
+simple_od = DictUtils.ordereddict()
+simple_od[99] = [('a', 1), ('b', 2)]
+simple_od[1] = [('c', 3), ('d', 4)]
+simple_od[7] = [('e', 5), ('f', 6)]
+
+
+class OrderedDictInABox(object):
+    def __init__(self, message, ordered_dict):
+        self.message = message
+        self.od = ordered_dict
+
+
+inner_od = DictUtils.ordereddict()
+inner_od['first'] = datetime_tz.datetime_tz(1979, 8, 8, 16)
+inner_od['second'] = {'a': 1, 'b': 2, 'c': 3}
+inner_od['third'] = OrderedDictInABox('Here it is', DictUtils.ordereddict([(0, 'Here'), (1, 'it'), (2, 'is')]))
+inner_od['fourth'] = OrderedDictInABox('Here it is - remix', DictUtils.ordereddict([(1, 'it'), (2, 'is'), (0, 'Here')]))
+inner_od['fifth'] = OrderedDictInABox('Here it is - remix 2 feat. ?', DictUtils.ordereddict([(2, 'is'), (1, 'it'), (0, 'Here?')]))
+
+complex_od = DictUtils.ordereddict()
+complex_od[2] = [('a', 1), ('b', 2)]
+complex_od[0] = inner_od
+complex_od[1] = None
+
+
+class TestCopy(object):
+
+    def test_simple_od_using_copy_instance_method(self):
+        od_copy = simple_od.copy()
+        assert len(od_copy) == len(simple_od)
+        assert od_copy.keys() == [99, 1, 7]
+        assert od_copy[99] == simple_od[99]
+        assert id(od_copy[99]) == id(simple_od[99])
+
+    def test_simple_od_using_copy_library_method(self):
+        od_copy = copy.copy(simple_od)
+        assert len(od_copy) == len(simple_od)
+        assert od_copy.keys() == [99, 1, 7]
+        assert od_copy[99] == simple_od[99]
+        assert id(od_copy[99]) == id(simple_od[99])
+
+    def test_complex_od_using_instance_method(self):
+        od_copy = complex_od.copy()
+        assert od_copy.keys() == [2, 0, 1]
+        assert od_copy[2] == complex_od[2]
+        assert id(od_copy[2]) == id(complex_od[2])
+        assert od_copy[0] == complex_od[0]
+        assert id(od_copy[0]) == id(complex_od[0])
+
+    def test_complex_od_using_copy_library_method(self):
+        od_copy = copy.copy(complex_od)
+        assert od_copy.keys() == [2, 0, 1]
+        assert od_copy[2] == complex_od[2]
+        assert id(od_copy[2]) == id(complex_od[2])
+        assert od_copy[0] == complex_od[0]
+        assert id(od_copy[0]) == id(complex_od[0])
+
+
+class TestDeepCopy(object):
+
+    def test_simple_ordered_dict(self):
+        od_copy = copy.deepcopy(simple_od)
+        assert od_copy.keys() == [99, 1, 7]
+        assert od_copy[99] == simple_od[99]
+        assert id(od_copy[99]) != id(simple_od[99])
+        # immutable objects like tuples reference the original source object
+        assert id(od_copy[99][0]) == id(simple_od[99][0])
+
+    def test_ordered_dict_with_nested_objects_and_ods(self):
+        od_copy = copy.deepcopy(complex_od)
+        assert od_copy.keys() == [2, 0, 1]
+        assert od_copy[0].keys() == ["first", "second", "third", "fourth", "fifth"]
+        assert od_copy[0]['third'].od.keys() == [0, 1, 2]
+        assert od_copy[0]['fourth'].od.keys() == [1, 2, 0]
+        assert od_copy[0]['fifth'].od.keys() == [2, 1, 0]
+        assert od_copy[0]['first'] == complex_od[0]['first']
+        assert id(od_copy[0]['first']) != id(complex_od[0]['first'])
