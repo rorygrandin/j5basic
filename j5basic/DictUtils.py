@@ -14,10 +14,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *
 
-try:
-    from virtualtime import datetime_tz
-except ImportError as e:
-    datetime_tz = None
+import datetime_tz
 
 import datetime
 

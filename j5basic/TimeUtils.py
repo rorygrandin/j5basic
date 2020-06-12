@@ -7,7 +7,7 @@ standard_library.install_aliases()
 from builtins import *
 from past.utils import old_div
 from j5basic import TzInfo
-from virtualtime import datetime_tz, _underlying_datetime_type
+import datetime_tz
 import datetime
 import threading
 import time
@@ -29,7 +29,6 @@ def localminutenow():
     """Provides the current local time with seconds and microseconds set to 0."""
     return datetime_tz.datetime_tz.now().replace(second=0,microsecond=0)
 
-# NB: There is a copy of totalseconds_float in virtualtime, to prevent circular imports - changes should be applied to both
 def totalseconds_float(timedelta):
     """Return the total number of seconds represented by a datetime.timedelta object, including fractions of seconds"""
     return timedelta.seconds + (timedelta.days * 24 * 60 * 60) + timedelta.microseconds/1000000.0
@@ -121,7 +120,7 @@ def _findall(text, substr):
 
 _NEEDS_STRFTIME_PATCH = True
 try:
-    _underlying_datetime_type(1,1,1).strftime("%Y-%m-%d")
+    datetime.datetime(1,1,1).strftime("%Y-%m-%d")
     _NEEDS_STRFTIME_PATCH = False
 except ValueError:
     pass

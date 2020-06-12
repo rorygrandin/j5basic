@@ -9,11 +9,10 @@ standard_library.install_aliases()
 from builtins import *
 from builtins import object
 from past.utils import old_div
-from virtualtime import datetime_tz
+import datetime_tz
 import logging
 import time
 import threading
-import virtualtime
 from j5basic import Errors
 
 def to_seconds(timedelta):
@@ -25,8 +24,6 @@ class Timer(object):
     def __init__(self, target, args=None, kwargs=None, resolution=1):
         self.interrupt_event = threading.Event()
         self.virtual_time_callback_event = threading.Event()
-        virtualtime.notify_on_change(self.interrupt_event)
-        virtualtime.wait_for_callback_on_change(self.virtual_time_callback_event)
         self._running = True
         self.target = target
         self.args = args
@@ -68,8 +65,6 @@ class Timer(object):
                     self.interrupt_event.wait(waitseconds)
                     self.interrupt_event.clear()
                     currenttime = datetime_tz.datetime_tz.now()
-                    if virtualtime.in_skip_time_change():
-                        nexttime = currenttime.replace(microsecond=0)
                 if self._running and nexttime <= currenttime:
                     self.setup_run(nexttime)
                     self.virtual_time_callback_event.set()
