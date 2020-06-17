@@ -121,13 +121,13 @@ class TestTimeCache(object):
         d[0] = datetime.datetime.now()
         d[1] = datetime.datetime.now()
         assert len(d) == 2
-        time.sleep(2)
+        time.sleep(2.2)
         assert len(d) == 2
         d.set(2, datetime.datetime.now())
         assert len(d) == 1
-        time.sleep(1)
+        time.sleep(1.1)
         d[3] = datetime.datetime.now()
-        time.sleep(1)
+        time.sleep(1.1)
         d[4] = datetime.datetime.now()
         assert len(d) == 1
         d.clear()
@@ -138,7 +138,7 @@ class TestTimeCache(object):
         d[1] = datetime.datetime.now()
         assert d.get(0)
         assert len(d) == 2
-        time.sleep(2)
+        time.sleep(2.2)
         assert d.get(0) is None
         assert raises(KeyError, lambda: d[0])
         assert not d.has_key(1)
@@ -151,7 +151,7 @@ class TestTimeCache(object):
         assert list(d.items())[0][0] == 2
         assert list(d.keys()) == [2]
         assert list(d.values())
-        time.sleep(1)
+        time.sleep(1.1)
         assert list(d) == []
         d[3] = datetime.datetime.now()
         assert d.popitem()[0] == 3
