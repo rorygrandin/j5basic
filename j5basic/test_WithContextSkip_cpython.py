@@ -11,7 +11,6 @@ import sys
 import tempfile
 import unittest
 from j5basic.WithContextSkip import *  # Tests __all__
-from test import support as test_support
 try:
     import threading
 except ImportError:
@@ -112,10 +111,3 @@ class ConditionalContextManagerTestCase(unittest.TestCase):
     def test_contextmanager_doc_attrib(self):
         baz = self._create_contextmanager_attribs()
         self.assertEqual(baz.__doc__, "Whee!")
-
-# This is needed to make the test actually run under regrtest.py!
-def test_main():
-    test_support.run_unittest(__name__)
-
-if __name__ == "__main__":
-    test_main()
